@@ -7,7 +7,9 @@ Serverless WarmUP Plugin ♨
 
 Keep your lambdas warm during Winter.
 
-**Note:** Requires Serverless *v1.2.x* or higher.
+**Requirements:**
+* Serverless *v1.2.x* or higher.
+* AWS provider and nodejs4.3 runtime
 
 ## Setup
 
