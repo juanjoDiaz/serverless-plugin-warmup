@@ -68,7 +68,7 @@ module.exports.lambdaToWarm = function(event, context, callback) {
 custom:
   warmup:
     memorySize: 256
-    name: 'make-them-pop'cron(0 12 * * ? *)
+    name: 'make-them-pop'
     schedule: 'cron(0/5 8-17 ? * MON-FRI *) // Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)'
     timeout: 20
 ```
