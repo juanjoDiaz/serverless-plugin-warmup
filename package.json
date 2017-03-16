@@ -27,7 +27,6 @@
   },
   "homepage": "https://github.com/FidelLimited/serverless-plugin-warmup#readme",
   "dependencies": {
-    "aws-sdk": "^2.28.0",
     "bluebird": "^3.5.0",
     "fs-extra": "^2.1.1"
   },
