@@ -1,0 +1,37 @@
+{
+  "name": "serverless-plugin-warmup",
+  "version": "1.0.0-rc.1",
+  "description": "Keep your lambdas warm during Winter.",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "node_modules/.bin/standard src/**",
+    "lint:fix": "node_modules/.bin/standard --fix src/**"
+  },
+  "author": "Gonçalo Neves",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FidelLimited/serverless-plugin-warmup.git"
+  },
+  "keywords": [
+    "serverless plugin warm up lambdas",
+    "serverless warmup",
+    "serverless plugin",
+    "lambda serverless",
+    "warm lambda",
+    "lambda coldstart",
+    "lambda cold"
+  ],
+  "bugs": {
+    "url": "https://github.com/FidelLimited/serverless-plugin-warmup/issues"
+  },
+  "homepage": "https://github.com/FidelLimited/serverless-plugin-warmup#readme",
+  "dependencies": {
+    "aws-sdk": "^2.28.0",
+    "bluebird": "^3.5.0",
+    "fs-extra": "^2.1.1"
+  },
+  "devDependencies": {
+    "standard": "^9.0.1"
+  }
+}

@@ -1,0 +1,10 @@
+# NPM
+node_modules
+npm-debug.log
+
+# IDE
+**/.idea
+
+# OS
+.DS_Store
+.tmp
