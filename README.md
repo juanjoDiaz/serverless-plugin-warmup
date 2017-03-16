@@ -5,7 +5,7 @@ Serverless WarmUP Plugin ♨
 [![dependencies](https://img.shields.io/david/FidelLimited/serverless-plugin-warmup.svg)](https://www.npmjs.com/package/serverless-plugin-warmup)
 [![license](https://img.shields.io/npm/l/serverless-plugin-warmup.svg)](https://raw.githubusercontent.com/FidelLimited/serverless-plugin-warmup/master/LICENSE)
 
-Select which functions are to be deployed based on region and stage.
+Keep your lambdas warm during Winter.
 
 **Note:** Requires Serverless *v1.2.x* or higher.
 
