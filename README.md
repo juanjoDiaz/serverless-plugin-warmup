@@ -60,7 +60,7 @@ module.exports.lambdaToWarm = function(event, context, callback) {
 ## Options
 
 * **memorySize** (default `128`)
-* **name** (default `warmup-plugin-${stage}`)
+* **name** (default `warmup-plugin-${service}-${stage}`)
 * **schedule** (default `rate(5 minutes)`) - More examples [here](https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html).
 * **timeout** (default `10` seconds)
 
