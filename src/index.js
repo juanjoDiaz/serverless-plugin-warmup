@@ -31,9 +31,13 @@ class WarmUP {
     this.options = options
     this.custom = this.serverless.service.custom
 
-    /** AWS provider and node4.3 runtime check */
-    if (this.serverless.service.provider.name === 'aws' &&
-      (!this.serverless.service.provider.runtime || this.serverless.service.provider.runtime === 'nodejs4.3')) {
+    /** Runtime >=node4.3 */
+    const validRunTime = (!this.serverless.service.provider.runtime ||
+      this.serverless.service.provider.runtime === 'nodejs4.3' ||
+      this.serverless.service.provider.runtime === 'nodejs6.10')
+
+    /** AWS provider and valid runtime check */
+    if (this.serverless.service.provider.name === 'aws' && validRunTime) {
       /** Serverless hooks */
       this.hooks = {
         'after:deploy:initialize': this.afterDeployInitialize.bind(this),
