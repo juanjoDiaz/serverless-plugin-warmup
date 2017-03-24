@@ -9,7 +9,7 @@ Keep your lambdas warm during Winter.
 
 **Requirements:**
 * Serverless *v1.2.x* or higher.
-* AWS provider and nodejs4.3 runtime
+* AWS provider and nodejs4.3 or nodejs6.10 runtimes
 
 ## Setup
 
