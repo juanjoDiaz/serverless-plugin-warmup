@@ -11,6 +11,10 @@ Keep your lambdas warm during Winter.
 * Serverless *v1.2.x* or higher.
 * AWS provider and nodejs4.3 or nodejs6.10 runtimes
 
+## How it works
+
+WarmUP solves *cold starts* by creating one schedule event lambda that invokes all the service lambdas you select in a configured time interval (default: 5 minutes) or a specific time, forcing your containers to stay alive. 
+
 ## Setup
 
  Install via npm in the root of your Serverless service:
@@ -43,7 +47,7 @@ iamRoleStatements:
     Resource: "*"
 ```
 
-* Add an early response to warm lambdas to quickly respond to WarmUP. This avoids errors, reduces duration and cost:
+* Add an early callback call when the event source is `serverless-plugin-warmup`. You should do this early exit before running your code logic, it will save your execution duration and cost:
 
 ```javascript
 module.exports.lambdaToWarm = function(event, context, callback) {
