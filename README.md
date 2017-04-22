@@ -38,9 +38,9 @@ functions:
 ```yaml
 iamRoleStatements:
   - Effect: 'Allow'
-      Action:
-        - 'lambda:InvokeFunction'
-      Resource: "*"
+    Action:
+      - 'lambda:InvokeFunction'
+    Resource: "*"
 ```
 
 * Add an early response to warm lambdas to quickly respond to WarmUP. This avoids errors, reduces duration and cost:
