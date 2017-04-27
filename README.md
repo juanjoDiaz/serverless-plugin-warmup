@@ -8,7 +8,7 @@ Serverless WarmUP Plugin ♨
 Keep your lambdas warm during Winter.
 
 **Requirements:**
-* Serverless *v1.2.x* or higher.
+* Serverless *v1.12.x* or higher.
 * AWS provider and nodejs4.3 or nodejs6.10 runtimes
 
 ## How it works
@@ -44,7 +44,13 @@ iamRoleStatements:
   - Effect: 'Allow'
     Action:
       - 'lambda:InvokeFunction'
-    Resource: "*"
+    Resource:
+    - Fn::Join:
+      - ':'
+      - - arn:aws:lambda
+        - Ref: AWS::Region
+        - Ref: AWS::AccountId
+        - function:${self:service}-${opt:stage, self:provider.stage}-*
 ```
 
 * Add an early callback call when the event source is `serverless-plugin-warmup`. You should do this early exit before running your code logic, it will save your execution duration and cost:
