@@ -40,8 +40,8 @@ class WarmUP {
     if (this.serverless.service.provider.name === 'aws' && validRunTime) {
       /** Serverless hooks */
       this.hooks = {
-        'after:deploy:initialize': this.afterDeployInitialize.bind(this),
-        'after:deploy:createDeploymentArtifacts': this.afterCreateDeploymentArtifacts.bind(this)
+        'after:package:initialize': this.afterDeployInitialize.bind(this),
+        'after:package:createDeploymentArtifacts': this.afterCreateDeploymentArtifacts.bind(this)
       }
     }
   }

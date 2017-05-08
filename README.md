@@ -67,7 +67,7 @@ module.exports.lambdaToWarm = function(event, context, callback) {
 }
 ```
 
-* All done!
+* All done! WarmUP will run on SLS `deploy` and `package` commands
 
 ## Options
 
