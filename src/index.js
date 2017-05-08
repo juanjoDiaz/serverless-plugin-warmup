@@ -31,7 +31,7 @@ class WarmUP {
     this.options = options
     this.custom = this.serverless.service.custom
 
-    /** AWS provider and valid runtime check */
+    /** AWS provider check */
     if (this.serverless.service.provider.name === 'aws') {
       /** Serverless hooks */
       this.hooks = {
