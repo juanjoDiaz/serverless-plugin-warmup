@@ -9,7 +9,7 @@ Keep your lambdas warm during Winter.
 
 **Requirements:**
 * Serverless *v1.12.x* or higher.
-* AWS provider and nodejs4.3 or nodejs6.10 runtimes
+* AWS provider
 
 ## How it works
 
@@ -67,7 +67,7 @@ module.exports.lambdaToWarm = function(event, context, callback) {
 }
 ```
 
-* All done!
+* All done! WarmUP will run on SLS `deploy` and `package` commands
 
 ## Options
 

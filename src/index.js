@@ -31,17 +31,12 @@ class WarmUP {
     this.options = options
     this.custom = this.serverless.service.custom
 
-    /** Runtime >=node4.3 */
-    const validRunTime = (!this.serverless.service.provider.runtime ||
-      this.serverless.service.provider.runtime === 'nodejs4.3' ||
-      this.serverless.service.provider.runtime === 'nodejs6.10')
-
-    /** AWS provider and valid runtime check */
-    if (this.serverless.service.provider.name === 'aws' && validRunTime) {
+    /** AWS provider check */
+    if (this.serverless.service.provider.name === 'aws') {
       /** Serverless hooks */
       this.hooks = {
-        'after:deploy:initialize': this.afterDeployInitialize.bind(this),
-        'after:deploy:createDeploymentArtifacts': this.afterCreateDeploymentArtifacts.bind(this)
+        'after:package:initialize': this.afterDeployInitialize.bind(this),
+        'after:package:createDeploymentArtifacts': this.afterCreateDeploymentArtifacts.bind(this)
       }
     }
   }
@@ -243,6 +238,7 @@ class WarmUP {
       handler: this.pathHandler,
       memorySize: this.warmup.memorySize,
       name: this.warmup.name,
+      runtime: 'nodejs6.10',
       package: {
         exclude: ['**'],
         include: [this.folderName + '/**']
