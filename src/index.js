@@ -81,6 +81,11 @@ class WarmUP {
         this.warmup.schedule = this.custom.warmup.schedule
       }
 
+      /** Role expression */
+      if (typeof this.custom.warmup.role === 'string') {
+        this.warmup.role = this.custom.warmup.role
+      }
+
       /** Timeout */
       if (typeof this.custom.warmup.timeout === 'number') {
         this.warmup.timeout = this.custom.warmup.timeout
@@ -246,6 +251,8 @@ class WarmUP {
       },
       timeout: this.warmup.timeout
     }
+
+    if(this.warmup.role) this.serverless.service.functions.warmUpPlugin.role = this.warmup.role
 
     /** Return service function object */
     return this.serverless.service.functions.warmUpPlugin
