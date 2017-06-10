@@ -35,7 +35,7 @@ class WarmUP {
     if (this.serverless.service.provider.name === 'aws') {
       /** Serverless hooks */
       this.hooks = {
-        'after:package:initialize': this.afterDeployInitialize.bind(this),
+        'after:package:initialize': this.afterPackageInitialize.bind(this),
         'after:package:createDeploymentArtifacts': this.afterCreateDeploymentArtifacts.bind(this)
       }
     }
@@ -49,7 +49,7 @@ class WarmUP {
    *
    * @return {(boolean|Promise)}
    * */
-  afterDeployInitialize () {
+  afterPackageInitialize () {
     /** Set warm up folder, file and handler paths */
     this.folderName = '_warmup'
     this.pathFolder = this.getPath(this.folderName)
