@@ -31,13 +31,11 @@ class WarmUP {
     this.options = options
     this.custom = this.serverless.service.custom
 
-    /** AWS provider check */
-    if (this.serverless.service.provider.name === 'aws') {
-      /** Serverless hooks */
-      this.hooks = {
-        'after:package:initialize': this.afterPackageInitialize.bind(this),
-        'after:package:createDeploymentArtifacts': this.afterCreateDeploymentArtifacts.bind(this)
-      }
+    this.provider = this.serverless.getProvider('aws')
+
+    this.hooks = {
+      'after:package:initialize': this.afterPackageInitialize.bind(this),
+      'after:package:createDeploymentArtifacts': this.afterCreateDeploymentArtifacts.bind(this)
     }
   }
 
