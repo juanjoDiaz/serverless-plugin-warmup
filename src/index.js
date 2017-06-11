@@ -35,12 +35,13 @@ class WarmUP {
 
     this.hooks = {
       'after:package:initialize': this.afterPackageInitialize.bind(this),
-      'after:package:createDeploymentArtifacts': this.afterCreateDeploymentArtifacts.bind(this)
+      'after:package:createDeploymentArtifacts': this.afterCreateDeploymentArtifacts.bind(this),
+      'after:deploy:deploy': this.afterDeployFunctions.bind(this)
     }
   }
 
   /**
-   * @description Deploy hook
+   * @description After package initialize hook
    *
    * @fulfil {} — Warm up set
    * @reject {Error} Warm up error
@@ -68,6 +69,20 @@ class WarmUP {
   }
 
   /**
+   * @description After deploy functions hooks
+   *
+   * @fulfil {} — Functions warmed up sucessfuly
+   * @reject {Error} Functions couldn't be warmed up
+   *
+   * @return {Promise}
+   * */
+  afterDeployFunctions () {
+    if (this.warmup.prewarm) {
+      return this.warmUpFunctions()
+    }
+  }
+
+  /**
    * @description Configure the plugin based on the context of serverless.yml
    *
    * @return {}
@@ -84,7 +99,8 @@ class WarmUP {
       memorySize: 128,
       name: 'warmup-plugin-' + this.serverless.service.service + '-' + this.options.stage,
       schedule: 'rate(5 minutes)',
-      timeout: 10
+      timeout: 10,
+      prewarm: false
     }
 
     /** Set global custom options */
@@ -110,6 +126,11 @@ class WarmUP {
     /** Timeout */
     if (typeof this.custom.warmup.timeout === 'number') {
       this.warmup.timeout = this.custom.warmup.timeout
+    }
+
+    /** Pre-warm */
+    if (typeof this.custom.warmup.prewarm === 'boolean') {
+      this.warmup.prewarm = this.custom.warmup.prewarm
     }
   }
 
@@ -258,6 +279,30 @@ class WarmUP {
 
     /** Return service function object */
     return this.serverless.service.functions.warmUpPlugin
+  }
+
+  /**
+   * @description Warm up the functions immediately after deployment
+   *
+   * @fulfil {} — Functions warmed up sucessfuly
+   * @reject {Error} Functions couldn't be warmed up
+   *
+   * @return {Promise}
+   * */
+  warmUpFunctions () {
+    this.serverless.cli.log('WarmUP: Pre-warming up your functions')
+
+    const params = {
+      FunctionName: this.warmup.name,
+      InvocationType: 'RequestResponse',
+      LogType: 'None',
+      Qualifier: process.env.SERVERLESS_ALIAS || '$LATEST',
+      Payload: JSON.stringify({ source: 'serverless-plugin-warmup' })
+    }
+
+    return this.provider.request('Lambda', 'invoke', params)
+      .then(data => this.serverless.cli.log('WarmUp: Functions sucessfuly pre-warmed'))
+      .catch(error => this.serverless.cli.log('WarmUp: Error while pre-warming functions', error))
   }
 }
 
