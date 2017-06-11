@@ -97,7 +97,7 @@ class WarmUP {
     /** Default options */
     this.warmup = {
       memorySize: 128,
-      name: 'warmup-plugin-' + this.serverless.service.service + '-' + this.options.stage,
+      name: this.serverless.service.service + '-' + this.options.stage + 'warmup-plugin',
       schedule: 'rate(5 minutes)',
       timeout: 10,
       prewarm: false
