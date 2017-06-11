@@ -233,7 +233,7 @@ class WarmUP {
       '      InvocationType: "RequestResponse",\n' +
       '      LogType: "None",\n' +
       '      Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",\n' +
-      '      Payload: "{\\"source\\": \\"serverless-plugin-warmup\\"}"\n' +
+      '      Payload: JSON.stringify({ source: "serverless-plugin-warmup" })\n' +
       '    };\n' +
       '    invokes.push(lambda.invoke(params).promise().then((data) => {\n' +
       '      console.log("Warm Up Invoke Success: " + functionName + "", data);\n' +
