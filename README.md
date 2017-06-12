@@ -52,6 +52,7 @@ iamRoleStatements:
         - Ref: AWS::AccountId
         - function:${self:service}-${opt:stage, self:provider.stage}-*
 ```
+If using pre-warm, the deployment user also needs a similar policy so it can run the WarmUp lambda.
 
 * Add an early callback call when the event source is `serverless-plugin-warmup`. You should do this early exit before running your code logic, it will save your execution duration and cost:
 
@@ -75,6 +76,7 @@ module.exports.lambdaToWarm = function(event, context, callback) {
 * **name** (default `warmup-plugin-${service}-${stage}`)
 * **schedule** (default `rate(5 minutes)`) - More examples [here](https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html).
 * **timeout** (default `10` seconds)
+* **prewarm** (default `false`)
 
 ```yml
 custom:
@@ -83,11 +85,13 @@ custom:
     name: 'make-them-pop'
     schedule: 'cron(0/5 8-17 ? * MON-FRI *) // Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)'
     timeout: 20
+    prewarm: true // Run WarmUp immediately after a deployment
 ```
 
 **Options should be tweaked depending on:**
 * Number of lambdas to warm up
 * Day cold periods
+* Desire to avoid cold lambdas after a deployment
 
 **Lambdas invoked by WarmUP will have event source `serverless-plugin-warmup`:**
 
