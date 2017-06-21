@@ -50,7 +50,7 @@ iamRoleStatements:
       - - arn:aws:lambda
         - Ref: AWS::Region
         - Ref: AWS::AccountId
-        - function:${self:service}-${opt:stage, self:provider.stage}-*
+        - function:${self:service}-${opt:stage, self:provider.stage}-warmup-plugin // must match warmup function name if you change from default
 ```
 If using pre-warm, the deployment user also needs a similar policy so it can run the WarmUp lambda.
 
@@ -73,7 +73,7 @@ module.exports.lambdaToWarm = function(event, context, callback) {
 ## Options
 
 * **memorySize** (default `128`)
-* **name** (default `warmup-plugin-${service}-${stage}`)
+* **name** (default `${service}-${stage}-warmup-plugin`)
 * **schedule** (default `rate(5 minutes)`) - More examples [here](https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html).
 * **timeout** (default `10` seconds)
 * **prewarm** (default `false`)
@@ -83,7 +83,7 @@ custom:
   warmup:
     memorySize: 256
     name: 'make-them-pop'
-    schedule: 'cron(0/5 8-17 ? * MON-FRI *) // Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)'
+    schedule: 'cron(0/5 8-17 ? * MON-FRI *)' // Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
     timeout: 20
     prewarm: true // Run WarmUp immediately after a deployment
 ```
