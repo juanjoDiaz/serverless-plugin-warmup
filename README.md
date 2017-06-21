@@ -50,7 +50,7 @@ iamRoleStatements:
       - - arn:aws:lambda
         - Ref: AWS::Region
         - Ref: AWS::AccountId
-        - function:${self:service}-${opt:stage, self:provider.stage}-warmup-plugin // must match warmup function name if you change from default
+        - function:${self:service}-${opt:stage, self:provider.stage}-*
 ```
 If using pre-warm, the deployment user also needs a similar policy so it can run the WarmUp lambda.
 
