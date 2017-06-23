@@ -272,6 +272,7 @@ class WarmUP {
       name: this.warmup.name,
       runtime: 'nodejs6.10',
       package: {
+        individually: true,
         exclude: ['**'],
         include: [this.folderName + '/**']
       },
