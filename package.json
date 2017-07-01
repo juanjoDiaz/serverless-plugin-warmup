@@ -4,8 +4,8 @@
   "description": "Keep your lambdas warm during Winter.",
   "main": "src/index.js",
   "scripts": {
-    "lint": "node_modules/.bin/standard src/**",
-    "lint:fix": "node_modules/.bin/standard --fix src/**"
+    "lint": "standard src/**",
+    "lint:fix": "standard --fix src/**"
   },
   "author": "Gonçalo Neves",
   "license": "MIT",
