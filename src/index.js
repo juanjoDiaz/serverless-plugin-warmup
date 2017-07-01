@@ -38,10 +38,12 @@ class WarmUP {
       'after:package:createDeploymentArtifacts': this.afterCreateDeploymentArtifacts.bind(this),
       'after:deploy:deploy': this.afterDeployFunctions.bind(this)
     }
+
+    this.configPlugin()
   }
 
   /**
-   * @description After package initialize hook
+   * @description After package initialize hook. Create warmer function and add it to the service.
    *
    * @fulfil {} — Warm up set
    * @reject {Error} Warm up error
@@ -49,14 +51,11 @@ class WarmUP {
    * @return {(boolean|Promise)}
    * */
   afterPackageInitialize () {
-    this.configPlugin()
-
-    /** Create warmer function and add it to the service */
     return this.createWarmer()
   }
 
   /**
-   * @description After create deployment artifacts
+   * @description After create deployment artifacts. Clean prefix folder.
    *
    * @fulfil {} — Optimization finished
    * @reject {Error} Optimization error
@@ -64,7 +63,6 @@ class WarmUP {
    * @return {Promise}
    * */
   afterCreateDeploymentArtifacts () {
-    /** Clean prefix folder */
     return this.cleanFolder()
   }
 
