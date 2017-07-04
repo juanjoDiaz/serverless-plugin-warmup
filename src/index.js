@@ -30,7 +30,6 @@ class WarmUP {
     this.serverless = serverless
     this.options = options
     this.custom = this.serverless.service.custom
-
     this.provider = this.serverless.getProvider('aws')
 
     this.hooks = {
@@ -38,8 +37,6 @@ class WarmUP {
       'after:package:createDeploymentArtifacts': this.afterCreateDeploymentArtifacts.bind(this),
       'after:deploy:deploy': this.afterDeployFunctions.bind(this)
     }
-
-    this.configPlugin()
   }
 
   /**
@@ -51,6 +48,7 @@ class WarmUP {
    * @return {(boolean|Promise)}
    * */
   afterPackageInitialize () {
+    this.configPlugin()
     return this.createWarmer()
   }
 
@@ -76,6 +74,7 @@ class WarmUP {
    * */
   afterDeployFunctions () {
     if (this.warmup.prewarm) {
+      this.configPlugin()
       return this.warmUpFunctions()
     }
   }
