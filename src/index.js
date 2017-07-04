@@ -73,8 +73,8 @@ class WarmUP {
    * @return {Promise}
    * */
   afterDeployFunctions () {
+    this.configPlugin()
     if (this.warmup.prewarm) {
-      this.configPlugin()
       return this.warmUpFunctions()
     }
   }
