@@ -72,6 +72,7 @@ module.exports.lambdaToWarm = function(event, context, callback) {
 
 ## Options
 
+* **cleanFolder** (default `true`) 
 * **memorySize** (default `128`)
 * **name** (default `${service}-${stage}-warmup-plugin`)
 * **schedule** (default `rate(5 minutes)`) - More examples [here](https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html).
@@ -81,6 +82,7 @@ module.exports.lambdaToWarm = function(event, context, callback) {
 ```yml
 custom:
   warmup:
+    cleanFolder: false,
     memorySize: 256
     name: 'make-them-pop'
     schedule: 'cron(0/5 8-17 ? * MON-FRI *)' // Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
@@ -102,6 +104,10 @@ custom:
   }
 }
 ```
+
+## Artifact
+
+If you are doing your own [package artifact](https://serverless.com/framework/docs/providers/aws/guide/packaging#artifact) set option `cleanFolder` to `false` and run `serverless package`. This will allow you to extract the `warmup` NodeJS lambda file from the `_warmup` folder and add it in your custom artifact logic.
 
 ## Gotchas
 
