@@ -93,6 +93,7 @@ class WarmUP {
 
     /** Default options */
     this.warmup = {
+      cleanFolder: true,
       memorySize: 128,
       name: this.serverless.service.service + '-' + this.options.stage + '-warmup-plugin',
       schedule: 'rate(5 minutes)',
@@ -103,6 +104,11 @@ class WarmUP {
     /** Set global custom options */
     if (!this.custom || !this.custom.warmup) {
       return
+    }
+
+    /** Clean folder */
+    if (typeof this.custom.warmup.cleanFolder === 'boolean') {
+      this.warmup.cleanFolder = this.custom.warmup.cleanFolder
     }
 
     /** Memory size */
@@ -151,6 +157,9 @@ class WarmUP {
    * @return {Promise}
    * */
   cleanFolder () {
+    if (!this.warmup.cleanFolder) {
+      return Promise.resolve()
+    }
     return fs.removeAsync(this.pathFolder)
   }
 
