@@ -29,7 +29,9 @@ plugins:
   - serverless-plugin-warmup
 ```
 
-* Add `warmup: true` property to all functions you want to be warm:
+* Add a `warmup` property to all functions you want to be warm.
+
+You can enable WarmUp in general:
 
 ```yml
 functions:
@@ -37,6 +39,23 @@ functions:
     warmup: true
 ```
 
+For a specific stage:
+
+```yml
+functions:
+  hello:
+    warmup: production
+```
+
+For several stages:
+
+```yml
+functions:
+  hello:
+    warmup:
+      - production
+      - staging
+```
 * WarmUP to be able to `invoke` lambdas requires the following Policy Statement in `iamRoleStatements`:
 
 ```yaml
