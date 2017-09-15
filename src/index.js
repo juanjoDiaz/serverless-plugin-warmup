@@ -123,6 +123,8 @@ class WarmUP {
 
     /** Schedule expression */
     if (typeof this.custom.warmup.schedule === 'string') {
+      this.warmup.schedule = [this.custom.warmup.schedule]
+    } else if (Array.isArray(this.custom.warmup.schedule)) {
       this.warmup.schedule = this.custom.warmup.schedule
     }
 
@@ -268,11 +270,7 @@ module.exports.warmUp = (event, context, callback) => {
     /** SLS warm up function */
     this.serverless.service.functions.warmUpPlugin = {
       description: 'Serverless WarmUP Plugin',
-      events: [
-        {
-          schedule: this.warmup.schedule
-        }
-      ],
+      events: this.warmup.schedule.map(schedule => { schedule }),
       handler: this.pathHandler,
       memorySize: this.warmup.memorySize,
       name: this.warmup.name,
