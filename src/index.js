@@ -180,7 +180,10 @@ class WarmUP {
       const functionObject = this.serverless.service.getFunction(functionName)
 
       /** Function needs to be warm */
-      if (functionObject.warmup === true) {
+      if (functionObject.warmup === true ||
+        functionObject.warmup === this.options.stage ||
+        (Array.isArray(functionObject.warmup) &&
+          functionObject.warmup.indexOf(this.options.stage) !== -1)) {
         return functionObject
       }
     }).then((functionNames) => {
