@@ -270,7 +270,7 @@ module.exports.warmUp = (event, context, callback) => {
     /** SLS warm up function */
     this.serverless.service.functions.warmUpPlugin = {
       description: 'Serverless WarmUP Plugin',
-      events: this.warmup.schedule.map(schedule => { schedule }),
+      events: this.warmup.schedule.map(schedule => { return { schedule } }),
       handler: this.pathHandler,
       memorySize: this.warmup.memorySize,
       name: this.warmup.name,
