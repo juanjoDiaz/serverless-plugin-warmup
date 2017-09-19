@@ -96,7 +96,7 @@ class WarmUP {
       cleanFolder: true,
       memorySize: 128,
       name: this.serverless.service.service + '-' + this.options.stage + '-warmup-plugin',
-      schedule: 'rate(5 minutes)',
+      schedule: ['rate(5 minutes)'],
       timeout: 10,
       prewarm: false
     }
