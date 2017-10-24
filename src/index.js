@@ -87,6 +87,9 @@ class WarmUP {
   configPlugin () {
     /** Set warm up folder, file and handler paths */
     this.folderName = '_warmup'
+    if (this.custom && this.custom.warmup && typeof this.custom.warmup.folderName === 'string') {
+      this.folderName = this.custom.warmup.folderName
+    }
     this.pathFolder = this.getPath(this.folderName)
     this.pathFile = this.pathFolder + '/index.js'
     this.pathHandler = this.folderName + '/index.warmUp'
