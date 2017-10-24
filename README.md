@@ -97,6 +97,7 @@ module.exports.lambdaToWarm = function(event, context, callback) {
 * **schedule** (default `rate(5 minutes)`) - More examples [here](https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html).
 * **timeout** (default `10` seconds)
 * **prewarm** (default `false`)
+* **folderName** (default `_warmup`)
 
 ```yml
 custom:
