@@ -190,15 +190,16 @@ class WarmUP {
     return BbPromise.filter(allFunctions, (functionName) => {
       const functionObject = this.serverless.service.getFunction(functionName)
 
-      /** Function needs to be warm */
-      if ((functionObject.warmup === true ||
+      const explicitlyIncluded = functionObject.warmup === true ||
         functionObject.warmup === this.options.stage ||
         (Array.isArray(functionObject.warmup) &&
-          functionObject.warmup.indexOf(this.options.stage) !== -1)) ||
-        (this.options.includeAll === true ||
-          (Array.isArray(this.options.includeAll) &&
-            this.options.includeAll.indexOf(this.options.stage) !== -1) &&
-          functionObject.exclude !== true) {
+          functionObject.warmup.indexOf(this.options.stage) !== -1)
+      const implicitlyIncluded = (this.warmup.includeAll === true ||
+        (Array.isArray(this.warmup.includeAll) &&
+          this.warmup.includeAll.indexOf(this.options.stage) !== -1)) &&
+        !(functionObject.warmup === false)
+      /** Function needs to be warm */
+      if (explicitlyIncluded || implicitlyIncluded) {
         return functionObject
       }
     }).then((functionNames) => {

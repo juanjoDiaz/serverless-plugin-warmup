@@ -62,8 +62,7 @@ Do not warm-up a lambda if `includeAll` (see below) is turned on:
 ```yml
 functions:
   hello:
-    warmup:
-      exclude: true
+    warmup: false
 ```
 
 * WarmUP to be able to `invoke` lambdas requires the following Policy Statement in `iamRoleStatements`:
