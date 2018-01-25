@@ -56,6 +56,14 @@ functions:
       - production
       - staging
 ```
+Do not warm-up a lambda if `includeAll` (see below) is turned on:
+
+```yml
+functions:
+  hello:
+    warmup: false
+```
+
 * WarmUP to be able to `invoke` lambdas requires the following Policy Statement in `iamRoleStatements`:
 
 ```yaml
@@ -98,6 +106,7 @@ module.exports.lambdaToWarm = function(event, context, callback) {
 * **timeout** (default `10` seconds)
 * **prewarm** (default `false`)
 * **folderName** (default `_warmup`)
+* **includeAll** (default `false`) - can also be an array of stages
 
 ```yml
 custom:
@@ -109,12 +118,14 @@ custom:
     timeout: 20
     prewarm: true // Run WarmUp immediately after a deployment
     folderName: '_warmup' // Name of the folder created for the generated warmup lambda
+    includeAll: false
 ```
 
 **Options should be tweaked depending on:**
 * Number of lambdas to warm up
 * Day cold periods
 * Desire to avoid cold lambdas after a deployment
+* Desire to warm-up all lambdas by default
 
 **Lambdas invoked by WarmUP will have event source `serverless-plugin-warmup`:**
 

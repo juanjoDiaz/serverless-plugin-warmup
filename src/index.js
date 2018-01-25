@@ -101,7 +101,8 @@ class WarmUP {
       name: this.serverless.service.service + '-' + this.options.stage + '-warmup-plugin',
       schedule: ['rate(5 minutes)'],
       timeout: 10,
-      prewarm: false
+      prewarm: false,
+      includeAll: false
     }
 
     /** Set global custom options */
@@ -139,6 +140,11 @@ class WarmUP {
     /** Pre-warm */
     if (typeof this.custom.warmup.prewarm === 'boolean') {
       this.warmup.prewarm = this.custom.warmup.prewarm
+    }
+
+    /** Include all by default */
+    if (typeof this.custom.warmup.includeAll === 'boolean' || Array.isArray(this.custom.warmup.includeAll)) {
+      this.warmup.includeAll = this.custom.warmup.includeAll
     }
   }
 
@@ -184,11 +190,16 @@ class WarmUP {
     return BbPromise.filter(allFunctions, (functionName) => {
       const functionObject = this.serverless.service.getFunction(functionName)
 
-      /** Function needs to be warm */
-      if (functionObject.warmup === true ||
+      const explicitlyIncluded = functionObject.warmup === true ||
         functionObject.warmup === this.options.stage ||
         (Array.isArray(functionObject.warmup) &&
-          functionObject.warmup.indexOf(this.options.stage) !== -1)) {
+          functionObject.warmup.indexOf(this.options.stage) !== -1)
+      const implicitlyIncluded = (this.warmup.includeAll === true ||
+        (Array.isArray(this.warmup.includeAll) &&
+          this.warmup.includeAll.indexOf(this.options.stage) !== -1)) &&
+        !(functionObject.warmup === false)
+      /** Function needs to be warm */
+      if (explicitlyIncluded || implicitlyIncluded) {
         return functionObject
       }
     }).then((functionNames) => {
