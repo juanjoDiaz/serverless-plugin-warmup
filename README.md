@@ -31,7 +31,6 @@ plugins:
 
 * Add a `warmup` property to all functions you want to be warm.
 
-
 You can enable WarmUp in general:
 
 ```yml
