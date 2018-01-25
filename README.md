@@ -57,7 +57,7 @@ functions:
       - production
       - staging
 ```
-Do not warm-up a lambda if includeAll (see below) is turned on:
+Do not warm-up a lambda if `includeAll` (see below) is turned on:
 
 ```yml
 functions:
