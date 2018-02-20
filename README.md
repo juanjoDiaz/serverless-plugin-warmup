@@ -56,7 +56,76 @@ functions:
       - production
       - staging
 ```
-* WarmUP to be able to `invoke` lambdas requires the following Policy Statement in `iamRoleStatements`:
+* WarmUP requires some permissions to be able to `invoke` lambdas.
+
+```yaml
+custom:
+  warmup:
+    folderName: '_warmup' // Name of the folder created for the generated warmup 
+    cleanFolder: false
+    memorySize: 256
+    name: 'make-them-pop'
+    role:  myCustRole0
+    schedule: 'cron(0/5 8-17 ? * MON-FRI *)' // Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
+    timeout: 20
+    prewarm: true // Run WarmUp immediately after a deployment
+    lambda
+
+.....
+
+resources:
+  Resources:
+    myCustRole0:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /my/cust/path/
+        RoleName: MyCustRole0
+        AssumeRolePolicyDocument:
+          Version: '2017'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: myPolicyName
+            PolicyDocument:
+              Version: '2017'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: 
+                    - 'Fn::Join':
+                      - ':'
+                      -
+                        - 'arn:aws:logs'
+                        - Ref: 'AWS::Region'
+                        - Ref: 'AWS::AccountId'
+                        - 'log-group:/aws/lambda/*:*:*'
+                - Effect: Allow
+                  Action:
+                    - ec2:CreateNetworkInterface
+                    - ec2:DescribeNetworkInterfaces
+                    - ec2:DetachNetworkInterface
+                    - ec2:DeleteNetworkInterface
+                  Resource: "*"
+                - Effect: 'Allow'
+                  Action:
+                    - 'lambda:InvokeFunction'
+                  Resource:
+                  - Fn::Join:
+                    - ':'
+                    - - arn:aws:lambda
+                      - Ref: AWS::Region
+                      - Ref: AWS::AccountId
+                      - function:${self:service}-${opt:stage, self:provider.stage}-*
+```
+
+The permissions can also be added to all lambdas using `iamRoleStatements`:
 
 ```yaml
 iamRoleStatements:
@@ -91,24 +160,26 @@ module.exports.lambdaToWarm = function(event, context, callback) {
 
 ## Options
 
+* **folderName** (default `_warmup`)
 * **cleanFolder** (default `true`)
 * **memorySize** (default `128`)
 * **name** (default `${service}-${stage}-warmup-plugin`)
+* **role** (default to role in the provider)
 * **schedule** (default `rate(5 minutes)`) - More examples [here](https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html).
 * **timeout** (default `10` seconds)
 * **prewarm** (default `false`)
-* **folderName** (default `_warmup`)
 
 ```yml
 custom:
   warmup:
-    cleanFolder: false,
+    folderName: '_warmup' // Name of the folder created for the generated warmup 
+    cleanFolder: false
     memorySize: 256
     name: 'make-them-pop'
+    role: myCustRole0
     schedule: 'cron(0/5 8-17 ? * MON-FRI *)' // Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
     timeout: 20
-    prewarm: true // Run WarmUp immediately after a deployment
-    folderName: '_warmup' // Name of the folder created for the generated warmup lambda
+    prewarm: true // Run WarmUp immediately after a deploymentlambda
 ```
 
 **Options should be tweaked depending on:**

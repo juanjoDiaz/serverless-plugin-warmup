@@ -124,6 +124,11 @@ class WarmUP {
       this.warmup.name = this.custom.warmup.name
     }
 
+    /** Role */
+    if (typeof this.custom.warmup.role === 'string') {
+      this.warmup.role = this.custom.warmup.role
+    }
+
     /** Schedule expression */
     if (typeof this.custom.warmup.schedule === 'string') {
       this.warmup.schedule = [this.custom.warmup.schedule]
@@ -276,7 +281,7 @@ module.exports.warmUp = (event, context, callback) => {
     /** SLS warm up function */
     this.serverless.service.functions.warmUpPlugin = {
       description: 'Serverless WarmUP Plugin',
-      events: this.warmup.schedule.map(schedule => { return { schedule } }),
+      events: this.warmup.schedule.map(schedule => ({ schedule })),
       handler: this.pathHandler,
       memorySize: this.warmup.memorySize,
       name: this.warmup.name,
@@ -287,6 +292,10 @@ module.exports.warmUp = (event, context, callback) => {
         include: [this.folderName + '/**']
       },
       timeout: this.warmup.timeout
+    }
+
+    if (this.warmup.role) {
+      this.serverless.service.functions.warmUpPlugin.role = this.warmup.role
     }
 
     /** Return service function object */
