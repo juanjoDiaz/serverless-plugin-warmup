@@ -61,15 +61,14 @@ functions:
 ```yaml
 custom:
   warmup:
-    folderName: '_warmup' // Name of the folder created for the generated warmup 
+    folderName: '_warmup' # Name of the folder created for the generated warmup 
     cleanFolder: false
     memorySize: 256
     name: 'make-them-pop'
     role:  myCustRole0
-    schedule: 'cron(0/5 8-17 ? * MON-FRI *)' // Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
+    schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
     timeout: 20
-    prewarm: true // Run WarmUp immediately after a deployment
-    lambda
+    prewarm: true # Run WarmUp immediately after a deployment
 
 .....
 
