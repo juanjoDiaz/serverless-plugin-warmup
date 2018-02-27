@@ -70,6 +70,9 @@ custom:
     timeout: 20
     prewarm: true // Run WarmUp immediately after a deployment
     lambda
+    tags:
+      Project: foo
+      Owner: bar
 
 .....
 
@@ -168,6 +171,7 @@ module.exports.lambdaToWarm = function(event, context, callback) {
 * **schedule** (default `rate(5 minutes)`) - More examples [here](https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html).
 * **timeout** (default `10` seconds)
 * **prewarm** (default `false`)
+* **tags** (default to serverless default tags)
 
 ```yml
 custom:
@@ -180,6 +184,9 @@ custom:
     schedule: 'cron(0/5 8-17 ? * MON-FRI *)' // Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
     timeout: 20
     prewarm: true // Run WarmUp immediately after a deploymentlambda
+    tags:
+      Project: foo
+      Owner: bar    
 ```
 
 **Options should be tweaked depending on:**
