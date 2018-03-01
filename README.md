@@ -128,17 +128,18 @@ resources:
 The permissions can also be added to all lambdas using `iamRoleStatements`:
 
 ```yaml
-iamRoleStatements:
-  - Effect: 'Allow'
-    Action:
-      - 'lambda:InvokeFunction'
-    Resource:
-    - Fn::Join:
-      - ':'
-      - - arn:aws:lambda
-        - Ref: AWS::Region
-        - Ref: AWS::AccountId
-        - function:${self:service}-${opt:stage, self:provider.stage}-*
+provider:
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 'lambda:InvokeFunction'
+      Resource:
+      - Fn::Join:
+        - ':'
+        - - arn:aws:lambda
+          - Ref: AWS::Region
+          - Ref: AWS::AccountId
+          - function:${self:service}-${opt:stage, self:provider.stage}-*
 ```
 If using pre-warm, the deployment user also needs a similar policy so it can run the WarmUp lambda.
 
