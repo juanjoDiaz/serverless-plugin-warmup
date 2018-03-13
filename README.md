@@ -69,7 +69,6 @@ custom:
     schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
     timeout: 20
     prewarm: true # Run WarmUp immediately after a deployment
-    lambda
     tags:
       Project: foo
       Owner: bar
