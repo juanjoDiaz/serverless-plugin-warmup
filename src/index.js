@@ -129,6 +129,11 @@ class WarmUP {
       this.warmup.role = this.custom.warmup.role
     }
 
+    /** Tags */
+    if (typeof this.custom.warmup.tags === 'object') {
+      this.warmup.tags = this.custom.warmup.tags
+    }
+
     /** Schedule expression */
     if (typeof this.custom.warmup.schedule === 'string') {
       this.warmup.schedule = [this.custom.warmup.schedule]
@@ -296,6 +301,10 @@ module.exports.warmUp = (event, context, callback) => {
 
     if (this.warmup.role) {
       this.serverless.service.functions.warmUpPlugin.role = this.warmup.role
+    }
+
+    if (this.warmup.tags) {
+      this.serverless.service.functions.warmUpPlugin.tags = this.warmup.tags
     }
 
     /** Return service function object */
