@@ -125,20 +125,23 @@ resources:
                       - function:${self:service}-${opt:stage, self:provider.stage}-*
 ```
 
-The permissions can also be added to all lambdas using `iamRoleStatements`:
+The permissions can also be added to all lambdas using `iamRoleStatements` under `provider` (see https://serverless.com/framework/docs/providers/aws/guide/functions/#permissions):
 
 ```yaml
-iamRoleStatements:
-  - Effect: 'Allow'
-    Action:
-      - 'lambda:InvokeFunction'
-    Resource:
-    - Fn::Join:
-      - ':'
-      - - arn:aws:lambda
-        - Ref: AWS::Region
-        - Ref: AWS::AccountId
-        - function:${self:service}-${opt:stage, self:provider.stage}-*
+provider:
+  name: aws
+  runtime: nodejs6.10
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 'lambda:InvokeFunction'
+      Resource:
+      - Fn::Join:
+        - ':'
+        - - arn:aws:lambda
+          - Ref: AWS::Region
+          - Ref: AWS::AccountId
+          - function:${self:service}-${opt:stage, self:provider.stage}-*
 ```
 If using pre-warm, the deployment user also needs a similar policy so it can run the WarmUp lambda.
 
