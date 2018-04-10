@@ -25,7 +25,7 @@
   "bugs": {
     "url": "https://github.com/FidelLimited/serverless-plugin-warmup/issues"
   },
-  "homepage": "https://github.com/FidelLimited/serverless-plugin-warmup#readme",
+  "homepage": "https://github.com/FidelLimited/serverless-plugin-warmup",
   "dependencies": {
     "bluebird": "^3.5.0",
     "fs-extra": "^3.0.1"
