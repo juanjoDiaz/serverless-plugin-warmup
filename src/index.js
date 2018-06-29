@@ -30,7 +30,6 @@ class WarmUP {
     this.serverless = serverless
     this.options = options
 
-    this.custom = this.serverless.service.custom
     this.provider = this.serverless.getProvider('aws')
 
     this.hooks = {
@@ -58,7 +57,8 @@ class WarmUP {
       || this.serverless.service.provider.region
       || (this.serverless.service.defaults && this.serverless.service.defaults.region)
       || 'us-east-1'
-      
+    this.custom = this.serverless.service.custom
+    
     this.configPlugin()
     return this.createWarmer()
   }
