@@ -8,10 +8,14 @@
  * @requires 'bluebird'
  * @requires 'fs-extra'
  * @requires 'path'
+ * @requires 'archiver'
  * */
 const BbPromise = require('bluebird')
 const fs = BbPromise.promisifyAll(require('fs-extra'))
 const path = require('path')
+const archiver = require('archiver')
+
+const artifactPath = './.serverless/_warmup.zip'
 
 /**
  * @classdesc Keep your lambdas warm during Winter
@@ -39,6 +43,19 @@ class WarmUP {
     }
   }
 
+  archiveDirectory (src, dest, format = 'zip', archiverOptions = {}, directoryDestPath = false) {
+    return new Promise((resolve, reject) => {
+      const archive = archiver(format, archiverOptions)
+      const output = fs.createWriteStream(dest)
+      archive.pipe(output)
+      archive.directory(src, directoryDestPath)
+      archive.finalize()
+      output.on('close', () => resolve(archive))
+      archive.on('error', (err) => reject(err))
+      archive.on('warning', (err) => this.serverless.cli.log(err))
+    })
+  }
+
   /**
    * @description After package initialize hook. Create warmer function and add it to the service.
    *
@@ -47,9 +64,9 @@ class WarmUP {
    *
    * @return {(boolean|Promise)}
    * */
-  afterPackageInitialize () {
+  afterPackageInitialize () {  /* eslint-disable operator-linebreak */
     // See https://github.com/serverless/serverless/issues/2631
-    this.options.stage  = this.options.stage
+    this.options.stage = this.options.stage
       || this.serverless.service.provider.stage
       || (this.serverless.service.defaults && this.serverless.service.defaults.stage)
       || 'dev'
@@ -58,7 +75,7 @@ class WarmUP {
       || (this.serverless.service.defaults && this.serverless.service.defaults.region)
       || 'us-east-1'
     this.custom = this.serverless.service.custom
-    
+
     this.configPlugin()
     return this.createWarmer()
   }
@@ -85,9 +102,17 @@ class WarmUP {
    * */
   afterDeployFunctions () {
     this.configPlugin()
-    if (this.warmup.prewarm) {
-      return this.warmUpFunctions()
+    let promise = Promise.resolve()
+
+    if (this.warmup.cleanFolder) {
+      promise = promise.then(() => fs.removeAsync(this.pathArchive))
     }
+
+    if (this.warmup.prewarm) {
+      promise = promise.then(this.warmUpFunctions)
+    }
+
+    return promise
   }
 
   /**
@@ -102,6 +127,7 @@ class WarmUP {
       this.folderName = this.custom.warmup.folderName
     }
     this.pathFolder = this.getPath(this.folderName)
+    this.pathArchive = this.getPath(artifactPath)
     this.pathFile = this.pathFolder + '/index.js'
     this.pathHandler = this.folderName + '/index.warmUp'
 
@@ -172,6 +198,19 @@ class WarmUP {
    * */
   getPath (file) {
     return path.join(this.serverless.config.servicePath, file)
+  }
+
+  /**
+   * @description Create zip artifact
+   *
+   * @fulfil {Archiver} — Artifact created
+   * @reject {Error} File system error
+   *
+   * @return {Promise}
+   */
+  createArtifact () {
+    const src = this.pathFolder + (this.pathFolder.endsWith('/') ? '' : '/')
+    return this.archiveDirectory(src, this.pathArchive, 'zip', { zlib: { level: 9 } }, this.folderName)
   }
 
   /**
@@ -265,6 +304,8 @@ module.exports.warmUp = (event, context, callback) => {
   console.log("Warm Up Start");
   functionNames.forEach((functionName) => {
     const params = {
+      // base64 encoded: {"custom":{"warmupEvent":"1"}}
+      ClientContext: "eyJjdXN0b20iOnsid2FybXVwRXZlbnQiOiIxIn19",
       FunctionName: functionName,
       InvocationType: "RequestResponse",
       LogType: "None",
@@ -286,6 +327,7 @@ module.exports.warmUp = (event, context, callback) => {
 
     /** Write warm up file */
     return fs.outputFileAsync(this.pathFile, warmUpFunction)
+      .then(res => this.createArtifact().then(() => res))
   }
 
   /**
@@ -305,7 +347,8 @@ module.exports.warmUp = (event, context, callback) => {
       package: {
         individually: true,
         exclude: ['**'],
-        include: [this.folderName + '/**']
+        include: [this.folderName + '/**'],
+        artifact: artifactPath
       },
       timeout: this.warmup.timeout
     }
