@@ -107,6 +107,7 @@ class WarmUP {
 
     /** Default options */
     this.warmup = {
+      default: false,
       cleanFolder: true,
       memorySize: 128,
       name: this.serverless.service.service + '-' + this.options.stage + '-warmup-plugin',
@@ -118,6 +119,11 @@ class WarmUP {
     /** Set global custom options */
     if (!this.custom || !this.custom.warmup) {
       return
+    }
+
+    /** Default warmup */
+    if (typeof this.custom.warmup.default !== 'undefined') {
+      this.warmup.default = this.custom.warmup.default
     }
 
     /** Clean folder */
@@ -205,13 +211,16 @@ class WarmUP {
     return BbPromise.filter(allFunctions, (functionName) => {
       const functionObject = this.serverless.service.getFunction(functionName)
 
+      const enable = (config) => config === true ||
+        config === this.options.stage ||
+        (Array.isArray(config) && config.indexOf(this.options.stage) !== -1)
+
+      const functionConfig = functionObject.hasOwnProperty('warmup')
+        ? functionObject.warmup
+        : this.warmup.default
+
       /** Function needs to be warm */
-      if (functionObject.warmup === true ||
-        functionObject.warmup === this.options.stage ||
-        (Array.isArray(functionObject.warmup) &&
-          functionObject.warmup.indexOf(this.options.stage) !== -1)) {
-        return functionObject
-      }
+      return enable(functionConfig)
     }).then((functionNames) => {
       /** Skip writing if no functions need to be warm */
       if (!functionNames.length) {
