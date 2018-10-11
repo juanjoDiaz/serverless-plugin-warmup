@@ -260,7 +260,7 @@ const lambda = new aws.Lambda();
 const functionNames = ${JSON.stringify(functionNames)};
 module.exports.warmUp = async (event, context, callback) => {
   console.log("Warm Up Start");
-  const invokes = await Promise.all(functionNames.map((functionName) => {
+  const invokes = await Promise.all(functionNames.map(async (functionName) => {
     const params = {
       FunctionName: functionName,
       InvocationType: "RequestResponse",
