@@ -266,7 +266,7 @@ module.exports.warmUp = async (event, context, callback) => {
       InvocationType: "RequestResponse",
       LogType: "None",
       Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",
-      Payload: ${JSON.stringify({ source: 'serverless-plugin-warmup' })}
+      Payload: '${JSON.stringify({ source: 'serverless-plugin-warmup' })}'
     };
 
     try {
