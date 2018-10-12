@@ -1,5 +1,5 @@
-Serverless WarmUP Plugin ♨
-=============================
+# Serverless WarmUP Plugin ♨
+
 [![serverless](http://public.serverless.com/badges/v3.svg)](http://www.serverless.com)
 [![npm version](https://badge.fury.io/js/serverless-plugin-warmup.svg)](https://badge.fury.io/js/serverless-plugin-warmup)
 [![npm downloads](https://img.shields.io/npm/dm/serverless-plugin-warmup.svg)](https://www.npmjs.com/package/serverless-plugin-warmup)
@@ -8,28 +8,30 @@ Serverless WarmUP Plugin ♨
 Keep your lambdas warm during Winter.
 
 **Requirements:**
-* Serverless *v1.12.x* or higher.
-* AWS provider
+
+- Serverless _v1.12.x_ or higher.
+- AWS provider
 
 ## How it works
 
-WarmUP solves *cold starts* by creating one schedule event lambda that invokes all the service lambdas you select in a configured time interval (default: 5 minutes) or a specific time, forcing your containers to stay alive.
+WarmUP solves _cold starts_ by creating one schedule event lambda that invokes all the service lambdas you select in a configured time interval (default: 5 minutes) or a specific time, forcing your containers to stay alive.
 
 ## Setup
 
- Install via npm in the root of your Serverless service:
+Install via npm in the root of your Serverless service:
+
 ```
 npm install serverless-plugin-warmup --save-dev
 ```
 
-* Add the plugin to the `plugins` array in your Serverless `serverless.yml`:
+- Add the plugin to the `plugins` array in your Serverless `serverless.yml`:
 
 ```yml
 plugins:
   - serverless-plugin-warmup
 ```
 
-* Add a `warmup.default` property to custom set the default configuration for all the functions
+- Add a `warmup.default` property to custom set the default configuration for all the functions
 
 Enable WarmUp in general:
 
@@ -52,12 +54,12 @@ For several stages:
 ```yml
 custom:
   warmup:
-    default: 
+    default:
       - production
       - staging
 ```
 
-* You can override the default `warmup` property on any function.
+- You can override the default `warmup` property on any function.
 
 Enable WarmUp for a specific function
 
@@ -86,24 +88,23 @@ functions:
 ```
 
 Do not warm-up a function if `default` is set to true:
- ```yml
+
+```yml
 custom:
   warmup:
     default: true
-
-...
-
+---
 functions:
   hello:
     warmup: false
 ```
 
-* WarmUP requires some permissions to be able to `invoke` lambdas.
+- WarmUP requires some permissions to be able to `invoke` lambdas.
 
 ```yaml
 custom:
   warmup:
-    folderName: '_warmup' # Name of the folder created for the generated warmup 
+    folderName: '_warmup' # Name of the folder created for the generated warmup
     cleanFolder: false
     memorySize: 256
     name: 'make-them-pop'
@@ -142,7 +143,7 @@ resources:
                     - logs:CreateLogGroup
                     - logs:CreateLogStream
                     - logs:PutLogEvents
-                  Resource: 
+                  Resource:
                     - 'Fn::Join':
                       - ':'
                       -
@@ -174,22 +175,16 @@ The permissions can also be added to all lambdas using `iamRoleStatements` under
 ```yaml
 provider:
   name: aws
-  runtime: nodejs6.10
   iamRoleStatements:
-    - Effect: 'Allow'
+    - Effect: Allow
+      Resource: "*"
       Action:
-        - 'lambda:InvokeFunction'
-      Resource:
-      - Fn::Join:
-        - ':'
-        - - arn:aws:lambda
-          - Ref: AWS::Region
-          - Ref: AWS::AccountId
-          - function:${self:service}-${opt:stage, self:provider.stage}-*
+        - lambda:InvokeFunction
 ```
+
 If using pre-warm, the deployment user also needs a similar policy so it can run the WarmUp lambda.
 
-* Add an early callback call when the event source is `serverless-plugin-warmup`. You should do this early exit before running your code logic, it will save your execution duration and cost:
+- Add an early callback call when the event source is `serverless-plugin-warmup`. You should do this early exit before running your code logic, it will save your execution duration and cost:
 
 ```javascript
 module.exports.lambdaToWarm = function(event, context, callback) {
@@ -203,44 +198,61 @@ module.exports.lambdaToWarm = function(event, context, callback) {
 }
 ```
 
-* All done! WarmUP will run on SLS `deploy` and `package` commands
-
-## Options
-
-* **default** (default `false`)
-* **folderName** (default `_warmup`)
-* **cleanFolder** (default `true`)
-* **memorySize** (default `128`)
-* **name** (default `${service}-${stage}-warmup-plugin`)
-* **role** (default to role in the provider)
-* **schedule** (default `rate(5 minutes)`) - More examples [here](https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html).
-* **timeout** (default `10` seconds)
-* **prewarm** (default `false`)
-* **tags** (default to serverless default tags)
+- Payload can be customimzed using the `custom.warmup.payload` config value:
 
 ```yml
 custom:
   warmup:
-    default: true // Whether to warm up functions by default or not
-    folderName: '_warmup' // Name of the folder created for the generated warmup 
+    payload:
+      isWarmup: true
+```
+
+In the case of the above configuration the lambdas will be invoked with `{ isWarmup: true }`.
+
+- All done! WarmUP will run on SLS `deploy` and `package` commands
+
+## Options
+
+- **default** (default `false`)
+- **folderName** (default `_warmup`)
+- **cleanFolder** (default `true`)
+- **memorySize** (default `128`)
+- **name** (default `${service}-${stage}-warmup-plugin`)
+- **role** (default to role in the provider)
+- **schedule** (default `rate(5 minutes)`) - More examples [here](https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html).
+- **timeout** (default `10` seconds)
+- **prewarm** (default `false`)
+- **payload** (default: `{ source: 'serverless-warmup-plugin }`)
+- **es6** (default: `false`)
+- **tags** (default to serverless default tags)
+
+```yml
+custom:
+  warmup:
+    default: true #  Whether to warm up functions by default or not
+    folderName: "_warmup" # Name of the folder created for the generated warmup
     cleanFolder: false
     memorySize: 256
-    name: 'make-them-pop'
+    name: "make-them-pop"
     role: myCustRole0
-    schedule: 'cron(0/5 8-17 ? * MON-FRI *)' // Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
+    schedule: "cron(0/5 8-17 ? * MON-FRI *)" # Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
     timeout: 20
-    prewarm: true // Run WarmUp immediately after a deploymentlambda
+    es6: false # default es6 value
+    payload: # shows default value
+      source: "serverless-warmup-plugin"
+    prewarm: true # Run WarmUp immediately after a deploymentlambda
     tags:
       Project: foo
-      Owner: bar    
+      Owner: bar
 ```
 
 **Options should be tweaked depending on:**
-* Number of lambdas to warm up
-* Day cold periods
-* Desire to avoid cold lambdas after a deployment
 
-**Lambdas invoked by WarmUP will have event source `serverless-plugin-warmup`:**
+- Number of lambdas to warm up
+- Day cold periods
+- Desire to avoid cold lambdas after a deployment
+
+**Lambdas invoked by WarmUP will have event source `serverless-plugin-warmup` unless changed with the `payload` configuration:**
 
 ```json
 {
@@ -249,6 +261,20 @@ custom:
   }
 }
 ```
+
+## ES6 Setting
+
+Specifically when `serverless-webpack` is bundling your functions, you may have a need to have the function body be setup using ES6 Modules. When this is the case you can set `es6` to `true` within your `custom.warmup` object.
+
+```yml
+custom:
+  warmup:
+    es6: true
+```
+
+> Your function will now be provided with `export async function warmUp` instead of `module.exports.warmUp`. Webpack will then properly be able to handle the function.
+
+- **Reference:** [Issue 73](https://github.com/FidelLimited/serverless-plugin-warmup/issues/73)
 
 ## Artifact
 
@@ -265,9 +291,10 @@ Lambda pricing [here](https://aws.amazon.com/lambda/pricing/). CloudWatch pricin
 #### Example
 
 Free Tier not included + Default WarmUP options + 10 lambdas to warm, each with `memorySize = 1024` and `duration = 10`:
-* WarmUP: runs 8640 times per month = $0.18
-* 10 warm lambdas: each invoked 8640 times per month = $14.4
-* Total = $14.58
+
+- WarmUP: runs 8640 times per month = $0.18
+- 10 warm lambdas: each invoked 8640 times per month = $14.4
+- Total = $14.58
 
 CloudWatch costs are not in this example because they are very low.
 
@@ -275,10 +302,10 @@ CloudWatch costs are not in this example because they are very low.
 
 Help us making this plugin better and future proof.
 
-* Clone the code
-* Install the dependencies with `npm install`
-* Create a feature branch `git checkout -b new_feature`
-* Lint with standard `npm run lint`
+- Clone the code
+- Install the dependencies with `npm install`
+- Create a feature branch `git checkout -b new_feature`
+- Lint with standard `npm run lint`
 
 ## License
 
