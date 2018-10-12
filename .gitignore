@@ -8,3 +8,4 @@ npm-debug.log
 # OS
 .DS_Store
 .tmp
+\.history/
