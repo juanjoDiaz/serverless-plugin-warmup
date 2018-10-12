@@ -301,7 +301,6 @@ const params = {
     `;
 
     const fnBody = `console.log("Warm Up Start");
-  console.log(payload);
   const invokes = await Promise.all(functionNames.map(async (functionName) => {
     
     params.FunctionName = functionName;
