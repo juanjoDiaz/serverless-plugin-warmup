@@ -265,6 +265,8 @@ module.exports.warmUp = (event, context, callback) => {
   console.log("Warm Up Start");
   functionNames.forEach((functionName) => {
     const params = {
+      // base64 encoded: {"custom":{"warmupEvent":"1"}}
+      ClientContext: "eyJjdXN0b20iOnsid2FybXVwRXZlbnQiOiIxIn19",
       FunctionName: functionName,
       InvocationType: "RequestResponse",
       LogType: "None",
