@@ -49,7 +49,7 @@ class WarmUP {
    * */
   afterPackageInitialize () {
     // See https://github.com/serverless/serverless/issues/2631
-    this.options.stage  = this.options.stage
+    this.options.stage = this.options.stage
       || this.serverless.service.provider.stage
       || (this.serverless.service.defaults && this.serverless.service.defaults.stage)
       || 'dev'
@@ -104,6 +104,7 @@ class WarmUP {
     this.pathFolder = this.getPath(this.folderName)
     this.pathFile = this.pathFolder + '/index.js'
     this.pathHandler = this.folderName + '/index.warmUp'
+    this.payload = JSON.stringify({ source: 'serverless-plugin-warmup' })
 
     /** Default options */
     this.warmup = {
@@ -265,13 +266,12 @@ module.exports.warmUp = (event, context, callback) => {
   console.log("Warm Up Start");
   functionNames.forEach((functionName) => {
     const params = {
-      // base64 encoded: {"custom":{"warmupEvent":"1"}}
-      ClientContext: "eyJjdXN0b20iOnsid2FybXVwRXZlbnQiOiIxIn19",
+      ClientContext: "${Buffer.from(`{"custom":${this.payload}}`).toString('base64')}",
       FunctionName: functionName,
       InvocationType: "RequestResponse",
       LogType: "None",
       Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",
-      Payload: JSON.stringify({ source: "serverless-plugin-warmup" })
+      Payload: ${this.payload}
     };
     invokes.push(lambda.invoke(params).promise().then((data) => {
       console.log("Warm Up Invoke Success: " + functionName, data);
