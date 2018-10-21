@@ -49,14 +49,14 @@ class WarmUP {
    * */
   afterPackageInitialize () {
     // See https://github.com/serverless/serverless/issues/2631
-    this.options.stage = this.options.stage
-      || this.serverless.service.provider.stage
-      || (this.serverless.service.defaults && this.serverless.service.defaults.stage)
-      || 'dev'
-    this.options.region = this.options.region
-      || this.serverless.service.provider.region
-      || (this.serverless.service.defaults && this.serverless.service.defaults.region)
-      || 'us-east-1'
+    this.options.stage = this.options.stage ||
+      this.serverless.service.provider.stage ||
+      (this.serverless.service.defaults && this.serverless.service.defaults.stage) ||
+      'dev'
+    this.options.region = this.options.region ||
+      this.serverless.service.provider.region ||
+      (this.serverless.service.defaults && this.serverless.service.defaults.region) ||
+      'us-east-1'
 
     this.custom = this.serverless.service.custom
 
