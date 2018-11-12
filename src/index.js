@@ -113,6 +113,7 @@ class WarmUP {
       name: this.serverless.service.service + '-' + this.options.stage + '-warmup-plugin',
       schedule: ['rate(5 minutes)'],
       timeout: 10,
+      source: JSON.stringify({ source: 'serverless-plugin-warmup' }),
       prewarm: false
     }
 
@@ -161,6 +162,11 @@ class WarmUP {
     /** Timeout */
     if (typeof this.custom.warmup.timeout === 'number') {
       this.warmup.timeout = this.custom.warmup.timeout
+    }
+
+    /** Source */
+    if (typeof this.custom.warmup.source !== 'undefined') {
+      this.warmup.source = this.custom.warmup.sourceRaw ? this.custom.warmup.source : JSON.stringify(this.custom.warmup.source)
     }
 
     /** Pre-warm */
@@ -275,7 +281,7 @@ module.exports.warmUp = async (event, context, callback) => {
       InvocationType: "RequestResponse",
       LogType: "None",
       Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",
-      Payload: '${JSON.stringify({ source: 'serverless-plugin-warmup' })}'
+      Payload: '${this.warmup.source}'
     };
 
     try {
@@ -345,7 +351,7 @@ module.exports.warmUp = async (event, context, callback) => {
       InvocationType: 'RequestResponse',
       LogType: 'None',
       Qualifier: process.env.SERVERLESS_ALIAS || '$LATEST',
-      Payload: JSON.stringify({ source: 'serverless-plugin-warmup' })
+      Payload: this.warmup.source
     }
 
     return this.provider.request('Lambda', 'invoke', params)
