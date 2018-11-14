@@ -57,6 +57,7 @@ class WarmUP {
       this.serverless.service.provider.region ||
       (this.serverless.service.defaults && this.serverless.service.defaults.region) ||
       'us-east-1'
+
     this.custom = this.serverless.service.custom
 
     this.configPlugin()
@@ -104,6 +105,7 @@ class WarmUP {
     this.pathFolder = this.getPath(this.folderName)
     this.pathFile = this.pathFolder + '/index.js'
     this.pathHandler = this.folderName + '/index.warmUp'
+    this.payload = JSON.stringify({ source: 'serverless-plugin-warmup' })
 
     /** Default options */
     this.warmup = {
@@ -271,11 +273,12 @@ module.exports.warmUp = async (event, context, callback) => {
   console.log("Warm Up Start");
   const invokes = await Promise.all(functionNames.map(async (functionName) => {
     const params = {
+      ClientContext: "${Buffer.from(`{"custom":${this.payload}}`).toString('base64')}",
       FunctionName: functionName,
       InvocationType: "RequestResponse",
       LogType: "None",
       Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",
-      Payload: '${JSON.stringify({ source: 'serverless-plugin-warmup' })}'
+      Payload: ${this.payload}
     };
 
     try {
