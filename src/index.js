@@ -57,6 +57,7 @@ class WarmUP {
       this.serverless.service.provider.region ||
       (this.serverless.service.defaults && this.serverless.service.defaults.region) ||
       'us-east-1'
+
     this.custom = this.serverless.service.custom
 
     this.configPlugin()
@@ -277,6 +278,7 @@ module.exports.warmUp = async (event, context, callback) => {
   console.log("Warm Up Start");
   const invokes = await Promise.all(functionNames.map(async (functionName) => {
     const params = {
+      ClientContext: "${Buffer.from(`{"custom":${this.warmup.source}}`).toString('base64')}",
       FunctionName: functionName,
       InvocationType: "RequestResponse",
       LogType: "None",

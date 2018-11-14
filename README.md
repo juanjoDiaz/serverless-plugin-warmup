@@ -202,6 +202,20 @@ module.exports.lambdaToWarm = function(event, context, callback) {
   ... add lambda logic after
 }
 ```
+You can also check for the warmp event using the `context` variable. This could be useful if you are handling the raw input and output streams:
+
+```javascript
+...
+
+if(context.custom.source === 'serverless-plugin-warmup'){
+  console.log('WarmUP - Lambda is warm!')
+  return callback(null, 'Lambda is warm!')
+}
+
+...
+```
+
+
 
 * All done! WarmUP will run on SLS `deploy` and `package` commands
 
