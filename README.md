@@ -230,6 +230,8 @@ if(context.custom.source === 'serverless-plugin-warmup'){
 * **schedule** (default `rate(5 minutes)`) - More examples [here](https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html).
 * **timeout** (default `10` seconds)
 * **prewarm** (default `false`)
+* **source** (default `{ "source": "serverless-plugin-warmup" }`)
+* **sourceRaw** (default `false`)
 * **tags** (default to serverless default tags)
 
 ```yml
@@ -244,6 +246,8 @@ custom:
     schedule: 'cron(0/5 8-17 ? * MON-FRI *)' // Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
     timeout: 20
     prewarm: true // Run WarmUp immediately after a deploymentlambda
+    source: '{ "source": "my-custom-payload" }'
+    sourceRaw: true // Won't JSON.stringify() the source, may be necessary for Go/AppSync deployments
     tags:
       Project: foo
       Owner: bar    
@@ -254,7 +258,7 @@ custom:
 * Day cold periods
 * Desire to avoid cold lambdas after a deployment
 
-**Lambdas invoked by WarmUP will have event source `serverless-plugin-warmup`:**
+**Lambdas invoked by WarmUP will have event source `serverless-plugin-warmup` (unless otherwise specified above):**
 
 ```json
 {

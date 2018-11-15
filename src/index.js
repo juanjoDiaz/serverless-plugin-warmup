@@ -105,7 +105,6 @@ class WarmUP {
     this.pathFolder = this.getPath(this.folderName)
     this.pathFile = this.pathFolder + '/index.js'
     this.pathHandler = this.folderName + '/index.warmUp'
-    this.payload = JSON.stringify({ source: 'serverless-plugin-warmup' })
 
     /** Default options */
     this.warmup = {
@@ -115,6 +114,7 @@ class WarmUP {
       name: this.serverless.service.service + '-' + this.options.stage + '-warmup-plugin',
       schedule: ['rate(5 minutes)'],
       timeout: 10,
+      source: JSON.stringify({ source: 'serverless-plugin-warmup' }),
       prewarm: false
     }
 
@@ -163,6 +163,11 @@ class WarmUP {
     /** Timeout */
     if (typeof this.custom.warmup.timeout === 'number') {
       this.warmup.timeout = this.custom.warmup.timeout
+    }
+
+    /** Source */
+    if (typeof this.custom.warmup.source !== 'undefined') {
+      this.warmup.source = this.custom.warmup.sourceRaw ? this.custom.warmup.source : JSON.stringify(this.custom.warmup.source)
     }
 
     /** Pre-warm */
@@ -273,12 +278,12 @@ module.exports.warmUp = async (event, context, callback) => {
   console.log("Warm Up Start");
   const invokes = await Promise.all(functionNames.map(async (functionName) => {
     const params = {
-      ClientContext: "${Buffer.from(`{"custom":${this.payload}}`).toString('base64')}",
+      ClientContext: "${Buffer.from(`{"custom":${this.warmup.source}}`).toString('base64')}",
       FunctionName: functionName,
       InvocationType: "RequestResponse",
       LogType: "None",
       Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",
-      Payload: ${this.payload}
+      Payload: '${this.warmup.source}'
     };
 
     try {
@@ -348,7 +353,7 @@ module.exports.warmUp = async (event, context, callback) => {
       InvocationType: 'RequestResponse',
       LogType: 'None',
       Qualifier: process.env.SERVERLESS_ALIAS || '$LATEST',
-      Payload: JSON.stringify({ source: 'serverless-plugin-warmup' })
+      Payload: this.warmup.source
     }
 
     return this.provider.request('Lambda', 'invoke', params)
