@@ -303,8 +303,9 @@ module.exports.warmUp = async (event, context, callback) => {
     console.log(\`Warming up function: \${functionName} with concurrency: \${concurrency}\`);
     
     for (let x = 0; x < concurrency; x++) {
+      source.concurrencyIndex = x;
       const params = {
-        ClientContext: Buffer.from(JSON.stringify({"custom":source, "concurrencyIndex":x})).toString('base64'),
+        ClientContext: Buffer.from(JSON.stringify({"custom":source})).toString('base64'),
         FunctionName: functionName,
         InvocationType: "RequestResponse",
         LogType: "None",
@@ -312,14 +313,22 @@ module.exports.warmUp = async (event, context, callback) => {
         Payload: JSON.stringify(source)
       };
       
-      console.log("Queuing lambda invocation.", params); 
       promises.push(lambda.invoke(params).promise());
     }
     
     let success = true;
     await Promise.all(promises).then(function(data) {
+      if (data && data.length > 0 && data[0].Payload) {
+        let payload = JSON.parse(data[0].Payload);
+        
+        if (payload && payload.statusCode && payload.statusCode !== 200) {
+          console.log(\`Warm Up Invoke Success: \${functionName}\`, data);
+          success = false;
+          return;
+        }
+      }
+      
       console.log(\`Warm Up Invoke Success: \${functionName}\`, data);
-      success = true;
     }, function(err) {
       console.log(\`Warm Up Invoke Error: \${functionName}\`, err);
       success = false;
