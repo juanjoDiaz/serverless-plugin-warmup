@@ -115,7 +115,8 @@ class WarmUP {
       schedule: ['rate(5 minutes)'],
       timeout: 10,
       source: JSON.stringify({ source: 'serverless-plugin-warmup' }),
-      prewarm: false
+      prewarm: false,
+      concurrency: 1
     }
 
     /** Set global custom options */
@@ -174,6 +175,11 @@ class WarmUP {
     if (typeof this.custom.warmup.prewarm === 'boolean') {
       this.warmup.prewarm = this.custom.warmup.prewarm
     }
+
+    /** Concurrency */
+    if (typeof this.custom.warmup.concurrency === 'number') {
+      this.warmup.concurrency = this.custom.warmup.concurrency
+    }
   }
 
   /**
@@ -213,6 +219,7 @@ class WarmUP {
   createWarmer () {
     /** Get functions */
     const allFunctions = this.serverless.service.getAllFunctions()
+    let functionConcurrency = {}
 
     /** Filter functions for warm up */
     return BbPromise.filter(allFunctions, (functionName) => {
@@ -227,7 +234,16 @@ class WarmUP {
         : this.warmup.default
 
       /** Function needs to be warm */
-      return enable(functionConfig)
+      if (enable(functionConfig)) {
+        const concurrency = functionObject.hasOwnProperty('warmup') && functionObject.warmup.hasOwnProperty('concurrency')
+          ? functionObject.warmup.concurrency
+          : this.warmup.concurrency
+        functionConcurrency[functionName] = concurrency
+
+        return true
+      } else {
+        return false
+      }
     }).then((functionNames) => {
       /** Skip writing if no functions need to be warm */
       if (!functionNames.length) {
@@ -237,7 +253,7 @@ class WarmUP {
       }
 
       /** Write warm up function */
-      return this.createWarmUpFunctionArtifact(functionNames)
+      return this.createWarmUpFunctionArtifact(functionNames, functionConcurrency)
     }).then((skip) => {
       /** Add warm up function to service */
       if (skip !== true) {
@@ -256,7 +272,7 @@ class WarmUP {
    *
    * @return {Promise}
    * */
-  createWarmUpFunctionArtifact (functionNames) {
+  createWarmUpFunctionArtifact (functionNames, functionConcurrency) {
     /** Log warmup start */
     this.serverless.cli.log('WarmUP: setting ' + functionNames.length + ' lambdas to be warm')
 
@@ -274,26 +290,34 @@ const aws = require("aws-sdk");
 aws.config.region = "${this.options.region}";
 const lambda = new aws.Lambda();
 const functionNames = ${JSON.stringify(functionNames)};
+const functionConcurrency = ${JSON.stringify(functionConcurrency)};
 module.exports.warmUp = async (event, context, callback) => {
   console.log("Warm Up Start");
   const invokes = await Promise.all(functionNames.map(async (functionName) => {
-    const params = {
-      ClientContext: "${Buffer.from(`{"custom":${this.warmup.source}}`).toString('base64')}",
-      FunctionName: functionName,
-      InvocationType: "RequestResponse",
-      LogType: "None",
-      Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",
-      Payload: '${this.warmup.source}'
-    };
-
-    try {
-      const data = await lambda.invoke(params).promise();
-      console.log(\`Warm Up Invoke Success: \${functionName}\`, data);
-      return true;
-    } catch (e) {
-      console.log(\`Warm Up Invoke Error: \${functionName}\`, e);
-      return false;
+    let concurrency = functionConcurrency[functionName] > 0 ? functionConcurrency[functionName] : 1;
+    let source = "${this.warmup.source}";
+    let promises = [];
+    
+    for (let x = 0; x < concurrency; x++) {
+      const params = {
+        ClientContext: Buffer.from({"custom":source, "concurrencyIndex":x}}).toString('base64')}",
+        FunctionName: functionName,
+        InvocationType: "RequestResponse",
+        LogType: "None",
+        Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",
+        Payload: source
+      };
+      
+      promises.push(lambda.invoke(params).promise());
     }
+    
+    return Promise.all(promises).then(function(data) {
+      console.log(\`Warm Up Invoke Success: \${functionName}\`, data);
+      resolve(true);
+    }, function(err) {
+      console.log(\`Warm Up Invoke Error: \${functionName}\`, err);
+      resolve(false);
+    });
   }));
 
   console.log(\`Warm Up Finished with \${invokes.filter(r => !r).length} invoke errors\`);
