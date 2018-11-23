@@ -300,6 +300,8 @@ module.exports.warmUp = async (event, context, callback) => {
     let source = ${JSON.stringify(this.warmup.source)};
     let promises = [];
     
+    console.log(\`Warming up function: \${functionName}\` with concurrency: \${concurrency}\`);
+    
     for (let x = 0; x < concurrency; x++) {
       const params = {
         ClientContext: Buffer.from(JSON.stringify({"custom":source, "concurrencyIndex":x})).toString('base64'),
@@ -310,6 +312,7 @@ module.exports.warmUp = async (event, context, callback) => {
         Payload: source
       };
       
+      console.log("Queuing lambda invocation.", params); 
       promises.push(lambda.invoke(params).promise());
     }
     
