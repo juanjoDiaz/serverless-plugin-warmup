@@ -313,13 +313,15 @@ module.exports.warmUp = async (event, context, callback) => {
       promises.push(lambda.invoke(params).promise());
     }
     
-    return Promise.all(promises).then(function(data) {
+    let success = true;
+    Promise.all(promises).then(function(data) {
       console.log(\`Warm Up Invoke Success: \${functionName}\`, data);
-      resolve(true);
+      success = true;
     }, function(err) {
       console.log(\`Warm Up Invoke Error: \${functionName}\`, err);
-      resolve(false);
+      success = false;
     });
+    return success;
   }));
 
   console.log(\`Warm Up Finished with \${invokes.filter(r => !r).length} invoke errors\`);
