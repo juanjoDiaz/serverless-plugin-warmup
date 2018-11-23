@@ -297,7 +297,7 @@ module.exports.warmUp = async (event, context, callback) => {
   console.log("Warm Up Start");
   const invokes = await Promise.all(functionNames.map(async (functionName) => {
     let concurrency = functionConcurrency[functionName] > 0 ? functionConcurrency[functionName] : 1;
-    let source = ${JSON.stringify(this.warmup.source)};
+    let source = ${this.warmup.source};
     let promises = [];
     
     console.log(\`Warming up function: \${functionName} with concurrency: \${concurrency}\`);
@@ -309,15 +309,15 @@ module.exports.warmUp = async (event, context, callback) => {
         InvocationType: "RequestResponse",
         LogType: "None",
         Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",
-        Payload: source
+        Payload: JSON.stringify(source)
       };
       
       console.log("Queuing lambda invocation.", params); 
-      promises.push(lambda.invoke(params));
+      promises.push(lambda.invoke(params).promise());
     }
     
     let success = true;
-    Promise.all(promises).then(function(data) {
+    await Promise.all(promises).then(function(data) {
       console.log(\`Warm Up Invoke Success: \${functionName}\`, data);
       success = true;
     }, function(err) {
