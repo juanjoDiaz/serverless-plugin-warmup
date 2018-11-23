@@ -300,7 +300,7 @@ module.exports.warmUp = async (event, context, callback) => {
     let source = ${JSON.stringify(this.warmup.source)};
     let promises = [];
     
-    console.log(\`Warming up function: \${functionName}\` with concurrency: \${concurrency}\`);
+    console.log(\`Warming up function: \${functionName} with concurrency: \${concurrency}\`);
     
     for (let x = 0; x < concurrency; x++) {
       const params = {
