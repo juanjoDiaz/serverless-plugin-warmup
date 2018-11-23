@@ -300,7 +300,7 @@ module.exports.warmUp = async (event, context, callback) => {
     
     for (let x = 0; x < concurrency; x++) {
       const params = {
-        ClientContext: Buffer.from({"custom":source, "concurrencyIndex":x}}).toString('base64')}",
+        ClientContext: Buffer.from({"custom":source, "concurrencyIndex":x}).toString('base64')}",
         FunctionName: functionName,
         InvocationType: "RequestResponse",
         LogType: "None",
