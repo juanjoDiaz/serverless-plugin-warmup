@@ -295,7 +295,7 @@ module.exports.warmUp = async (event, context, callback) => {
   console.log("Warm Up Start");
   const invokes = await Promise.all(functionNames.map(async (functionName) => {
     let concurrency = functionConcurrency[functionName] > 0 ? functionConcurrency[functionName] : 1;
-    let source = "${this.warmup.source}";
+    let source = ${JSON.stringify(this.warmup.source)};
     let promises = [];
     
     for (let x = 0; x < concurrency; x++) {
