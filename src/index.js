@@ -277,9 +277,11 @@ class WarmUP {
     this.serverless.cli.log('WarmUP: setting ' + functionNames.length + ' lambdas to be warm')
 
     /** Get function names */
+    let fullFunctionConcurrency = {}
     functionNames = functionNames.map((functionName) => {
       const functionObject = this.serverless.service.getFunction(functionName)
       this.serverless.cli.log('WarmUP: ' + functionObject.name)
+      fullFunctionConcurrency[functionObject.name] = functionConcurrency[functionName]
       return functionObject.name
     })
 
@@ -290,7 +292,7 @@ const aws = require("aws-sdk");
 aws.config.region = "${this.options.region}";
 const lambda = new aws.Lambda();
 const functionNames = ${JSON.stringify(functionNames)};
-const functionConcurrency = ${JSON.stringify(functionConcurrency)};
+const functionConcurrency = ${JSON.stringify(fullFunctionConcurrency)};
 module.exports.warmUp = async (event, context, callback) => {
   console.log("Warm Up Start");
   const invokes = await Promise.all(functionNames.map(async (functionName) => {
