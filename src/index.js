@@ -313,7 +313,7 @@ module.exports.warmUp = async (event, context, callback) => {
       };
       
       console.log("Queuing lambda invocation.", params); 
-      promises.push(lambda.invoke(params).promise());
+      promises.push(lambda.invoke(params));
     }
     
     let success = true;
