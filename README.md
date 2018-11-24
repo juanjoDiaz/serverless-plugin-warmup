@@ -233,6 +233,7 @@ if(context.custom.source === 'serverless-plugin-warmup'){
 * **source** (default `{ "source": "serverless-plugin-warmup" }`)
 * **sourceRaw** (default `false`)
 * **tags** (default to serverless default tags)
+* **concurrency** (default `1`)
 
 ```yml
 custom:
@@ -248,6 +249,7 @@ custom:
     prewarm: true // Run WarmUp immediately after a deploymentlambda
     source: '{ "source": "my-custom-payload" }'
     sourceRaw: true // Won't JSON.stringify() the source, may be necessary for Go/AppSync deployments
+    concurrency: 2 // How many concurrent instances of a lambda to warm - can be overridden per lambda by setting warmupConcurrency in the function definition.
     tags:
       Project: foo
       Owner: bar    

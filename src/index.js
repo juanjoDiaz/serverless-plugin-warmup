@@ -235,9 +235,8 @@ class WarmUP {
 
       /** Function needs to be warm */
       if (enable(functionConfig)) {
-        const concurrency = functionObject.hasOwnProperty('warmup') && functionObject.warmup.hasOwnProperty('concurrency')
-          ? functionObject.warmup.concurrency
-          : this.warmup.concurrency
+        const concurrency = functionObject.hasOwnProperty('warmupConcurrency') && typeof functionObject.warmupConcurrency === 'number'
+          ? functionObject.warmupConcurrency : this.warmup.concurrency
         functionConcurrency[functionName] = concurrency
 
         return true
@@ -266,6 +265,7 @@ class WarmUP {
    * @description Write warm up ES6 function
    *
    * @param {Array} functionNames - Function names
+   * @param (Dictionary) functionConcurrency - Mapping of concurrency level by function name
    *
    * @fulfil {} — Warm up function created
    * @reject {Error} Warm up error
