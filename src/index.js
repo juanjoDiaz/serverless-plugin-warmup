@@ -219,7 +219,6 @@ class WarmUP {
   createWarmer () {
     /** Get functions */
     const allFunctions = this.serverless.service.getAllFunctions()
-    let functionConcurrency = {}
 
     /** Filter functions for warm up */
     return BbPromise.filter(allFunctions, (functionName) => {
@@ -234,15 +233,7 @@ class WarmUP {
         : this.warmup.default
 
       /** Function needs to be warm */
-      if (enable(functionConfig)) {
-        const concurrency = functionObject.hasOwnProperty('warmupConcurrency') && typeof functionObject.warmupConcurrency === 'number'
-          ? functionObject.warmupConcurrency : this.warmup.concurrency
-        functionConcurrency[functionName] = concurrency
-
-        return true
-      } else {
-        return false
-      }
+      return enable(functionConfig)
     }).then((functionNames) => {
       /** Skip writing if no functions need to be warm */
       if (!functionNames.length) {
@@ -252,7 +243,7 @@ class WarmUP {
       }
 
       /** Write warm up function */
-      return this.createWarmUpFunctionArtifact(functionNames, functionConcurrency)
+      return this.createWarmUpFunctionArtifact(functionNames)
     }).then((skip) => {
       /** Add warm up function to service */
       if (skip !== true) {
@@ -272,17 +263,20 @@ class WarmUP {
    *
    * @return {Promise}
    * */
-  createWarmUpFunctionArtifact (functionNames, functionConcurrency) {
+  createWarmUpFunctionArtifact (functionNames) {
     /** Log warmup start */
     this.serverless.cli.log('WarmUP: setting ' + functionNames.length + ' lambdas to be warm')
 
-    /** Get function names */
-    let fullFunctionConcurrency = {}
-    functionNames = functionNames.map((functionName) => {
+    /** Get necessary function info */
+    let functions = functionNames.map((functionName) => {
+      let functionInfo = {}
       const functionObject = this.serverless.service.getFunction(functionName)
-      this.serverless.cli.log('WarmUP: ' + functionObject.name)
-      fullFunctionConcurrency[functionObject.name] = functionConcurrency[functionName]
-      return functionObject.name
+      functionInfo.name = functionObject.name
+      functionInfo.concurrency = functionObject.hasOwnProperty('warmupConcurrency') &&
+        typeof functionObject.warmupConcurrency === 'number'
+        ? functionObject.warmupConcurrency : this.warmup.concurrency
+      this.serverless.cli.log(`WarmUP: ${functionInfo.name} concurrency: ${functionInfo.concurrency}`)
+      return functionInfo
     })
 
     const warmUpFunction = `"use strict";
@@ -291,49 +285,32 @@ class WarmUP {
 const aws = require("aws-sdk");
 aws.config.region = "${this.options.region}";
 const lambda = new aws.Lambda();
-const functionNames = ${JSON.stringify(functionNames)};
-const functionConcurrency = ${JSON.stringify(fullFunctionConcurrency)};
+const functions = ${JSON.stringify(functions)};
+
 module.exports.warmUp = async (event, context, callback) => {
   console.log("Warm Up Start");
-  const invokes = await Promise.all(functionNames.map(async (functionName) => {
-    let concurrency = functionConcurrency[functionName] > 0 ? functionConcurrency[functionName] : 1;
-    let source = ${this.warmup.source};
-    let promises = [];
+  
+  const invokes = await Promise.all(functions.map(async (functionInfo) => {
+    console.log(\`Warming up function: \${functionInfo.name} with concurrency: \${functionInfo.concurrency}\`);
     
-    console.log(\`Warming up function: \${functionName} with concurrency: \${concurrency}\`);
+    const params = {
+      ClientContext: "${Buffer.from(`{"custom":${this.warmup.source}}`).toString('base64')}",
+      FunctionName: functionInfo.name,
+      InvocationType: "RequestResponse",
+      LogType: "None",
+      Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",
+      Payload: '${this.warmup.source}'
+    };
     
-    for (let x = 0; x < concurrency; x++) {
-      source.concurrencyIndex = x;
-      const params = {
-        ClientContext: Buffer.from(JSON.stringify({"custom":source})).toString('base64'),
-        FunctionName: functionName,
-        InvocationType: "RequestResponse",
-        LogType: "None",
-        Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",
-        Payload: JSON.stringify(source)
-      };
-      
-      promises.push(lambda.invoke(params).promise());
+    try {
+      await Promise.all(Array(functionInfo.concurrency).fill(0)
+        .map(async _ => await lambda.invoke(params).promise()))
+      console.log(\`Warm Up Invoke Success: \${functionInfo.name}\`);
+      return true;
+    } catch (e) {
+      console.log(\`Warm Up Invoke Error: \${functionInfo.name}\`, e);
+      return false;
     }
-    
-    let success = true;
-    await Promise.all(promises).then(function(data) {
-      if (data && data.length > 0 && data[0].Payload) {
-        let payload = JSON.parse(data[0].Payload);
-        
-        if (payload && payload.statusCode && payload.statusCode !== 200) {
-          console.log(\`Warm Up Invoke Success: \${functionName}\`, data);
-          success = false;
-          return;
-        }
-      }
-      
-      console.log(\`Warm Up Invoke Success: \${functionName}\`, data);
-    }, function(err) {
-      console.log(\`Warm Up Invoke Error: \${functionName}\`, err);
-      success = false;
-    });
-    return success;
   }));
 
   console.log(\`Warm Up Finished with \${invokes.filter(r => !r).length} invoke errors\`);

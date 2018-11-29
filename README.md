@@ -98,6 +98,26 @@ functions:
     warmup: false
 ```
 
+Warm-up multiple concurrent instances of your functions:
+```yml
+custom:
+  warmup:
+    concurency: 2
+```
+
+Maintain different levels of concurrency per function: 
+```yml
+custom:
+  warmup:
+    concurrency: 1
+
+...
+
+functions:
+  hello:
+    warmupConcurrency: 5 
+```
+
 * WarmUP requires some permissions to be able to `invoke` lambdas.
 
 ```yaml
@@ -208,6 +228,19 @@ You can also check for the warmp event using the `context` variable. This could 
 ...
 
 if(context.custom.source === 'serverless-plugin-warmup'){
+  console.log('WarmUP - Lambda is warm!')
+  return callback(null, 'Lambda is warm!')
+}
+
+...
+```
+If you're using the `concurrency` option you might consider adding a slight delay before returning when warming up to ensure your function doesn't return before all concurrent requests have been started:
+
+```javascript
+...
+
+if(context.custom.source === 'serverless-plugin-warmup'){
+  await sleep(25) // Pause for 25ms
   console.log('WarmUP - Lambda is warm!')
   return callback(null, 'Lambda is warm!')
 }
