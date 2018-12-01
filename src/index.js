@@ -256,7 +256,6 @@ class WarmUP {
    * @description Write warm up ES6 function
    *
    * @param {Array} functionNames - Function names
-   * @param (Dictionary) functionConcurrency - Mapping of concurrency level by function name
    *
    * @fulfil {} — Warm up function created
    * @reject {Error} Warm up error
@@ -272,8 +271,7 @@ class WarmUP {
       let functionInfo = {}
       const functionObject = this.serverless.service.getFunction(functionName)
       functionInfo.name = functionObject.name
-      functionInfo.concurrency = functionObject.hasOwnProperty('warmupConcurrency') &&
-        typeof functionObject.warmupConcurrency === 'number'
+      functionInfo.concurrency = typeof functionObject.warmupConcurrency === 'number'
         ? functionObject.warmupConcurrency : this.warmup.concurrency
       this.serverless.cli.log(`WarmUP: ${functionInfo.name} concurrency: ${functionInfo.concurrency}`)
       return functionInfo
