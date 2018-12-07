@@ -37,17 +37,7 @@ class WarmUP {
       'after:package:createDeploymentArtifacts': this.afterCreateDeploymentArtifacts.bind(this),
       'after:deploy:deploy': this.afterDeployFunctions.bind(this)
     }
-  }
 
-  /**
-   * @description After package initialize hook. Create warmer function and add it to the service.
-   *
-   * @fulfil {} — Warm up set
-   * @reject {Error} Warm up error
-   *
-   * @return {(boolean|Promise)}
-   * */
-  afterPackageInitialize () {
     // See https://github.com/serverless/serverless/issues/2631
     this.options.stage = this.options.stage ||
       this.serverless.service.provider.stage ||
@@ -61,6 +51,17 @@ class WarmUP {
     this.custom = this.serverless.service.custom
 
     this.configPlugin()
+  }
+
+  /**
+   * @description After package initialize hook. Create warmer function and add it to the service.
+   *
+   * @fulfil {} — Warm up set
+   * @reject {Error} Warm up error
+   *
+   * @return {(boolean|Promise)}
+   * */
+  afterPackageInitialize () {
     return this.createWarmer()
   }
 
@@ -85,8 +86,6 @@ class WarmUP {
    * @return {Promise}
    * */
   afterDeployFunctions () {
-    this.configPlugin()
-
     if (this.warmupOpts.prewarm) {
       return this.warmUpFunctions()
     }
