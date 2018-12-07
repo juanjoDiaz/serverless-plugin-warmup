@@ -74,7 +74,9 @@ class WarmUP {
    * @return {Promise}
    * */
   afterCreateDeploymentArtifacts () {
-    return this.cleanFolder()
+    if (this.warmupOpts.cleanFolder) {
+      return this.cleanFolder()
+    }
   }
 
   /**
@@ -179,9 +181,6 @@ class WarmUP {
    * @return {Promise}
    * */
   cleanFolder () {
-    if (!this.warmupOpts.cleanFolder) {
-      return Promise.resolve()
-    }
     return fs.removeAsync(this.warmupOpts.pathFolder)
   }
 
