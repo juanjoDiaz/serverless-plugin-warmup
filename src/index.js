@@ -109,8 +109,7 @@ class WarmUP {
         : (Array.isArray(possibleConfig.schedule)) ? possibleConfig.schedule : defaultOpts.schedule,
       memorySize: (typeof possibleConfig.memorySize === 'number') ? possibleConfig.memorySize : defaultOpts.memorySize,
       timeout: (typeof possibleConfig.timeout === 'number') ? possibleConfig.timeout : defaultOpts.timeout,
-      prewarm: (typeof possibleConfig.prewarm === 'boolean') ? possibleConfig.prewarm : defaultOpts.prewarm,
-      concurrency: (typeof possibleConfig.concurrency === 'number') ? possibleConfig.concurrency : defaultOpts.concurrency
+      prewarm: (typeof possibleConfig.prewarm === 'boolean') ? possibleConfig.prewarm : defaultOpts.prewarm
     }
   }
 
@@ -136,7 +135,8 @@ class WarmUP {
         : defaultOpts.enabled,
       source: (typeof possibleConfig.source !== 'undefined')
         ? (possibleConfig.sourceRaw ? possibleConfig.source : JSON.stringify(possibleConfig.source))
-        : (defaultOpts.sourceRaw ? defaultOpts.source : JSON.stringify(defaultOpts.source))
+        : (defaultOpts.sourceRaw ? defaultOpts.source : JSON.stringify(defaultOpts.source)),
+      concurrency: (typeof possibleConfig.concurrency === 'number') ? possibleConfig.concurrency : defaultOpts.concurrency
     }
   }
 
@@ -153,13 +153,13 @@ class WarmUP {
       name: this.serverless.service.service + '-' + this.options.stage + '-warmup-plugin',
       schedule: ['rate(5 minutes)'],
       timeout: 10,
-      prewarm: false,
-      concurrency: 1
+      prewarm: false
     }
 
     const functionDefaultOpts = {
       enabled: false,
-      source: JSON.stringify({ source: 'serverless-plugin-warmup' })
+      source: JSON.stringify({ source: 'serverless-plugin-warmup' }),
+      concurrency: 1
     }
 
     const customConfig = (this.custom && typeof this.custom.warmup !== 'undefined')
@@ -240,16 +240,6 @@ class WarmUP {
 
     /** Log functions being warmed up */
     functions.forEach(func => this.serverless.cli.log('WarmUP: ' + func.name))
-    /** Get necessary function info */
-    let functions = functionNames.map((functionName) => {
-      let functionInfo = {}
-      const functionObject = this.serverless.service.getFunction(functionName)
-      functionInfo.name = functionObject.name
-      functionInfo.concurrency = typeof functionObject.warmupConcurrency === 'number'
-        ? functionObject.warmupConcurrency : this.warmup.concurrency
-      this.serverless.cli.log(`WarmUP: ${functionInfo.name} concurrency: ${functionInfo.concurrency}`)
-      return functionInfo
-    })
 
     const warmUpFunction = `"use strict";
 
@@ -262,12 +252,12 @@ const functions = ${JSON.stringify(functions)};
 module.exports.warmUp = async (event, context, callback) => {
   console.log("Warm Up Start");
   
-  const invokes = await Promise.all(functions.map(async (functionInfo) => {
-    console.log(\`Warming up function: \${functionInfo.name} with concurrency: \${functionInfo.concurrency}\`);
+  const invokes = await Promise.all(functions.map(async (func) => {
+    console.log(\`Warming up function: \${func.name} with concurrency: \${func.config.concurrency}\`);
     
     const params = {
-      ClientContext: "${Buffer.from(`{"custom":${this.warmup.source}}`).toString('base64')}",
-      FunctionName: functionInfo.name,
+      ClientContext: Buffer.from(\`{"custom":\${func.config.source}}\`).toString('base64'),
+      FunctionName: func.name,
       InvocationType: "RequestResponse",
       LogType: "None",
       Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",
@@ -275,12 +265,12 @@ module.exports.warmUp = async (event, context, callback) => {
     };
     
     try {
-      await Promise.all(Array(functionInfo.concurrency).fill(0)
+      await Promise.all(Array(func.config.concurrency).fill(0)
         .map(async _ => await lambda.invoke(params).promise()))
-      console.log(\`Warm Up Invoke Success: \${functionInfo.name}\`);
+      console.log(\`Warm Up Invoke Success: \${func.name}\`);
       return true;
     } catch (e) {
-      console.log(\`Warm Up Invoke Error: \${functionInfo.name}\`, e);
+      console.log(\`Warm Up Invoke Error: \${func.name}\`, e);
       return false;
     }
   }));

@@ -110,27 +110,6 @@ functions:
       enabled: false
 ```
 
-Warm-up multiple concurrent instances of your functions:
-```yml
-custom:
-  warmup:
-    concurency: 2
-```
-
-Maintain different levels of concurrency per function: 
-```yml
-custom:
-  warmup:
-    concurrency: 1
-
-...
-
-functions:
-  hello:
-    warmupConcurrency: 5 
-```
-
-* WarmUP requires some permissions to be able to `invoke` lambdas.
 ### Other Options
 
 #### Global options
@@ -150,6 +129,7 @@ functions:
 * **enabled** (default `false`)
 * **source** (default `{ "source": "serverless-plugin-warmup" }`)
 * **sourceRaw** (default `false`)
+* **concurrency** (default `1`)
 
 ```yml
 custom:
@@ -167,7 +147,8 @@ custom:
     timeout: 20
     prewarm: true // Run WarmUp immediately after a deploymentlambda
     source: '{ "source": "my-custom-payload" }'
-    sourceRaw: true // Won't JSON.stringify() the source, may be necessary for Go/AppSync deployments   
+    sourceRaw: true // Won't JSON.stringify() the source, may be necessary for Go/AppSync deployments
+    concurrency: 5 // Warm up 5 concurrent instances
 ```
 
 **Options should be tweaked depending on:**
