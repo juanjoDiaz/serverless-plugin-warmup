@@ -93,8 +93,8 @@ class WarmUP {
     }
   }
 
-  getGlobalConfig (possibleConfig, defaultOpts = {}) {
-    const folderName = (typeof possibleConfig.folderName === 'string') ? possibleConfig.folderName : '_warmup'
+  getGlobalConfig (config, defaultOpts = {}) {
+    const folderName = (typeof config.folderName === 'string') ? config.folderName : '_warmup'
     const pathFolder = path.join(this.serverless.config.servicePath, folderName)
 
     return {
@@ -102,40 +102,36 @@ class WarmUP {
       pathFolder,
       pathFile: `${pathFolder}/index.js`,
       pathHandler: `${folderName}/index.warmUp`,
-      cleanFolder: (typeof possibleConfig.cleanFolder === 'boolean') ? possibleConfig.cleanFolder : defaultOpts.cleanFolder,
-      name: (typeof possibleConfig.name === 'string') ? possibleConfig.name : defaultOpts.name,
-      role: (typeof possibleConfig.role === 'string') ? possibleConfig.role : defaultOpts.role,
-      tags: (typeof possibleConfig.tags === 'object') ? possibleConfig.tags : defaultOpts.tags,
-      schedule: (typeof possibleConfig.schedule === 'string') ? [possibleConfig.schedule]
-        : (Array.isArray(possibleConfig.schedule)) ? possibleConfig.schedule : defaultOpts.schedule,
-      memorySize: (typeof possibleConfig.memorySize === 'number') ? possibleConfig.memorySize : defaultOpts.memorySize,
-      timeout: (typeof possibleConfig.timeout === 'number') ? possibleConfig.timeout : defaultOpts.timeout,
-      prewarm: (typeof possibleConfig.prewarm === 'boolean') ? possibleConfig.prewarm : defaultOpts.prewarm
+      cleanFolder: (typeof config.cleanFolder === 'boolean') ? config.cleanFolder : defaultOpts.cleanFolder,
+      name: (typeof config.name === 'string') ? config.name : defaultOpts.name,
+      role: (typeof config.role === 'string') ? config.role : defaultOpts.role,
+      tags: (typeof config.tags === 'object') ? config.tags : defaultOpts.tags,
+      schedule: (typeof config.schedule === 'string') ? [config.schedule]
+        : (Array.isArray(config.schedule)) ? config.schedule : defaultOpts.schedule,
+      memorySize: (typeof config.memorySize === 'number') ? config.memorySize : defaultOpts.memorySize,
+      timeout: (typeof config.timeout === 'number') ? config.timeout : defaultOpts.timeout,
+      prewarm: (typeof config.prewarm === 'boolean') ? config.prewarm : defaultOpts.prewarm
     }
   }
 
   getFunctionConfig (possibleConfig, defaultOpts) {
-    if (typeof possibleConfig === 'undefined') {
-      return defaultOpts
-    }
-
-    if (typeof possibleConfig !== 'object') {
-      return Object.assign({}, defaultOpts, { enabled: possibleConfig })
-    }
+    const config = (typeof possibleConfig !== 'object')
+      ? { enabled: possibleConfig }
+      : possibleConfig
 
     // Keep backwards compatibility for now
-    if (possibleConfig.default) {
-      possibleConfig.enabled = possibleConfig.default
+    if (config.default) {
+      config.enabled = possibleConfig.default
     }
 
     return {
-      enabled: (typeof possibleConfig.enabled === 'boolean' ||
-          typeof possibleConfig.enabled === 'string' ||
-          Array.isArray(possibleConfig.enabled))
-        ? possibleConfig.enabled
+      enabled: (typeof config.enabled === 'boolean' ||
+          typeof config.enabled === 'string' ||
+          Array.isArray(config.enabled))
+        ? config.enabled
         : defaultOpts.enabled,
-      source: (typeof possibleConfig.source !== 'undefined')
-        ? (possibleConfig.sourceRaw ? possibleConfig.source : JSON.stringify(possibleConfig.source))
+      source: (typeof config.source !== 'undefined')
+        ? (config.sourceRaw ? config.source : JSON.stringify(config.source))
         : (defaultOpts.sourceRaw ? defaultOpts.source : JSON.stringify(defaultOpts.source))
     }
   }
