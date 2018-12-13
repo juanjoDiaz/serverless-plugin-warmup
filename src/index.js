@@ -194,20 +194,14 @@ class WarmUP {
    * */
   createWarmer () {
     /** Get functions */
-    const allFunctions = this.serverless.service.getAllFunctions()
-      .map(functionName => this.serverless.service.getFunction(functionName))
-      .map(functionConfig => ({
-        name: functionConfig.name,
-        config: this.getFunctionConfig(functionConfig.warmup, this.warmupOpts)
-      }))
-
-    /** Filter functions for warm up */
-    const functionsToWarmup = allFunctions.filter((func) => {
-      const config = func.config.enabled
-      return config === true ||
-        config === this.options.stage ||
-        (Array.isArray(config) && config.indexOf(this.options.stage) !== -1)
-    })
+    const functionsToWarmup = this.serverless.service.getAllFunctions()
+      .map(name => this.serverless.service.getFunction(name))
+      .map(config => ({ name: config.name, config: this.getFunctionConfig(config.warmup, this.warmupOpts) }))
+      .filter(({ config: { enabled } }) => (
+        enabled === true ||
+        enabled === this.options.stage ||
+        (Array.isArray(enabled) && enabled.indexOf(this.options.stage) !== -1)
+      ))
 
     /** Skip writing if no functions need to be warm */
     if (!functionsToWarmup.length) {
@@ -327,7 +321,7 @@ module.exports.warmUp = async (event, context, callback) => {
     }
 
     return this.provider.request('Lambda', 'invoke', params)
-      .then(data => this.serverless.cli.log('WarmUp: Functions sucessfuly pre-warmed'))
+      .then(() => this.serverless.cli.log('WarmUp: Functions sucessfuly pre-warmed'))
       .catch(error => this.serverless.cli.log('WarmUp: Error while pre-warming functions', error))
   }
 }
