@@ -291,8 +291,8 @@ If you're using the `concurrency` option you might consider adding a slight dela
 
 ```javascript
 module.exports.lambdaToWarm = function(event, context, callback) {
-  /** Slightly delayed response for WarmUP plugin to ensure concurrent invocation */
   if (event.source === 'serverless-plugin-warmup') {
+    /** Slightly delayed (25ms) response for WarmUP plugin to ensure concurrent invocation */
     await new Promise(r => setTimeout(r, 25))
     console.log('WarmUP - Lambda is warm!')
     return
