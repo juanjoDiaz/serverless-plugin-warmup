@@ -135,7 +135,8 @@ class WarmUP {
         : defaultOpts.enabled,
       source: (typeof possibleConfig.source !== 'undefined')
         ? (possibleConfig.sourceRaw ? possibleConfig.source : JSON.stringify(possibleConfig.source))
-        : (defaultOpts.sourceRaw ? defaultOpts.source : JSON.stringify(defaultOpts.source))
+        : (defaultOpts.sourceRaw ? defaultOpts.source : JSON.stringify(defaultOpts.source)),
+      concurrency: (typeof possibleConfig.concurrency === 'number') ? possibleConfig.concurrency : defaultOpts.concurrency
     }
   }
 
@@ -157,7 +158,8 @@ class WarmUP {
 
     const functionDefaultOpts = {
       enabled: false,
-      source: JSON.stringify({ source: 'serverless-plugin-warmup' })
+      source: JSON.stringify({ source: 'serverless-plugin-warmup' }),
+      concurrency: 1
     }
 
     const customConfig = (this.custom && typeof this.custom.warmup !== 'undefined')
@@ -246,9 +248,13 @@ const aws = require("aws-sdk");
 aws.config.region = "${this.options.region}";
 const lambda = new aws.Lambda();
 const functions = ${JSON.stringify(functions)};
+
 module.exports.warmUp = async (event, context, callback) => {
   console.log("Warm Up Start");
+  
   const invokes = await Promise.all(functions.map(async (func) => {
+    console.log(\`Warming up function: \${func.name} with concurrency: \${func.config.concurrency}\`);
+    
     const params = {
       ClientContext: Buffer.from(\`{"custom":\${func.config.source}}\`).toString('base64'),
       FunctionName: func.name,
@@ -257,13 +263,14 @@ module.exports.warmUp = async (event, context, callback) => {
       Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",
       Payload: func.config.source
     };
-
+    
     try {
-      const data = await lambda.invoke(params).promise();
-      console.log(\`Warm Up Invoke Success: \${functionName}\`, data);
+      await Promise.all(Array(func.config.concurrency).fill(0)
+        .map(async _ => await lambda.invoke(params).promise()))
+      console.log(\`Warm Up Invoke Success: \${func.name}\`);
       return true;
     } catch (e) {
-      console.log(\`Warm Up Invoke Error: \${functionName}\`, e);
+      console.log(\`Warm Up Invoke Error: \${func.name}\`, e);
       return false;
     }
   }));

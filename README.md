@@ -129,6 +129,7 @@ functions:
 * **enabled** (default `false`)
 * **source** (default `{ "source": "serverless-plugin-warmup" }`)
 * **sourceRaw** (default `false`)
+* **concurrency** (default `1`)
 
 ```yml
 custom:
@@ -146,7 +147,8 @@ custom:
     timeout: 20
     prewarm: true // Run WarmUp immediately after a deploymentlambda
     source: '{ "source": "my-custom-payload" }'
-    sourceRaw: true // Won't JSON.stringify() the source, may be necessary for Go/AppSync deployments   
+    sourceRaw: true // Won't JSON.stringify() the source, may be necessary for Go/AppSync deployments
+    concurrency: 5 // Warm up 5 concurrent instances
 ```
 
 **Options should be tweaked depending on:**
@@ -285,8 +287,20 @@ if(context.custom.source === 'serverless-plugin-warmup'){
 
 ...
 ```
+If you're using the `concurrency` option you might consider adding a slight delay before returning when warming up to ensure your function doesn't return before all concurrent requests have been started:
 
+```javascript
+module.exports.lambdaToWarm = function(event, context, callback) {
+  if (event.source === 'serverless-plugin-warmup') {
+    /** Slightly delayed (25ms) response for WarmUP plugin to ensure concurrent invocation */
+    await new Promise(r => setTimeout(r, 25))
+    console.log('WarmUP - Lambda is warm!')
+    return
+  }
 
+  ... add lambda logic after
+}
+```
 ## Deployment
 
 Once everything is configured WarmUP will run on SLS `deploy`.
