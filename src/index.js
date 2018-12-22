@@ -48,9 +48,8 @@ class WarmUP {
       (this.serverless.service.defaults && this.serverless.service.defaults.region) ||
       'us-east-1'
 
-    this.custom = this.serverless.service.custom
-
-    this.configPlugin()
+    this.warmupOpts = this.configPlugin(this.serverless.service, this.options.stage)
+    this.functionsToWarmup = this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
   }
 
   /**
@@ -88,12 +87,19 @@ class WarmUP {
    * @return {Promise}
    * */
   afterDeployFunctions () {
-    if (this.warmupOpts.prewarm) {
+    if (this.warmupOpts.prewarm && this.functionsToWarmup.length > 0) {
       return this.warmUpFunctions()
     }
   }
 
-  getGlobalConfig (config, defaultOpts = {}) {
+  /**
+   * @description Clean a global configuration object
+   * and fill the missing options using the given defaults
+   *
+   * @return {Object} - Global configuration options
+   * */
+  getGlobalConfig (possibleConfig, defaultOpts = {}) {
+    const config = (typeof possibleConfig === 'object') ? possibleConfig : {}
     const folderName = (typeof config.folderName === 'string') ? config.folderName : '_warmup'
     const pathFolder = path.join(this.serverless.config.servicePath, folderName)
 
@@ -114,6 +120,12 @@ class WarmUP {
     }
   }
 
+  /**
+   * @description Clean a function-specific configuration object
+   * and fill the missing options using the given defaults
+   *
+   * @return {Object} - Function-specific configuration options
+   * */
   getFunctionConfig (possibleConfig, defaultOpts) {
     const config = (typeof possibleConfig !== 'object')
       ? { enabled: possibleConfig }
@@ -140,14 +152,14 @@ class WarmUP {
   /**
    * @description Configure the plugin based on the context of serverless.yml
    *
-   * @return {}
+   * @return {Object} - Configuration options to be used by the plugin
    * */
-  configPlugin () {
+  configPlugin (service, stage) {
     const globalDefaultOpts = {
       folderName: '_warmup',
       cleanFolder: true,
       memorySize: 128,
-      name: this.serverless.service.service + '-' + this.options.stage + '-warmup-plugin',
+      name: `${service.service}-${stage}-warmup-plugin`,
       schedule: ['rate(5 minutes)'],
       timeout: 10,
       prewarm: false
@@ -159,15 +171,30 @@ class WarmUP {
       concurrency: 1
     }
 
-    const customConfig = (this.custom && typeof this.custom.warmup !== 'undefined')
-      ? this.custom.warmup
+    const customConfig = (service.custom && typeof service.custom.warmup !== 'undefined')
+      ? service.custom.warmup
       : {}
 
-    /** Set global custom options */
-    this.warmupOpts = Object.assign(
+    return Object.assign(
       this.getGlobalConfig(customConfig, globalDefaultOpts),
       this.getFunctionConfig(customConfig, functionDefaultOpts)
     )
+  }
+
+  /**
+   * @description After package initialize hook. Create warmer function and add it to the service.
+   *
+   * @return {Array} - List of functions to be warmed up and their specific configs
+   * */
+  getFunctionsToBeWarmedUp (service, stage, warmupOpts) {
+    return service.getAllFunctions()
+      .map(name => service.getFunction(name))
+      .map(config => ({ name: config.name, config: this.getFunctionConfig(config.warmup, warmupOpts) }))
+      .filter(({ config: { enabled } }) => (
+        enabled === true ||
+        enabled === stage ||
+        (Array.isArray(enabled) && enabled.indexOf(stage) !== -1)
+      ))
   }
 
   /**
@@ -191,24 +218,14 @@ class WarmUP {
    * @return {Promise}
    * */
   createWarmer () {
-    /** Get functions */
-    const functionsToWarmup = this.serverless.service.getAllFunctions()
-      .map(name => this.serverless.service.getFunction(name))
-      .map(config => ({ name: config.name, config: this.getFunctionConfig(config.warmup, this.warmupOpts) }))
-      .filter(({ config: { enabled } }) => (
-        enabled === true ||
-        enabled === this.options.stage ||
-        (Array.isArray(enabled) && enabled.indexOf(this.options.stage) !== -1)
-      ))
-
     /** Skip writing if no functions need to be warm */
-    if (!functionsToWarmup.length) {
+    if (!this.functionsToWarmup.length) {
       this.serverless.cli.log('WarmUP: no lambda to warm')
       return Promise.resolve()
     }
 
     /** Write warm up function */
-    return this.createWarmUpFunctionArtifact(functionsToWarmup)
+    return this.createWarmUpFunctionArtifact(this.functionsToWarmup)
       .then(() => this.addWarmUpFunctionToService())
   }
 
