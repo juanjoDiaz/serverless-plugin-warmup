@@ -188,13 +188,17 @@ class WarmUP {
    * */
   getFunctionsToBeWarmedUp (service, stage, warmupOpts) {
     return service.getAllFunctions()
-      .map(name => service.getFunction(name))
-      .map(config => ({ name: config.name, config: this.getFunctionConfig(config.warmup, warmupOpts) }))
-      .filter(({ config: { enabled } }) => (
-        enabled === true ||
-        enabled === stage ||
-        (Array.isArray(enabled) && enabled.indexOf(stage) !== -1)
-      ))
+      .map((name) => { return { name: name, service: service.getFunction(name) } })
+      .map((theFunction) => {
+      
+        return { name: theFunction.name, config: this.getFunctionConfig(theFunction.service.warmup, warmupOpts) }
+      })
+      .filter((item) => {
+        
+        return item.config.enabled === true ||
+        item.config.enabled === stage ||
+        (Array.isArray(item.config.enabled) && item.config.enabled.indexOf(stage) !== -1)
+      })
   }
 
   /**
