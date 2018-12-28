@@ -188,7 +188,7 @@ class WarmUP {
    * */
   getFunctionsToBeWarmedUp (service, stage, warmupOpts) {
     return service.getAllFunctions()
-      .map((name) => { return { name: name, service: service.getFunction(name) } })
+      .map((name) => ({ name: name, service: service.getFunction(name) }))
       .map((theFunction) => ({ name: theFunction.name, config: this.getFunctionConfig(theFunction.service.warmup, warmupOpts) }))
       .filter(item => item.config.enabled === true ||
         item.config.enabled === stage ||
