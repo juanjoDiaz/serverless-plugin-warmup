@@ -119,8 +119,8 @@ functions:
 * **name** (default `${service}-${stage}-warmup-plugin`)
 * **role** (default to role in the provider)
 * **tags** (default to serverless default tags)
-* **schedule** (default `rate(5 minutes)`) - More examples [here](https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html).
 * **memorySize** (default `128`)
+* **events** (default `- schedule: rate(5 minutes)`)
 * **timeout** (default `10` seconds)
 * **prewarm** (default `false`)
 
@@ -134,8 +134,8 @@ functions:
 ```yml
 custom:
   warmup:
-    enabled: true // Whether to warm up functions by default or not
-    folderName: '_warmup' // Name of the folder created for the generated warmup 
+    enabled: true # Whether to warm up functions by default or not
+    folderName: '_warmup' # Name of the folder created for the generated warmup 
     cleanFolder: false
     memorySize: 256
     name: 'make-them-pop'
@@ -143,12 +143,13 @@ custom:
     tags:
       Project: foo
       Owner: bar 
-    schedule: 'cron(0/5 8-17 ? * MON-FRI *)' // Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
+    events:
+      - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
     timeout: 20
-    prewarm: true // Run WarmUp immediately after a deploymentlambda
+    prewarm: true # Run WarmUp immediately after a deploymentlambda
     source: '{ "source": "my-custom-payload" }'
-    sourceRaw: true // Won't JSON.stringify() the source, may be necessary for Go/AppSync deployments
-    concurrency: 5 // Warm up 5 concurrent instances
+    sourceRaw: true # Won't JSON.stringify() the source, may be necessary for Go/AppSync deployments
+    concurrency: 5 # Warm up 5 concurrent instances
 ```
 
 **Options should be tweaked depending on:**
@@ -166,6 +167,15 @@ custom:
 }
 ```
 
+#### Legacy options
+
+Over time some options have been removed form the pluging.
+For now, we keep backwards compatibility so they still work.
+However, they are listed here only to facilitate upgrading the pluging and we strongly recommend switching to the options defined above as soon as possible.
+
+* **default** Has been renamed to `enabled`
+* **schedule** `schedule: rate(5 minutes)` is equivalent to `events: - schedule: rate(5 minutes)`.
+
 ### Permissions
 
 WarmUP requires some permissions to be able to `invoke` lambdas.
@@ -178,7 +188,8 @@ custom:
     memorySize: 256
     name: 'make-them-pop'
     role:  myCustRole0
-    schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
+    events:
+      - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
     timeout: 20
     prewarm: true # Run WarmUp immediately after a deployment
     tags:
