@@ -240,10 +240,10 @@ class WarmUP {
    * */
   createWarmUpFunctionArtifact (functions) {
     /** Log warmup start */
-    this.serverless.cli.log('WarmUP: setting ' + functions.length + ' lambdas to be warm')
+    this.serverless.cli.log(`WarmUP: setting ${functions.length} lambdas to be warm`)
 
     /** Log functions being warmed up */
-    functions.forEach(func => this.serverless.cli.log('WarmUP: ' + func.name))
+    functions.forEach(func => this.serverless.cli.log(`WarmUP: ${func.name}`))
 
     const warmUpFunction = `"use strict";
 
