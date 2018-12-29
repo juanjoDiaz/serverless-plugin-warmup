@@ -102,6 +102,13 @@ class WarmUP {
     const folderName = (typeof config.folderName === 'string') ? config.folderName : '_warmup'
     const pathFolder = path.join(this.serverless.config.servicePath, folderName)
 
+    // Keep backwards compatibility for now
+    config.events = (typeof config.schedule === 'string')
+      ? [{ schedule: config.schedule }]
+      : (Array.isArray(config.schedule))
+        ? config.schedule.map(schedule => ({ schedule }))
+        : undefined
+
     return {
       folderName,
       pathFolder,
@@ -111,8 +118,7 @@ class WarmUP {
       name: (typeof config.name === 'string') ? config.name : defaultOpts.name,
       role: (typeof config.role === 'string') ? config.role : defaultOpts.role,
       tags: (typeof config.tags === 'object') ? config.tags : defaultOpts.tags,
-      schedule: (typeof config.schedule === 'string') ? [config.schedule]
-        : (Array.isArray(config.schedule)) ? config.schedule : defaultOpts.schedule,
+      events: (Array.isArray(config.events)) ? config.events : defaultOpts.events,
       memorySize: (typeof config.memorySize === 'number') ? config.memorySize : defaultOpts.memorySize,
       timeout: (typeof config.timeout === 'number') ? config.timeout : defaultOpts.timeout,
       prewarm: (typeof config.prewarm === 'boolean') ? config.prewarm : defaultOpts.prewarm
@@ -159,7 +165,7 @@ class WarmUP {
       cleanFolder: true,
       memorySize: 128,
       name: `${service.service}-${stage}-warmup-plugin`,
-      schedule: ['rate(5 minutes)'],
+      events: [{ schedule: 'rate(5 minutes)' }],
       timeout: 10,
       prewarm: false
     }
@@ -295,7 +301,7 @@ module.exports.warmUp = async (event, context, callback) => {
     /** SLS warm up function */
     this.serverless.service.functions.warmUpPlugin = {
       description: 'Serverless WarmUP Plugin',
-      events: this.warmupOpts.schedule.map(schedule => ({ schedule })),
+      events: this.warmupOpts.events,
       handler: this.warmupOpts.pathHandler,
       memorySize: this.warmupOpts.memorySize,
       name: this.warmupOpts.name,
