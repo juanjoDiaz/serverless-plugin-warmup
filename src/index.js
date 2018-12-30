@@ -49,7 +49,6 @@ class WarmUP {
       'us-east-1'
 
     this.warmupOpts = this.configPlugin(this.serverless.service, this.options.stage)
-    this.functionsToWarmup = this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
   }
 
   /**
@@ -61,6 +60,7 @@ class WarmUP {
    * @return {(boolean|Promise)}
    * */
   afterPackageInitialize () {
+    this.functionsToWarmup = this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
     return this.createWarmer()
   }
 
@@ -88,6 +88,7 @@ class WarmUP {
    * */
   afterDeployFunctions () {
     if (this.warmupOpts.prewarm && this.functionsToWarmup.length > 0) {
+      this.functionsToWarmup = this.functionsToWarmup || this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
       return this.warmUpFunctions()
     }
   }
@@ -188,7 +189,8 @@ class WarmUP {
    * */
   getFunctionsToBeWarmedUp (service, stage, warmupOpts) {
     return service.getAllFunctions()
-      .map(name => ({ name, config: this.getFunctionConfig(service.getFunction(name).warmup, warmupOpts) }))
+      .map(name => service.getFunction(name))
+      .map(config => ({ name: config.name, config: this.getFunctionConfig(config.warmup, warmupOpts) }))
       .filter(({ config: { enabled } }) => (
         enabled === true ||
         enabled === stage ||
