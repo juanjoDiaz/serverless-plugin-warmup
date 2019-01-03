@@ -290,7 +290,7 @@ if(context.custom.source === 'serverless-plugin-warmup'){
 If you're using the `concurrency` option you might consider adding a slight delay before returning when warming up to ensure your function doesn't return before all concurrent requests have been started:
 
 ```javascript
-module.exports.lambdaToWarm = function(event, context, callback) {
+module.exports.lambdaToWarm = async (event) => {
   if (event.source === 'serverless-plugin-warmup') {
     /** Slightly delayed (25ms) response for WarmUP plugin to ensure concurrent invocation */
     await new Promise(r => setTimeout(r, 25))
