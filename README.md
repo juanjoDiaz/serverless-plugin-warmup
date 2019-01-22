@@ -1,8 +1,11 @@
 Serverless WarmUP Plugin ♨
 =============================
-[![serverless](http://public.serverless.com/badges/v3.svg)](http://www.serverless.com)
-[![npm version](https://badge.fury.io/js/serverless-plugin-warmup.svg)](https://badge.fury.io/js/serverless-plugin-warmup)
-[![npm downloads](https://img.shields.io/npm/dm/serverless-plugin-warmup.svg)](https://www.npmjs.com/package/serverless-plugin-warmup)
+[![Serverless][serverless-badge]](serverless-badge-url)
+[![npm version][npm-version-badge]][npm-version-badge-url]
+[![npm monthly downloads][npm-downloads-badge]][npm-version-badge-url]
+[![Build Status][travis-badge]][travis-badge-url]
+[![Coverage Status][coveralls-badge]][coveralls-badge-url]
+[![Dependency Status][dev-badge]][dev-badge-url]
 [![license](https://img.shields.io/npm/l/serverless-plugin-warmup.svg)](https://raw.githubusercontent.com/FidelLimited/serverless-plugin-warmup/master/LICENSE)
 
 Keep your lambdas warm during Winter.
@@ -348,3 +351,15 @@ Help us making this plugin better and future proof.
 ## License
 
 This software is released under the MIT license. See [the license file](LICENSE) for more details.
+
+[serverless-badge]: http://public.serverless.com/badges/v3.svg
+[serverless-badge-url]: http://www.serverless.com
+[npm-version-badge]: https://badge.fury.io/js/serverless-plugin-warmup.svg
+[npm-version-badge-url]: https://www.npmjs.com/package/serverless-plugin-warmup
+[npm-downloads-badge]: https://img.shields.io/npm/dm/serverless-plugin-warmup.svg
+[travis-badge]: https://travis-ci.org/FidelLimited/serverless-plugin-warmup.svg
+[travis-badge-url]: https://travis-ci.org/FidelLimited/serverless-plugin-warmup
+[coveralls-badge]: https://coveralls.io/repos/FidelLimited/serverless-plugin-warmup/badge.svg?branch=master
+[coveralls-badge-url]: https://coveralls.io/r/FidelLimited/serverless-plugin-warmup?branch=master
+[dev-badge]: https://david-dm.org/FidelLimited/serverless-plugin-warmup.svg
+[dev-badge-url]: https://david-dm.org/FidelLimited/serverless-plugin-warmup
