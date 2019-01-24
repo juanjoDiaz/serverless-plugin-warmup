@@ -5,12 +5,10 @@
  *
  * @see {@link https://serverless.com/framework/docs/providers/aws/guide/plugins/}
  *
- * @requires 'bluebird'
  * @requires 'fs-extra'
  * @requires 'path'
  * */
-const BbPromise = require('bluebird')
-const fs = BbPromise.promisifyAll(require('fs-extra'))
+const fs = require('fs-extra')
 const path = require('path')
 
 /**
@@ -207,7 +205,7 @@ class WarmUP {
    * @return {Promise}
    * */
   cleanFolder () {
-    return fs.removeAsync(this.warmupOpts.pathFolder)
+    return fs.remove(this.warmupOpts.pathFolder)
   }
 
   /**
@@ -285,7 +283,7 @@ module.exports.warmUp = async (event, context, callback) => {
 }`
 
     /** Write warm up file */
-    return fs.outputFileAsync(this.warmupOpts.pathFile, warmUpFunction)
+    return fs.outputFile(this.warmupOpts.pathFile, warmUpFunction)
   }
 
   /**
