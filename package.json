@@ -27,7 +27,6 @@
   },
   "homepage": "https://github.com/FidelLimited/serverless-plugin-warmup",
   "dependencies": {
-    "bluebird": "^3.5.0",
     "fs-extra": "^7.0.1"
   },
   "devDependencies": {
