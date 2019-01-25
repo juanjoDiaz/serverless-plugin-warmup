@@ -1,0 +1,6 @@
+#tests
+test
+coverage
+
+#build tools
+.travis.yml

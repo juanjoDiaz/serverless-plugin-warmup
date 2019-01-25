@@ -5,6 +5,9 @@ npm-debug.log
 # IDE
 **/.idea
 
+# Tests
+coverage
+
 # OS
 .DS_Store
 .tmp
