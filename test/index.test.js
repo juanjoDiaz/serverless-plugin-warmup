@@ -180,6 +180,15 @@ describe('Serverless warmup plugin', () => {
   })
 
   describe('createWarmupFunctionArtifact', () => {
+    const { version } = process
+    const [major, minor, patch] = version.replace('v', '').split('.').map(Number)
+
+    const supportsAsyncAwait = major >= 8 || (major === 7 && minor >= 11) || (major === 7 && minor === 10 && patch >= 1)
+
+    if (!supportsAsyncAwait) {
+      return
+    }
+
     // Fake 'this' context for WarmUP class
     const mockCtx = {
       options: {
