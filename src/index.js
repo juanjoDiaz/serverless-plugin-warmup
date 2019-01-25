@@ -118,6 +118,8 @@ class WarmUP {
       name: (typeof config.name === 'string') ? config.name : defaultOpts.name,
       role: (typeof config.role === 'string') ? config.role : defaultOpts.role,
       tags: (typeof config.tags === 'object') ? config.tags : defaultOpts.tags,
+      vpc: config.vpc === false ? { securityGroupIds: [], subnetIds: [] }
+        : (typeof config.vpc === 'object' ? config.vpc : defaultOpts.vpc),
       events: (Array.isArray(config.events)) ? config.events : defaultOpts.events,
       memorySize: (typeof config.memorySize === 'number') ? config.memorySize : defaultOpts.memorySize,
       timeout: (typeof config.timeout === 'number') ? config.timeout : defaultOpts.timeout,
@@ -320,6 +322,10 @@ module.exports.warmUp = async (event, context, callback) => {
 
     if (this.warmupOpts.tags) {
       this.serverless.service.functions.warmUpPlugin.tags = this.warmupOpts.tags
+    }
+
+    if (this.warmupOpts.vpc) {
+      this.serverless.service.functions.vpc = this.warmupOpts.vpc
     }
 
     /** Return service function object */

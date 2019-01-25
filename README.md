@@ -122,6 +122,7 @@ functions:
 * **name** (default `${service}-${stage}-warmup-plugin`)
 * **role** (default to role in the provider)
 * **tags** (default to serverless default tags)
+* **vpc** (default to vpc in provider, can be set to `false` to deploy the warmup function outside of VPC)
 * **memorySize** (default `128`)
 * **events** (default `- schedule: rate(5 minutes)`)
 * **timeout** (default `10` seconds)
@@ -146,6 +147,7 @@ custom:
     tags:
       Project: foo
       Owner: bar 
+    vpc: false
     events:
       - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
     timeout: 20
