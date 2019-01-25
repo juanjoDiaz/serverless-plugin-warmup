@@ -178,4 +178,111 @@ describe('Serverless warmup plugin', () => {
       })
     })
   })
+
+  describe('createWarmupFunctionArtifact', () => {
+    // Fake 'this' context for WarmUP class
+    const mockCtx = {
+      options: {
+        region: 'us-east-1'
+      },
+      warmupOpts: {
+        pathFile: 'some/gosh/darned/path/file.js'
+      },
+      serverless: {
+        cli: {
+          log: () => null
+        }
+      }
+    }
+
+    // Fake fs that just returns the path and the generated JS string
+    const mockFs = { outputFile: (path, funcString) => ({ path, funcString }) }
+
+    // Some test lambdas
+    const testFunc1 = {
+      name: 'someFunc1',
+      config: {
+        concurrency: 2,
+        enabled: true,
+        source: 'sauce'
+      }
+    }
+    const testFunc2 = {
+      name: 'someFunc2',
+      config: {
+        concurrency: 3,
+        enabled: 'production',
+        source: 'meatball sauce'
+      }
+    }
+    const functions = [testFunc1, testFunc2]
+
+    // Call the artifact creator function
+    const result = WarmUP.prototype.createWarmUpFunctionArtifact.call(mockCtx, functions, mockFs)
+
+    // Fake context for the generated warmer, used to track what happens when the function is invoked
+    const testCtx = {
+      lambdaConstructed: false,
+      exportedFunc: null,
+      lambdaInvocations: []
+    }
+
+    // Wrap the artifact in a closure that dispatches changes to testCtx when something we want to test happens
+    const ctxWrapper = `
+    const testCtx = this;
+    const module = {
+      exports: {
+        set warmUp(val) {
+          testCtx.exportedFunc = val;
+        }
+      }
+    }
+    const require = () => {
+      testCtx.aws = {
+        config: {},
+        Lambda: function Lambda() { testCtx.lambdaConstructed = true; }
+      };
+      testCtx.aws.Lambda.prototype.invoke = function (params) {
+        testCtx.lambdaInvocations.push(params.FunctionName);
+        return {
+          promise() {
+            return Promise.resolve();
+          }
+        }
+      }
+      return testCtx.aws;
+    }
+    return function() { ${result.funcString} }
+    `
+
+    // eslint-disable-next-line no-new-func
+    const warmupExporterFunc = new Function(ctxWrapper).call(testCtx)
+
+    // Export the warmup lambda
+    warmupExporterFunc()
+
+    it('Should construct an AWS lambda', () => {
+      expect(testCtx.lambdaConstructed).toBe(true)
+    })
+
+    it('Should have the right configured region', () => {
+      expect(testCtx.aws.config.region).toBe(mockCtx.options.region)
+    })
+
+    it('Should export a function from the module', () => {
+      expect(testCtx.exportedFunc).toBeInstanceOf(Function)
+    })
+
+    describe('The exported warmup lambda', () => {
+      it('Should invoke the configured lambdas the correct number of times', (done) => {
+        testCtx.exportedFunc().then(() => {
+          expect(testCtx.lambdaInvocations.filter(func => func === testFunc1.name)).toHaveLength(testFunc1.config.concurrency)
+          expect(testCtx.lambdaInvocations.filter(func => func === testFunc2.name)).toHaveLength(testFunc2.config.concurrency)
+          done()
+        }).catch(e => {
+          throw e
+        })
+      })
+    })
+  })
 })

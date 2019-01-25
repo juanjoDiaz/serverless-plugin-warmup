@@ -238,12 +238,31 @@ class WarmUP {
    *
    * @return {Promise}
    * */
-  createWarmUpFunctionArtifact (functions) {
+  createWarmUpFunctionArtifact (functions, filesystemUtils = fs) {
     /** Log warmup start */
     this.serverless.cli.log(`WarmUP: setting ${functions.length} lambdas to be warm`)
 
     /** Log functions being warmed up */
     functions.forEach(func => this.serverless.cli.log(`WarmUP: ${func.name}`))
+
+    if (typeof this.options.region !== 'string') {
+      throw Error(`Invalid region: expected string, received ${this.options.region}(${typeof this.options.region})`)
+    }
+
+    functions.forEach(func => {
+      if (typeof func.name !== 'string') {
+        throw Error(`Invalid function name: expected string, received ${func.name}(${typeof func.name})`)
+      }
+      if (typeof func.config.concurrency !== 'number') {
+        throw Error(`Invalid function concurrency, expected number, received ${func.config.concurrency}(${typeof func.config.concurrency})`)
+      }
+      if (typeof func.config.source !== 'string') {
+        throw Error(`Invalid function source, expected string, received ${func.config.source}(${typeof func.config.source})`)
+      }
+      if (typeof func.config.enabled !== 'boolean' && typeof func.config.enabled !== 'string' && !(Array.isArray(func.config.enabled) && func.config.enabled.every(val => typeof val === 'string'))) {
+        throw Error(`Invalid function enabled status, expected boolean, string, or array of strings, received ${func.concurrency}(${typeof func.concurrency})`)
+      }
+    })
 
     const warmUpFunction = `"use strict";
 
@@ -283,7 +302,7 @@ module.exports.warmUp = async (event, context, callback) => {
 }`
 
     /** Write warm up file */
-    return fs.outputFile(this.warmupOpts.pathFile, warmUpFunction)
+    return filesystemUtils.outputFile(this.warmupOpts.pathFile, warmUpFunction)
   }
 
   /**
