@@ -134,9 +134,9 @@ class WarmUP {
    * @return {Object} - Function-specific configuration options
    * */
   getFunctionConfig (possibleConfig, defaultOpts) {
-    const config = (typeof possibleConfig !== 'object')
+    const config = (['boolean', 'string'].includes(typeof possibleConfig) || Array.isArray(possibleConfig))
       ? { enabled: possibleConfig }
-      : possibleConfig
+      : (possibleConfig || {})
 
     // Keep backwards compatibility for now
     if (config.default) {
