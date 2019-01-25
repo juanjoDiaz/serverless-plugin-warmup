@@ -8,7 +8,7 @@ node_js:
   - "11"
 script:
   - "npm run lint"
-#   - "npm run test-with-coverage"
+  - "npm run test"
 # after_success:
 #   - "npm run coveralls"
 sudo: false
