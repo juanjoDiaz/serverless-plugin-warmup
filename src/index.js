@@ -174,7 +174,7 @@ class WarmUP {
 
     const functionDefaultOpts = {
       enabled: false,
-      source: JSON.stringify({ source: 'serverless-plugin-warmup' }),
+      source: { source: 'serverless-plugin-warmup' },
       concurrency: 1
     }
 
