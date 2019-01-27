@@ -7,7 +7,7 @@
     "lint": "standard **/*.js",
     "lint:fix": "standard --fix **/*.js",
     "test": "jest test",
-    "test-with-coverage": "jest --coverage test",
+    "test-with-coverage": "jest --coverage --collectCoverageFrom=src/**/*.js test",
     "coveralls": "cat coverage/lcov.info | coveralls"
   },
   "author": "Gonçalo Neves",

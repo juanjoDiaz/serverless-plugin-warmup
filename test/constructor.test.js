@@ -1,31 +1,7 @@
 /* global describe it expect */
 
 const WarmUP = require('../src/index')
-
-function getServerlessConfig (serverless = {}) {
-  return {
-    getProvider: serverless.getProvider || (() => {}),
-    config: {
-      servicePath: (serverless.config && serverless.config.servicePath) ? serverless.config.servicePath : 'testPath'
-    },
-    cli: console,
-    service: {
-      provider: (serverless.service && serverless.service.provider)
-        ? serverless.service.provider
-        : { stage: '', region: '' },
-      defaults: (serverless.service && serverless.service.defaults)
-        ? serverless.service.defaults
-        : { stage: '', region: '' },
-      service: 'warmup-test',
-      custom: (serverless.service && serverless.service.custom) ? serverless.service.custom : {},
-      functions: (serverless.service && serverless.service.functions) ? serverless.service.functions : {}
-    }
-  }
-}
-
-function getOptions (options = {}) {
-  return options
-}
+const { getServerlessConfig, getOptions } = require('./utils/configUtils')
 
 describe('Serverless warmup plugin constructor', () => {
   it('Should work with only defaults (no config overrides specified)', () => {
