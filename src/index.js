@@ -55,11 +55,18 @@ class WarmUP {
    * @fulfil {} — Warm up set
    * @reject {Error} Warm up error
    *
-   * @return {(boolean|Promise)}
+   * @return {Promise}
    * */
   afterPackageInitialize () {
     this.functionsToWarmup = this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
-    return this.createWarmer()
+
+    if (!this.functionsToWarmup.length) {
+      this.serverless.cli.log('WarmUP: no functions to warm up')
+      return Promise.resolve()
+    }
+
+    return this.createWarmUpFunctionArtifact(this.functionsToWarmup)
+      .then(() => this.addWarmUpFunctionToService())
   }
 
   /**
@@ -71,9 +78,11 @@ class WarmUP {
    * @return {Promise}
    * */
   afterCreateDeploymentArtifacts () {
-    if (this.warmupOpts.cleanFolder) {
-      return this.cleanFolder()
+    if (!this.warmupOpts.cleanFolder) {
+      return Promise.resolve()
     }
+
+    return this.cleanFolder()
   }
 
   /**
@@ -85,10 +94,14 @@ class WarmUP {
    * @return {Promise}
    * */
   afterDeployFunctions () {
-    if (this.warmupOpts.prewarm && this.functionsToWarmup.length > 0) {
-      this.functionsToWarmup = this.functionsToWarmup || this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
-      return this.warmUpFunctions()
+    this.functionsToWarmup = this.functionsToWarmup || this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
+
+    if (!this.warmupOpts.prewarm || this.functionsToWarmup.length <= 0) {
+      this.serverless.cli.log('WarmUP: no functions to prewarm')
+      return Promise.resolve()
     }
+
+    return this.warmUpFunctions()
   }
 
   /**
@@ -214,26 +227,6 @@ class WarmUP {
    * */
   cleanFolder () {
     return fs.remove(this.warmupOpts.pathFolder)
-  }
-
-  /**
-   * @description Warm up functions
-   *
-   * @fulfil {} — Warm up function created and added to service
-   * @reject {Error} Warm up error
-   *
-   * @return {Promise}
-   * */
-  createWarmer () {
-    /** Skip writing if no functions need to be warm */
-    if (!this.functionsToWarmup.length) {
-      this.serverless.cli.log('WarmUP: no lambda to warm')
-      return Promise.resolve()
-    }
-
-    /** Write warm up function */
-    return this.createWarmUpFunctionArtifact(this.functionsToWarmup)
-      .then(() => this.addWarmUpFunctionToService())
   }
 
   /**
