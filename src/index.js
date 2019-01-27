@@ -107,7 +107,7 @@ class WarmUP {
       ? [{ schedule: config.schedule }]
       : (Array.isArray(config.schedule))
         ? config.schedule.map(schedule => ({ schedule }))
-        : undefined
+        : config.events
 
     return {
       folderName,
