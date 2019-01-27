@@ -318,7 +318,7 @@ module.exports.warmUp = async (event, context, callback) => {
     }
 
     if (this.warmupOpts.vpc) {
-      this.serverless.service.functions.vpc = this.warmupOpts.vpc
+      this.serverless.service.functions.warmUpPlugin.vpc = this.warmupOpts.vpc
     }
 
     /** Return service function object */
