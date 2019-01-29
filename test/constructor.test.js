@@ -499,7 +499,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
   })
 
-  it('Should use the prewarm from options if present', () => {
+  it('Should use the prewarm option from options if present', () => {
     const serverless = getServerlessConfig({
       service: {
         custom: {
@@ -533,6 +533,244 @@ describe('Serverless warmup plugin constructor', () => {
       enabled: false,
       source: '{"source":"serverless-plugin-warmup"}',
       concurrency: 1
+    }
+    expect(plugin.options).toMatchObject(expectedOptions)
+    expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
+  })
+
+  it('Should use the enable option from options if present', () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            enabled: true
+          }
+        }
+      }
+    })
+    const options = getOptions()
+
+    const plugin = new WarmUP(serverless, options)
+
+    const expectedOptions = {
+      stage: 'dev',
+      region: 'us-east-1'
+    }
+    const expectedWarmupOpts = {
+      folderName: '_warmup',
+      cleanFolder: true,
+      name: 'warmup-test-dev-warmup-plugin',
+      pathFile: 'testPath/_warmup/index.js',
+      pathFolder: 'testPath/_warmup',
+      pathHandler: '_warmup/index.warmUp',
+      role: undefined,
+      tags: undefined,
+      events: [{ schedule: 'rate(5 minutes)' }],
+      memorySize: 128,
+      timeout: 10,
+      prewarm: false,
+      enabled: true,
+      source: '{"source":"serverless-plugin-warmup"}',
+      concurrency: 1
+    }
+    expect(plugin.options).toMatchObject(expectedOptions)
+    expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
+  })
+
+  it('Should use the source from options if present', () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            source: {
+              test: 123
+            }
+          }
+        }
+      }
+    })
+    const options = getOptions()
+
+    const plugin = new WarmUP(serverless, options)
+
+    const expectedOptions = {
+      stage: 'dev',
+      region: 'us-east-1'
+    }
+    const expectedWarmupOpts = {
+      folderName: '_warmup',
+      cleanFolder: true,
+      name: 'warmup-test-dev-warmup-plugin',
+      pathFile: 'testPath/_warmup/index.js',
+      pathFolder: 'testPath/_warmup',
+      pathHandler: '_warmup/index.warmUp',
+      role: undefined,
+      tags: undefined,
+      events: [{ schedule: 'rate(5 minutes)' }],
+      memorySize: 128,
+      timeout: 10,
+      prewarm: false,
+      enabled: false,
+      source: '{"test":123}',
+      concurrency: 1
+    }
+    expect(plugin.options).toMatchObject(expectedOptions)
+    expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
+  })
+
+  it('Should stringify the source by default', () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            source: '123'
+          }
+        }
+      }
+    })
+    const options = getOptions()
+
+    const plugin = new WarmUP(serverless, options)
+
+    const expectedOptions = {
+      stage: 'dev',
+      region: 'us-east-1'
+    }
+    const expectedWarmupOpts = {
+      folderName: '_warmup',
+      cleanFolder: true,
+      name: 'warmup-test-dev-warmup-plugin',
+      pathFile: 'testPath/_warmup/index.js',
+      pathFolder: 'testPath/_warmup',
+      pathHandler: '_warmup/index.warmUp',
+      role: undefined,
+      tags: undefined,
+      events: [{ schedule: 'rate(5 minutes)' }],
+      memorySize: 128,
+      timeout: 10,
+      prewarm: false,
+      enabled: false,
+      source: '"123"',
+      concurrency: 1
+    }
+    expect(plugin.options).toMatchObject(expectedOptions)
+    expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
+  })
+
+  it('Should stringify the source if sourceRaw is set to false', () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            source: '123',
+            sourceRaw: false
+          }
+        }
+      }
+    })
+    const options = getOptions()
+
+    const plugin = new WarmUP(serverless, options)
+
+    const expectedOptions = {
+      stage: 'dev',
+      region: 'us-east-1'
+    }
+    const expectedWarmupOpts = {
+      folderName: '_warmup',
+      cleanFolder: true,
+      name: 'warmup-test-dev-warmup-plugin',
+      pathFile: 'testPath/_warmup/index.js',
+      pathFolder: 'testPath/_warmup',
+      pathHandler: '_warmup/index.warmUp',
+      role: undefined,
+      tags: undefined,
+      events: [{ schedule: 'rate(5 minutes)' }],
+      memorySize: 128,
+      timeout: 10,
+      prewarm: false,
+      enabled: false,
+      source: '"123"',
+      concurrency: 1
+    }
+    expect(plugin.options).toMatchObject(expectedOptions)
+    expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
+  })
+
+  it('Should not stringify the source if sourceRaw is set to true', () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            source: '123',
+            sourceRaw: true
+          }
+        }
+      }
+    })
+    const options = getOptions()
+
+    const plugin = new WarmUP(serverless, options)
+
+    const expectedOptions = {
+      stage: 'dev',
+      region: 'us-east-1'
+    }
+    const expectedWarmupOpts = {
+      folderName: '_warmup',
+      cleanFolder: true,
+      name: 'warmup-test-dev-warmup-plugin',
+      pathFile: 'testPath/_warmup/index.js',
+      pathFolder: 'testPath/_warmup',
+      pathHandler: '_warmup/index.warmUp',
+      role: undefined,
+      tags: undefined,
+      events: [{ schedule: 'rate(5 minutes)' }],
+      memorySize: 128,
+      timeout: 10,
+      prewarm: false,
+      enabled: false,
+      source: '123',
+      concurrency: 1
+    }
+    expect(plugin.options).toMatchObject(expectedOptions)
+    expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
+  })
+
+  it('Should use the concurrency from options if present', () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            concurrency: 3
+          }
+        }
+      }
+    })
+    const options = getOptions()
+
+    const plugin = new WarmUP(serverless, options)
+
+    const expectedOptions = {
+      stage: 'dev',
+      region: 'us-east-1'
+    }
+    const expectedWarmupOpts = {
+      folderName: '_warmup',
+      cleanFolder: true,
+      name: 'warmup-test-dev-warmup-plugin',
+      pathFile: 'testPath/_warmup/index.js',
+      pathFolder: 'testPath/_warmup',
+      pathHandler: '_warmup/index.warmUp',
+      role: undefined,
+      tags: undefined,
+      events: [{ schedule: 'rate(5 minutes)' }],
+      memorySize: 128,
+      timeout: 10,
+      prewarm: false,
+      enabled: false,
+      source: '{"source":"serverless-plugin-warmup"}',
+      concurrency: 3
     }
     expect(plugin.options).toMatchObject(expectedOptions)
     expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
