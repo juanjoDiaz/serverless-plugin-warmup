@@ -110,7 +110,7 @@ class WarmUP {
    *
    * @return {Object} - Global configuration options
    * */
-  getGlobalConfig (possibleConfig, defaultOpts = {}) {
+  getGlobalConfig (possibleConfig, defaultOpts) {
     const config = (typeof possibleConfig === 'object') ? possibleConfig : {}
     const folderName = (typeof config.folderName === 'string') ? config.folderName : '_warmup'
     const pathFolder = path.join(this.serverless.config.servicePath, folderName)
@@ -191,9 +191,7 @@ class WarmUP {
       concurrency: 1
     }
 
-    const customConfig = (service.custom && typeof service.custom.warmup !== 'undefined')
-      ? service.custom.warmup
-      : {}
+    const customConfig = service.custom ? service.custom.warmup : undefined
 
     return Object.assign(
       this.getGlobalConfig(customConfig, globalDefaultOpts),
