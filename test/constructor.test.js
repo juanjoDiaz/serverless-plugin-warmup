@@ -858,4 +858,203 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.options).toMatchObject(expectedOptions)
     expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
   })
+
+  describe('Backwards compatibility', () => {
+    it('Should accept backwards compatible "default" as boolean property in place of "enabled"', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              default: true
+            }
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+        }
+      })
+      const options = getOptions()
+
+      const plugin = new WarmUP(serverless, options)
+
+      const expectedOptions = {
+        stage: 'dev',
+        region: 'us-east-1'
+      }
+      const expectedWarmupOpts = {
+        folderName: '_warmup',
+        cleanFolder: true,
+        name: 'warmup-test-dev-warmup-plugin',
+        pathFile: 'testPath/_warmup/index.js',
+        pathFolder: 'testPath/_warmup',
+        pathHandler: '_warmup/index.warmUp',
+        role: undefined,
+        tags: undefined,
+        events: [{ schedule: 'rate(5 minutes)' }],
+        memorySize: 128,
+        timeout: 10,
+        prewarm: false,
+        enabled: true,
+        source: '{"source":"serverless-plugin-warmup"}',
+        concurrency: 1
+      }
+      expect(plugin.options).toMatchObject(expectedOptions)
+      expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
+    })
+
+    it('Should accept backwards compatible "default" as boolean property in place of "enabled"', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              default: 'dev'
+            }
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+        }
+      })
+      const options = getOptions()
+
+      const plugin = new WarmUP(serverless, options)
+
+      const expectedOptions = {
+        stage: 'dev',
+        region: 'us-east-1'
+      }
+      const expectedWarmupOpts = {
+        folderName: '_warmup',
+        cleanFolder: true,
+        name: 'warmup-test-dev-warmup-plugin',
+        pathFile: 'testPath/_warmup/index.js',
+        pathFolder: 'testPath/_warmup',
+        pathHandler: '_warmup/index.warmUp',
+        role: undefined,
+        tags: undefined,
+        events: [{ schedule: 'rate(5 minutes)' }],
+        memorySize: 128,
+        timeout: 10,
+        prewarm: false,
+        enabled: 'dev',
+        source: '{"source":"serverless-plugin-warmup"}',
+        concurrency: 1
+      }
+      expect(plugin.options).toMatchObject(expectedOptions)
+      expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
+    })
+
+    it('Should accept backwards compatible "default" as boolean property in place of "enabled"', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              default: ['dev', 'staging']
+            }
+          }
+        }
+      })
+      const options = getOptions()
+
+      const plugin = new WarmUP(serverless, options)
+
+      const expectedOptions = {
+        stage: 'dev',
+        region: 'us-east-1'
+      }
+      const expectedWarmupOpts = {
+        folderName: '_warmup',
+        cleanFolder: true,
+        name: 'warmup-test-dev-warmup-plugin',
+        pathFile: 'testPath/_warmup/index.js',
+        pathFolder: 'testPath/_warmup',
+        pathHandler: '_warmup/index.warmUp',
+        role: undefined,
+        tags: undefined,
+        events: [{ schedule: 'rate(5 minutes)' }],
+        memorySize: 128,
+        timeout: 10,
+        prewarm: false,
+        enabled: ['dev', 'staging'],
+        source: '{"source":"serverless-plugin-warmup"}',
+        concurrency: 1
+      }
+      expect(plugin.options).toMatchObject(expectedOptions)
+      expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
+    })
+
+    it('Should accept backwards compatible "schedule" property as string in place of "events"', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              schedule: 'rate(10 minutes)'
+            }
+          }
+        }
+      })
+      const options = getOptions()
+
+      const plugin = new WarmUP(serverless, options)
+
+      const expectedOptions = {
+        stage: 'dev',
+        region: 'us-east-1'
+      }
+      const expectedWarmupOpts = {
+        folderName: '_warmup',
+        cleanFolder: true,
+        name: 'warmup-test-dev-warmup-plugin',
+        pathFile: 'testPath/_warmup/index.js',
+        pathFolder: 'testPath/_warmup',
+        pathHandler: '_warmup/index.warmUp',
+        role: undefined,
+        tags: undefined,
+        events: [{ schedule: 'rate(10 minutes)' }],
+        memorySize: 128,
+        timeout: 10,
+        prewarm: false,
+        enabled: false,
+        source: '{"source":"serverless-plugin-warmup"}',
+        concurrency: 1
+      }
+      expect(plugin.options).toMatchObject(expectedOptions)
+      expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
+    })
+
+    it('Should accept backwards compatible "schedule" property as array in place of "events"', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              schedule: ['rate(10 minutes)', 'rate(30 minutes)']
+            }
+          }
+        }
+      })
+      const options = getOptions()
+
+      const plugin = new WarmUP(serverless, options)
+
+      const expectedOptions = {
+        stage: 'dev',
+        region: 'us-east-1'
+      }
+      const expectedWarmupOpts = {
+        folderName: '_warmup',
+        cleanFolder: true,
+        name: 'warmup-test-dev-warmup-plugin',
+        pathFile: 'testPath/_warmup/index.js',
+        pathFolder: 'testPath/_warmup',
+        pathHandler: '_warmup/index.warmUp',
+        role: undefined,
+        tags: undefined,
+        events: [{ schedule: 'rate(10 minutes)' }, { schedule: 'rate(30 minutes)' }],
+        memorySize: 128,
+        timeout: 10,
+        prewarm: false,
+        enabled: false,
+        source: '{"source":"serverless-plugin-warmup"}',
+        concurrency: 1
+      }
+      expect(plugin.options).toMatchObject(expectedOptions)
+      expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
+    })
+  })
 })
