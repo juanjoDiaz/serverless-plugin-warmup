@@ -327,6 +327,76 @@ describe('Serverless warmup plugin constructor', () => {
       })
   })
 
+  it('Should set the VPC to empty if set to false in options', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            enabled: true,
+            vpc: false
+          }
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+      }
+    })
+    const options = getOptions()
+    const plugin = new WarmUP(serverless, options)
+
+    await plugin.hooks['after:package:initialize']()
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toMatchObject({
+        description: 'Serverless WarmUP Plugin',
+        events: [{ schedule: 'rate(5 minutes)' }],
+        handler: '_warmup/index.warmUp',
+        memorySize: 128,
+        name: 'warmup-test-dev-warmup-plugin',
+        runtime: 'nodejs8.10',
+        package: {
+          individually: true,
+          exclude: ['**'],
+          include: ['_warmup/**']
+        },
+        timeout: 10,
+        vpc: { securityGroupIds: [], subnetIds: [] }
+      })
+  })
+
+  it('Should set the VPC to empty from options if present', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            enabled: true,
+            vpc: { securityGroupIds: ['sg-test1', 'sg-test2'], subnetIds: ['sn-test1', 'sn-test2'] }
+          }
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+      }
+    })
+    const options = getOptions()
+    const plugin = new WarmUP(serverless, options)
+
+    await plugin.hooks['after:package:initialize']()
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toMatchObject({
+        description: 'Serverless WarmUP Plugin',
+        events: [{ schedule: 'rate(5 minutes)' }],
+        handler: '_warmup/index.warmUp',
+        memorySize: 128,
+        name: 'warmup-test-dev-warmup-plugin',
+        runtime: 'nodejs8.10',
+        package: {
+          individually: true,
+          exclude: ['**'],
+          include: ['_warmup/**']
+        },
+        timeout: 10,
+        vpc: { securityGroupIds: ['sg-test1', 'sg-test2'], subnetIds: ['sn-test1', 'sn-test2'] }
+      })
+  })
+
   it('Should use the service schedule from options if present', async () => {
     const serverless = getServerlessConfig({
       service: {
