@@ -498,4 +498,173 @@ describe('Serverless warmup plugin constructor', () => {
         timeout: 30
       })
   })
+
+  describe('Backwards compatibility', () => {
+    it('Should accept backwards compatible "default" as boolean property in place of "enabled"', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              default: true
+            }
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+        }
+      })
+      const options = getOptions()
+      const plugin = new WarmUP(serverless, options)
+
+      await plugin.hooks['after:package:initialize']()
+
+      expect(plugin.serverless.service.functions.warmUpPlugin)
+        .toMatchObject({
+          description: 'Serverless WarmUP Plugin',
+          events: [{ schedule: 'rate(5 minutes)' }],
+          handler: '_warmup/index.warmUp',
+          memorySize: 128,
+          name: 'warmup-test-dev-warmup-plugin',
+          runtime: 'nodejs8.10',
+          package: {
+            individually: true,
+            exclude: ['**'],
+            include: ['_warmup/**']
+          },
+          timeout: 10
+        })
+    })
+
+    it('Should accept backwards compatible "default" as boolean property in place of "enabled"', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              default: 'dev'
+            }
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+        }
+      })
+      const options = getOptions()
+      const plugin = new WarmUP(serverless, options)
+
+      await plugin.hooks['after:package:initialize']()
+
+      expect(plugin.serverless.service.functions.warmUpPlugin)
+        .toMatchObject({
+          description: 'Serverless WarmUP Plugin',
+          events: [{ schedule: 'rate(5 minutes)' }],
+          handler: '_warmup/index.warmUp',
+          memorySize: 128,
+          name: 'warmup-test-dev-warmup-plugin',
+          runtime: 'nodejs8.10',
+          package: {
+            individually: true,
+            exclude: ['**'],
+            include: ['_warmup/**']
+          },
+          timeout: 10
+        })
+    })
+
+    it('Should accept backwards compatible "default" as boolean property in place of "enabled"', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              default: ['dev', 'staging']
+            }
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+        }
+      })
+      const options = getOptions()
+      const plugin = new WarmUP(serverless, options)
+
+      await plugin.hooks['after:package:initialize']()
+
+      expect(plugin.serverless.service.functions.warmUpPlugin)
+        .toMatchObject({
+          description: 'Serverless WarmUP Plugin',
+          events: [{ schedule: 'rate(5 minutes)' }],
+          handler: '_warmup/index.warmUp',
+          memorySize: 128,
+          name: 'warmup-test-dev-warmup-plugin',
+          runtime: 'nodejs8.10',
+          package: {
+            individually: true,
+            exclude: ['**'],
+            include: ['_warmup/**']
+          },
+          timeout: 10
+        })
+    })
+
+    it('Should accept backwards compatible "schedule" property as string in place of "events"', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              enabled: true,
+              schedule: 'rate(10 minutes)'
+            }
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+        }
+      })
+      const options = getOptions()
+      const plugin = new WarmUP(serverless, options)
+
+      await plugin.hooks['after:package:initialize']()
+
+      expect(plugin.serverless.service.functions.warmUpPlugin)
+        .toMatchObject({
+          description: 'Serverless WarmUP Plugin',
+          events: [{ schedule: 'rate(10 minutes)' }],
+          handler: '_warmup/index.warmUp',
+          memorySize: 128,
+          name: 'warmup-test-dev-warmup-plugin',
+          runtime: 'nodejs8.10',
+          package: {
+            individually: true,
+            exclude: ['**'],
+            include: ['_warmup/**']
+          },
+          timeout: 10
+        })
+    })
+
+    it('Should accept backwards compatible "schedule" property as array in place of "events"', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              enabled: true,
+              schedule: ['rate(10 minutes)', 'rate(30 minutes)']
+            }
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+        }
+      })
+      const options = getOptions()
+      const plugin = new WarmUP(serverless, options)
+
+      await plugin.hooks['after:package:initialize']()
+
+      expect(plugin.serverless.service.functions.warmUpPlugin)
+        .toMatchObject({
+          description: 'Serverless WarmUP Plugin',
+          events: [{ schedule: 'rate(10 minutes)' }, { schedule: 'rate(30 minutes)' }],
+          handler: '_warmup/index.warmUp',
+          memorySize: 128,
+          name: 'warmup-test-dev-warmup-plugin',
+          runtime: 'nodejs8.10',
+          package: {
+            individually: true,
+            exclude: ['**'],
+            include: ['_warmup/**']
+          },
+          timeout: 10
+        })
+    })
+  })
 })
