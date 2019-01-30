@@ -382,6 +382,89 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
   })
 
+  it('Should set the VPC to empty if set to false in options', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            enabled: true,
+            vpc: false
+          }
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+      }
+    })
+    const options = getOptions()
+
+    const plugin = new WarmUP(serverless, options)
+
+    const expectedOptions = {
+      stage: 'dev',
+      region: 'us-east-1'
+    }
+    const expectedWarmupOpts = {
+      folderName: '_warmup',
+      cleanFolder: true,
+      name: 'warmup-test-dev-warmup-plugin',
+      pathFile: 'testPath/_warmup/index.js',
+      pathFolder: 'testPath/_warmup',
+      pathHandler: '_warmup/index.warmUp',
+      role: undefined,
+      tags: undefined,
+      vpc: { securityGroupIds: [], subnetIds: [] },
+      events: [{ schedule: 'rate(5 minutes)' }],
+      memorySize: 128,
+      timeout: 10,
+      prewarm: false,
+      enabled: true,
+      source: '{"source":"serverless-plugin-warmup"}',
+      concurrency: 1
+    }
+    expect(plugin.options).toMatchObject(expectedOptions)
+    expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
+  })
+
+  it('Should set the VPC to empty from options if present', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            enabled: true,
+            vpc: { securityGroupIds: ['sg-test1', 'sg-test2'], subnetIds: ['sn-test1', 'sn-test2'] }
+          }
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+      }
+    })
+    const options = getOptions()
+    const plugin = new WarmUP(serverless, options)
+
+    const expectedOptions = {
+      stage: 'dev',
+      region: 'us-east-1'
+    }
+    const expectedWarmupOpts = {
+      folderName: '_warmup',
+      cleanFolder: true,
+      name: 'warmup-test-dev-warmup-plugin',
+      pathFile: 'testPath/_warmup/index.js',
+      pathFolder: 'testPath/_warmup',
+      pathHandler: '_warmup/index.warmUp',
+      role: undefined,
+      tags: undefined,
+      vpc: { securityGroupIds: ['sg-test1', 'sg-test2'], subnetIds: ['sn-test1', 'sn-test2'] },
+      events: [{ schedule: 'rate(5 minutes)' }],
+      memorySize: 128,
+      timeout: 10,
+      prewarm: false,
+      enabled: true,
+      source: '{"source":"serverless-plugin-warmup"}',
+      concurrency: 1
+    }
+    expect(plugin.options).toMatchObject(expectedOptions)
+    expect(plugin.warmupOpts).toMatchObject(expectedWarmupOpts)
+  })
+
   it('Should use the service schedule from options if present', () => {
     const serverless = getServerlessConfig({
       service: {
