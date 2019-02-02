@@ -252,7 +252,7 @@ aws.config.region = "${this.options.region}";
 const lambda = new aws.Lambda();
 const functions = ${JSON.stringify(functions)};
 
-module.exports.warmUp = async (event, context, callback) => {
+module.exports.warmUp = async (event, context) => {
   console.log("Warm Up Start");
   
   const invokes = await Promise.all(functions.map(async (func) => {
