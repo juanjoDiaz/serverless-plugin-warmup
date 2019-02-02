@@ -164,7 +164,7 @@ class WarmUP {
         : defaultOpts.enabled,
       source: (typeof config.source !== 'undefined')
         ? (config.sourceRaw ? config.source : JSON.stringify(config.source))
-        : (defaultOpts.sourceRaw ? defaultOpts.source : JSON.stringify(defaultOpts.source)),
+        : defaultOpts.source,
       concurrency: (typeof config.concurrency === 'number') ? config.concurrency : defaultOpts.concurrency
     }
   }
@@ -187,7 +187,7 @@ class WarmUP {
 
     const functionDefaultOpts = {
       enabled: false,
-      source: { source: 'serverless-plugin-warmup' },
+      source: JSON.stringify({ source: 'serverless-plugin-warmup' }),
       concurrency: 1
     }
 
