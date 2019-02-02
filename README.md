@@ -131,8 +131,8 @@ functions:
 #### Options that can be overridden per function
 
 * **enabled** (default `false`)
-* **source** (default `{ "source": "serverless-plugin-warmup" }`)
-* **sourceRaw** (default `false`)
+* **payload** (default `{ "source": "serverless-plugin-warmup" }`)
+* **payloadRaw** (default `false`)
 * **concurrency** (default `1`)
 
 ```yml
@@ -152,8 +152,10 @@ custom:
       - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
     timeout: 20
     prewarm: true # Run WarmUp immediately after a deploymentlambda
-    source: '{ "source": "my-custom-payload" }'
-    sourceRaw: true # Won't JSON.stringify() the source, may be necessary for Go/AppSync deployments
+    payload: 
+      source: my-custom-source
+      other: 20
+    payloadRaw: true # Won't JSON.stringify() the source, may be necessary for Go/AppSync deployments
     concurrency: 5 # Warm up 5 concurrent instances
 ```
 
@@ -180,6 +182,8 @@ However, they are listed here only to facilitate upgrading the pluging and we st
 
 * **default** Has been renamed to `enabled`
 * **schedule** `schedule: rate(5 minutes)` is equivalent to `events: - schedule: rate(5 minutes)`.
+* **source** Has been renamed to `payload`
+* **sourceRaw** Has been renamed to `payloadRaw`
 
 ### Permissions
 
@@ -291,7 +295,7 @@ module.exports.lambdaToWarm = function(event, context, callback) {
   ... add lambda logic after
 }
 ```
-You can also check for the warmp event using the `context` variable. This could be useful if you are handling the raw input and output streams:
+You can also check for the warmup event using the `context` variable. This could be useful if you are handling the raw input and output streams:
 
 ```javascript
 ...

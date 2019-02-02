@@ -1188,7 +1188,7 @@ describe('Serverless warmup plugin constructor', () => {
         custom: {
           warmup: {
             enabled: true,
-            source: { test: 20 }
+            payload: { test: 20 }
           }
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
@@ -1224,11 +1224,11 @@ describe('Serverless warmup plugin constructor', () => {
         custom: {
           warmup: {
             enabled: true,
-            source: { test: 20 }
+            payload: { test: 20 }
           }
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { source: { othersource: 'test' } } },
+          someFunc1: { name: 'someFunc1', warmup: { payload: { othersource: 'test' } } },
           someFunc2: { name: 'someFunc2' } }
       }
     })
@@ -1256,14 +1256,14 @@ describe('Serverless warmup plugin constructor', () => {
       }))
   })
 
-  it('Should not stringify the source if the sourceRaw option is present', async () => {
+  it('Should not stringify the payload if it is already a string', async () => {
     const serverless = getServerlessConfig({
       service: {
         custom: {
           warmup: {
             enabled: true,
-            source: '{test:20}',
-            sourceRaw: true
+            payload: '{test:20}',
+            payloadRaw: true
           }
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
@@ -1293,18 +1293,18 @@ describe('Serverless warmup plugin constructor', () => {
       }))
   })
 
-  it('Should override sourceRaw option from options if present at the function', async () => {
+  it('Should not stringify the payload at function level if it is already a string', async () => {
     const serverless = getServerlessConfig({
       service: {
         custom: {
           warmup: {
             enabled: true,
-            source: '{test:20}',
-            sourceRaw: true
+            payload: '{test:20}',
+            payloadRaw: true
           }
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { source: { test: 'value' }, sourceRaw: false } },
+          someFunc1: { name: 'someFunc1', warmup: { payload: { test: 'value' }, payloadRaw: false } },
           someFunc2: { name: 'someFunc2' } }
       }
     })
@@ -1479,6 +1479,84 @@ describe('Serverless warmup plugin constructor', () => {
       expect(plugin.serverless.service.functions.warmUpPlugin)
         .toEqual(getExpectedFunctionConfig({
           events: [{ schedule: 'rate(10 minutes)' }]
+        }))
+    })
+
+    it('Should accept backwards compatible "source" property in place of "payload"', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              enabled: true,
+              source: '{"test":20}'
+            }
+          },
+          functions: {
+            someFunc1: { name: 'someFunc1', warmup: { source: { otherpayload: 'test' } } },
+            someFunc2: { name: 'someFunc2' } }
+        }
+      })
+      const plugin = new WarmUP(serverless, {})
+
+      await plugin.hooks['after:package:initialize']()
+
+      expect(plugin.serverless.service.functions.warmUpPlugin)
+        .toEqual(getExpectedFunctionConfig())
+
+      const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
+      functionTester.executeWarmupFunction()
+
+      expect(functionTester.aws.config.region).toBe('us-east-1')
+      expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2)
+      expect(functionTester.lambdaInstances[0])
+        .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
+          ClientContext: Buffer.from('{"custom":{"otherpayload":"test"}}').toString('base64'),
+          Payload: '{"otherpayload":"test"}'
+        }))
+      expect(functionTester.lambdaInstances[0])
+        .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2', {
+          ClientContext: Buffer.from('{"custom":{"test":20}}').toString('base64'),
+          Payload: '{"test":20}'
+        }))
+    })
+
+    it('Should accept backwards compatible "sourceRaw" property in place of "payloadRaw"', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              enabled: true,
+              source: '{test:20}',
+              sourceRaw: true
+            }
+          },
+          functions: {
+            someFunc1: { name: 'someFunc1', warmup: { source: { test: 'value' }, sourceRaw: false } },
+            someFunc2: { name: 'someFunc2' }
+          }
+        }
+      })
+      const plugin = new WarmUP(serverless, {})
+
+      await plugin.hooks['after:package:initialize']()
+
+      expect(plugin.serverless.service.functions.warmUpPlugin)
+        .toEqual(getExpectedFunctionConfig())
+
+      const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
+      functionTester.executeWarmupFunction()
+
+      expect(functionTester.aws.config.region).toBe('us-east-1')
+      expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2)
+      expect(functionTester.lambdaInstances[0])
+        .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
+          ClientContext: Buffer.from('{"custom":{"test":"value"}}').toString('base64'),
+          Payload: '{"test":"value"}'
+        }))
+      expect(functionTester.lambdaInstances[0])
+        .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2', {
+          ClientContext: Buffer.from('{"custom":{test:20}}').toString('base64'),
+          Payload: '{test:20}'
         }))
     })
 

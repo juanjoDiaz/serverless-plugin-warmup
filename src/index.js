@@ -155,6 +155,9 @@ class WarmUP {
     if (config.default) {
       config.enabled = possibleConfig.default
     }
+    if (config.source) {
+      config.payload = possibleConfig.source
+    }
 
     return {
       enabled: (typeof config.enabled === 'boolean' ||
@@ -162,9 +165,9 @@ class WarmUP {
           Array.isArray(config.enabled))
         ? config.enabled
         : defaultOpts.enabled,
-      source: (typeof config.source !== 'undefined')
-        ? (config.sourceRaw ? config.source : JSON.stringify(config.source))
-        : defaultOpts.source,
+      payload: (typeof config.payload !== 'undefined')
+        ? (typeof config.payload === 'string' ? config.payload : JSON.stringify(config.payload))
+        : defaultOpts.payload,
       concurrency: (typeof config.concurrency === 'number') ? config.concurrency : defaultOpts.concurrency
     }
   }
@@ -187,7 +190,7 @@ class WarmUP {
 
     const functionDefaultOpts = {
       enabled: false,
-      source: JSON.stringify({ source: 'serverless-plugin-warmup' }),
+      payload: JSON.stringify({ source: 'serverless-plugin-warmup' }),
       concurrency: 1
     }
 
@@ -259,12 +262,12 @@ module.exports.warmUp = async (event, context) => {
     console.log(\`Warming up function: \${func.name} with concurrency: \${func.config.concurrency}\`);
     
     const params = {
-      ClientContext: Buffer.from(\`{"custom":\${func.config.source}}\`).toString('base64'),
+      ClientContext: Buffer.from(\`{"custom":\${func.config.payload}}\`).toString('base64'),
       FunctionName: func.name,
       InvocationType: "RequestResponse",
       LogType: "None",
       Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",
-      Payload: func.config.source
+      Payload: func.config.payload
     };
     
     try {
@@ -339,7 +342,7 @@ module.exports.warmUp = async (event, context) => {
       InvocationType: 'RequestResponse',
       LogType: 'None',
       Qualifier: process.env.SERVERLESS_ALIAS || '$LATEST',
-      Payload: this.warmupOpts.source
+      Payload: this.warmupOpts.payload
     }
 
     return this.provider.request('Lambda', 'invoke', params)
