@@ -21,8 +21,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -56,8 +54,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -92,8 +88,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -128,8 +122,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -167,8 +159,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/test-folder/index.js',
       pathFolder: 'testPath/test-folder',
       pathHandler: 'test-folder/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -206,8 +196,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -245,8 +233,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -284,8 +270,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -324,7 +308,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
       role: 'test-role',
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -365,7 +348,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
       tags: {
         tag1: 'test-tag-1',
         tag2: 'test-tag-2'
@@ -391,7 +373,10 @@ describe('Serverless warmup plugin constructor', () => {
             vpc: false
           }
         },
-        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+        functions: {
+          someFunc1: { name: 'someFunc1' },
+          someFunc2: { name: 'someFunc2' }
+        }
       }
     })
     const options = getOptions()
@@ -409,8 +394,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       vpc: { securityGroupIds: [], subnetIds: [] },
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
@@ -430,10 +413,16 @@ describe('Serverless warmup plugin constructor', () => {
         custom: {
           warmup: {
             enabled: true,
-            vpc: { securityGroupIds: ['sg-test1', 'sg-test2'], subnetIds: ['sn-test1', 'sn-test2'] }
+            vpc: {
+              securityGroupIds: ['sg-test1', 'sg-test2'],
+              subnetIds: ['sn-test1', 'sn-test2']
+            }
           }
         },
-        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+        functions: {
+          someFunc1: { name: 'someFunc1' },
+          someFunc2: { name: 'someFunc2' }
+        }
       }
     })
     const options = getOptions()
@@ -450,9 +439,10 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
-      vpc: { securityGroupIds: ['sg-test1', 'sg-test2'], subnetIds: ['sn-test1', 'sn-test2'] },
+      vpc: {
+        securityGroupIds: ['sg-test1', 'sg-test2'],
+        subnetIds: ['sn-test1', 'sn-test2']
+      },
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -490,8 +480,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(10 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -529,8 +517,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 256,
       timeout: 10,
@@ -568,8 +554,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 30,
@@ -607,8 +591,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -646,8 +628,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -687,8 +667,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -726,8 +704,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -766,8 +742,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -806,8 +780,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -845,8 +817,6 @@ describe('Serverless warmup plugin constructor', () => {
       pathFile: 'testPath/_warmup/index.js',
       pathFolder: 'testPath/_warmup',
       pathHandler: '_warmup/index.warmUp',
-      role: undefined,
-      tags: undefined,
       events: [{ schedule: 'rate(5 minutes)' }],
       memorySize: 128,
       timeout: 10,
@@ -868,7 +838,10 @@ describe('Serverless warmup plugin constructor', () => {
               default: true
             }
           },
-          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+          functions: {
+            someFunc1: { name: 'someFunc1' },
+            someFunc2: { name: 'someFunc2' }
+          }
         }
       })
       const options = getOptions()
@@ -886,8 +859,6 @@ describe('Serverless warmup plugin constructor', () => {
         pathFile: 'testPath/_warmup/index.js',
         pathFolder: 'testPath/_warmup',
         pathHandler: '_warmup/index.warmUp',
-        role: undefined,
-        tags: undefined,
         events: [{ schedule: 'rate(5 minutes)' }],
         memorySize: 128,
         timeout: 10,
@@ -908,7 +879,10 @@ describe('Serverless warmup plugin constructor', () => {
               default: 'dev'
             }
           },
-          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+          functions: {
+            someFunc1: { name: 'someFunc1' },
+            someFunc2: { name: 'someFunc2' }
+          }
         }
       })
       const options = getOptions()
@@ -926,8 +900,6 @@ describe('Serverless warmup plugin constructor', () => {
         pathFile: 'testPath/_warmup/index.js',
         pathFolder: 'testPath/_warmup',
         pathHandler: '_warmup/index.warmUp',
-        role: undefined,
-        tags: undefined,
         events: [{ schedule: 'rate(5 minutes)' }],
         memorySize: 128,
         timeout: 10,
@@ -965,8 +937,6 @@ describe('Serverless warmup plugin constructor', () => {
         pathFile: 'testPath/_warmup/index.js',
         pathFolder: 'testPath/_warmup',
         pathHandler: '_warmup/index.warmUp',
-        role: undefined,
-        tags: undefined,
         events: [{ schedule: 'rate(5 minutes)' }],
         memorySize: 128,
         timeout: 10,
@@ -1004,8 +974,6 @@ describe('Serverless warmup plugin constructor', () => {
         pathFile: 'testPath/_warmup/index.js',
         pathFolder: 'testPath/_warmup',
         pathHandler: '_warmup/index.warmUp',
-        role: undefined,
-        tags: undefined,
         events: [{ schedule: 'rate(10 minutes)' }],
         memorySize: 128,
         timeout: 10,
@@ -1043,9 +1011,10 @@ describe('Serverless warmup plugin constructor', () => {
         pathFile: 'testPath/_warmup/index.js',
         pathFolder: 'testPath/_warmup',
         pathHandler: '_warmup/index.warmUp',
-        role: undefined,
-        tags: undefined,
-        events: [{ schedule: 'rate(10 minutes)' }, { schedule: 'rate(30 minutes)' }],
+        events: [
+          { schedule: 'rate(10 minutes)' },
+          { schedule: 'rate(30 minutes)' }
+        ],
         memorySize: 128,
         timeout: 10,
         prewarm: false,

@@ -10,6 +10,12 @@
  * */
 const fs = require('fs-extra')
 const path = require('path')
+const { ensureObject, isType, isObject, Validator } = require('./helpers')
+
+const DEFAULT = {
+  STAGE: 'dev',
+  REGION: 'us-east-1'
+}
 
 /**
  * @classdesc Keep your lambdas warm during Winter
@@ -26,27 +32,37 @@ class WarmUP {
   constructor (serverless, options) {
     /** Serverless variables */
     this.serverless = serverless
-    this.options = options
+    const { service } = serverless
+    service.defaults = ensureObject(service.defaults)
+
+    // See https://github.com/serverless/serverless/issues/2631
+    this.options = new Validator(options)
+      .withTypes({
+        stage: { type: 'string' },
+        region: { type: 'string' }
+      })
+      .withDefaults({
+        stage:
+          service.provider.stage || service.defaults.stage || DEFAULT.STAGE,
+        region:
+          service.provider.region || service.defaults.region || DEFAULT.REGION
+      })
+      .validate()
 
     this.provider = this.serverless.getProvider('aws')
 
     this.hooks = {
       'after:package:initialize': this.afterPackageInitialize.bind(this),
-      'after:package:createDeploymentArtifacts': this.afterCreateDeploymentArtifacts.bind(this),
+      'after:package:createDeploymentArtifacts': this.afterCreateDeploymentArtifacts.bind(
+        this
+      ),
       'after:deploy:deploy': this.afterDeployFunctions.bind(this)
     }
 
-    // See https://github.com/serverless/serverless/issues/2631
-    this.options.stage = this.options.stage ||
-      this.serverless.service.provider.stage ||
-      (this.serverless.service.defaults && this.serverless.service.defaults.stage) ||
-      'dev'
-    this.options.region = this.options.region ||
-      this.serverless.service.provider.region ||
-      (this.serverless.service.defaults && this.serverless.service.defaults.region) ||
-      'us-east-1'
-
-    this.warmupOpts = this.configPlugin(this.serverless.service, this.options.stage)
+    this.warmupOpts = this.configPlugin(
+      this.serverless.service,
+      this.options.stage
+    )
   }
 
   /**
@@ -58,15 +74,20 @@ class WarmUP {
    * @return {Promise}
    * */
   afterPackageInitialize () {
-    this.functionsToWarmup = this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
+    this.functionsToWarmup = this.getFunctionsToBeWarmedUp(
+      this.serverless.service,
+      this.options.stage,
+      this.warmupOpts
+    )
 
-    if (!this.functionsToWarmup.length) {
+    if (this.functionsToWarmup.length === 0) {
       this.serverless.cli.log('WarmUP: no functions to warm up')
       return Promise.resolve()
     }
 
-    return this.createWarmUpFunctionArtifact(this.functionsToWarmup)
-      .then(() => this.addWarmUpFunctionToService())
+    return this.createWarmUpFunctionArtifact(this.functionsToWarmup).then(() =>
+      this.addWarmUpFunctionToService(this.warmupOpts)
+    )
   }
 
   /**
@@ -78,7 +99,7 @@ class WarmUP {
    * @return {Promise}
    * */
   afterCreateDeploymentArtifacts () {
-    if (!this.warmupOpts.cleanFolder) {
+    if (this.warmupOpts.cleanFolder !== true) {
       return Promise.resolve()
     }
 
@@ -94,9 +115,18 @@ class WarmUP {
    * @return {Promise}
    * */
   afterDeployFunctions () {
-    this.functionsToWarmup = this.functionsToWarmup || this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
+    if (!Array.isArray(this.functionsToWarmup)) {
+      this.functionsToWarmup = this.getFunctionsToBeWarmedUp(
+        this.serverless.service,
+        this.options.stage,
+        this.warmupOpts
+      )
+    }
 
-    if (!this.warmupOpts.prewarm || this.functionsToWarmup.length <= 0) {
+    if (
+      this.warmupOpts.prewarm !== true ||
+      this.functionsToWarmup.length === 0
+    ) {
       this.serverless.cli.log('WarmUP: no functions to prewarm')
       return Promise.resolve()
     }
@@ -111,33 +141,57 @@ class WarmUP {
    * @return {Object} - Global configuration options
    * */
   getGlobalConfig (possibleConfig, defaultOpts) {
-    const config = (typeof possibleConfig === 'object') ? possibleConfig : {}
-    const folderName = (typeof config.folderName === 'string') ? config.folderName : '_warmup'
-    const pathFolder = path.join(this.serverless.config.servicePath, folderName)
+    const config = ensureObject(possibleConfig)
+    const folderName =
+      typeof config.folderName === 'string' ? config.folderName : '_warmup'
+    const pathFolder = path.join(
+      this.serverless.config.servicePath,
+      folderName
+    )
 
     // Keep backwards compatibility for now
-    config.events = (typeof config.schedule === 'string')
-      ? [{ schedule: config.schedule }]
-      : (Array.isArray(config.schedule))
-        ? config.schedule.map(schedule => ({ schedule }))
-        : config.events
+    if (typeof config.schedule === 'string') {
+      config.events = [{ schedule: config.schedule }]
+    } else if (Array.isArray(config.schedule)) {
+      config.events = config.schedule.map(schedule => ({ schedule }))
+    }
 
-    return {
+    if (config.vpc === false) {
+      config.vpc = { securityGroupIds: [], subnetIds: [] }
+    }
+
+    return new Validator({
       folderName,
       pathFolder,
       pathFile: `${pathFolder}/index.js`,
       pathHandler: `${folderName}/index.warmUp`,
-      cleanFolder: (typeof config.cleanFolder === 'boolean') ? config.cleanFolder : defaultOpts.cleanFolder,
-      name: (typeof config.name === 'string') ? config.name : defaultOpts.name,
-      role: (typeof config.role === 'string') ? config.role : defaultOpts.role,
-      tags: (typeof config.tags === 'object') ? config.tags : defaultOpts.tags,
-      vpc: config.vpc === false ? { securityGroupIds: [], subnetIds: [] }
-        : (typeof config.vpc === 'object' ? config.vpc : defaultOpts.vpc),
-      events: (Array.isArray(config.events)) ? config.events : defaultOpts.events,
-      memorySize: (typeof config.memorySize === 'number') ? config.memorySize : defaultOpts.memorySize,
-      timeout: (typeof config.timeout === 'number') ? config.timeout : defaultOpts.timeout,
-      prewarm: (typeof config.prewarm === 'boolean') ? config.prewarm : defaultOpts.prewarm
-    }
+      cleanFolder: config.cleanFolder,
+      name: config.name,
+      role: config.role,
+      tags: config.tags,
+      vpc: config.vpc,
+      events: config.events,
+      memorySize: config.memorySize,
+      timeout: config.timeout,
+      prewarm: config.prewarm
+    })
+      .withTypes({
+        folderName: { type: 'string' },
+        pathFolder: { type: 'string' },
+        pathFile: { type: 'string' },
+        pathHandler: { type: 'string' },
+        cleanFolder: { type: 'boolean' },
+        name: { type: 'string' },
+        role: { type: 'string', optional: true },
+        tags: { type: 'object', optional: true },
+        vpc: { type: 'object', optional: true },
+        events: { type: 'array' },
+        memorySize: { type: 'number' },
+        timeout: { type: 'number' },
+        prewarm: { type: 'boolean' }
+      })
+      .withDefaults(defaultOpts)
+      .validate()
   }
 
   /**
@@ -147,26 +201,36 @@ class WarmUP {
    * @return {Object} - Function-specific configuration options
    * */
   getFunctionConfig (possibleConfig, defaultOpts) {
-    const config = (['boolean', 'string'].includes(typeof possibleConfig) || Array.isArray(possibleConfig))
+    const config = ['boolean', 'string', 'array'].some(type =>
+      isType(possibleConfig, type)
+    )
       ? { enabled: possibleConfig }
-      : (possibleConfig || {})
+      : ensureObject(possibleConfig)
+
+    defaultOpts = ensureObject(defaultOpts)
 
     // Keep backwards compatibility for now
     if (config.default) {
-      config.enabled = possibleConfig.default
+      config.enabled = config.default
     }
 
-    return {
-      enabled: (typeof config.enabled === 'boolean' ||
-          typeof config.enabled === 'string' ||
-          Array.isArray(config.enabled))
-        ? config.enabled
-        : defaultOpts.enabled,
-      source: (typeof config.source !== 'undefined')
-        ? (config.sourceRaw ? config.source : JSON.stringify(config.source))
-        : (defaultOpts.sourceRaw ? defaultOpts.source : JSON.stringify(defaultOpts.source)),
-      concurrency: (typeof config.concurrency === 'number') ? config.concurrency : defaultOpts.concurrency
+    let source = config.source
+    if (config.source && config.sourceRaw !== true) {
+      source = JSON.stringify(config.source)
     }
+
+    return new Validator({
+      enabled: config.enabled,
+      source,
+      concurrency: config.concurrency
+    })
+      .withTypes({
+        enabled: { type: ['boolean', 'string', 'array'] },
+        source: { type: 'string' },
+        concurrency: { type: 'number' }
+      })
+      .withDefaults(defaultOpts)
+      .validate()
   }
 
   /**
@@ -187,7 +251,7 @@ class WarmUP {
 
     const functionDefaultOpts = {
       enabled: false,
-      source: { source: 'serverless-plugin-warmup' },
+      source: JSON.stringify({ source: 'serverless-plugin-warmup' }),
       concurrency: 1
     }
 
@@ -205,14 +269,19 @@ class WarmUP {
    * @return {Array} - List of functions to be warmed up and their specific configs
    * */
   getFunctionsToBeWarmedUp (service, stage, warmupOpts) {
-    return service.getAllFunctions()
+    return service
+      .getAllFunctions()
       .map(name => service.getFunction(name))
-      .map(config => ({ name: config.name, config: this.getFunctionConfig(config.warmup, warmupOpts) }))
-      .filter(({ config: { enabled } }) => (
-        enabled === true ||
-        enabled === stage ||
-        (Array.isArray(enabled) && enabled.indexOf(stage) !== -1)
-      ))
+      .map(config => ({
+        name: config.name,
+        config: this.getFunctionConfig(config.warmup, warmupOpts)
+      }))
+      .filter(
+        ({ config: { enabled } }) =>
+          enabled === true ||
+          enabled === stage ||
+          (Array.isArray(enabled) && enabled.includes(stage))
+      )
   }
 
   /**
@@ -239,7 +308,9 @@ class WarmUP {
    * */
   createWarmUpFunctionArtifact (functions) {
     /** Log warmup start */
-    this.serverless.cli.log(`WarmUP: setting ${functions.length} lambdas to be warm`)
+    this.serverless.cli.log(
+      `WarmUP: setting ${functions.length} lambdas to be warm`
+    )
 
     /** Log functions being warmed up */
     functions.forEach(func => this.serverless.cli.log(`WarmUP: ${func.name}`))
@@ -290,33 +361,43 @@ module.exports.warmUp = async (event, context, callback) => {
    *
    * @return {Object} Warm up service function object
    * */
-  addWarmUpFunctionToService () {
+  addWarmUpFunctionToService ({
+    events,
+    pathHandler: handler,
+    memorySize,
+    name,
+    folderName,
+    timeout,
+    role,
+    tags,
+    vpc
+  }) {
     /** SLS warm up function */
     this.serverless.service.functions.warmUpPlugin = {
       description: 'Serverless WarmUP Plugin',
-      events: this.warmupOpts.events,
-      handler: this.warmupOpts.pathHandler,
-      memorySize: this.warmupOpts.memorySize,
-      name: this.warmupOpts.name,
+      events,
+      handler,
+      memorySize,
+      name,
       runtime: 'nodejs8.10',
       package: {
         individually: true,
         exclude: ['**'],
-        include: [this.warmupOpts.folderName + '/**']
+        include: [folderName + '/**']
       },
-      timeout: this.warmupOpts.timeout
+      timeout
     }
 
-    if (this.warmupOpts.role) {
-      this.serverless.service.functions.warmUpPlugin.role = this.warmupOpts.role
+    if (typeof role === 'string') {
+      this.serverless.service.functions.warmUpPlugin.role = role
     }
 
-    if (this.warmupOpts.tags) {
-      this.serverless.service.functions.warmUpPlugin.tags = this.warmupOpts.tags
+    if (isObject(tags)) {
+      this.serverless.service.functions.warmUpPlugin.tags = tags
     }
 
-    if (this.warmupOpts.vpc) {
-      this.serverless.service.functions.warmUpPlugin.vpc = this.warmupOpts.vpc
+    if (isObject(vpc)) {
+      this.serverless.service.functions.warmUpPlugin.vpc = vpc
     }
 
     /** Return service function object */
@@ -342,9 +423,17 @@ module.exports.warmUp = async (event, context, callback) => {
       Payload: this.warmupOpts.source
     }
 
-    return this.provider.request('Lambda', 'invoke', params)
-      .then(() => this.serverless.cli.log('WarmUp: Functions sucessfuly pre-warmed'))
-      .catch(error => this.serverless.cli.log('WarmUp: Error while pre-warming functions', error))
+    return this.provider
+      .request('Lambda', 'invoke', params)
+      .then(() =>
+        this.serverless.cli.log('WarmUp: Functions sucessfuly pre-warmed')
+      )
+      .catch(error =>
+        this.serverless.cli.log(
+          'WarmUp: Error while pre-warming functions',
+          error
+        )
+      )
   }
 }
 
