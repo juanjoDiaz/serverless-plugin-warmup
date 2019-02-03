@@ -1,7 +1,12 @@
 /* global jest beforeEach describe it expect */
 
 const WarmUP = require('../src/index')
-const { getServerlessConfig, getOptions } = require('./utils/configUtils')
+const {
+  getServerlessConfig,
+  getOptions,
+  getExpectedFunctionConfig,
+  getExpectedLambdaCallOptions
+} = require('./utils/configUtils')
 const { GeneratedFunctionTester } = require('./utils/generatedFunctionTester')
 
 jest.mock('fs-extra')
@@ -59,20 +64,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -81,22 +73,10 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(2, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should warmup all functions if globally enabled for a stage using shorthand and stage match', async () => {
@@ -114,20 +94,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -136,22 +103,10 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(2, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should do nothing if globally enabled for stage using shorthand but stage does not match', async () => {
@@ -187,20 +142,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -209,22 +151,10 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(2, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should do nothing if globally enabled for stage list using shorthand but no stage match', async () => {
@@ -282,20 +212,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -304,22 +221,10 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(2, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should warmup all functions if globally enabled for a stage and stage match', async () => {
@@ -339,20 +244,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -361,22 +253,10 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(2, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should do nothing if globally enabled for stage but stage does not match', async () => {
@@ -416,20 +296,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -438,22 +305,10 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(2, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should do nothing if globally enabled for stage list but no stage match', async () => {
@@ -495,20 +350,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -517,14 +359,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should override globally enabled option with local enablement for stage', async () => {
@@ -546,20 +382,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -568,14 +391,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should override globally enabled option with local enablement for stage', async () => {
@@ -597,20 +414,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -619,14 +423,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should override globally not enabled option with local enablement', async () => {
@@ -648,20 +446,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -670,14 +455,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
   })
 
   it('Should override globally not enabled option with local enablement for stage', async () => {
@@ -699,20 +478,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -721,14 +487,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
   })
 
   it('Should override globally not enabled option with local enablement for stage', async () => {
@@ -750,20 +510,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -772,14 +519,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
   })
 
   it('Should override globally enabled for stage with local enablement', async () => {
@@ -801,20 +542,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -823,14 +551,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should override globally enabled for stage with local enablement for stage', async () => {
@@ -852,20 +574,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -874,14 +583,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should override globally enabled for stage with local enablement for stage', async () => {
@@ -903,20 +606,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -925,14 +615,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should override globally not enabled for stage with local enablement', async () => {
@@ -954,20 +638,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -976,14 +647,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
   })
 
   it('Should override globally not enabled for stage with local enablement for stage', async () => {
@@ -1005,20 +670,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -1027,14 +679,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
   })
 
   it('Should override globally not enabled for stage with local enablement for stage', async () => {
@@ -1056,20 +702,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -1078,14 +711,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
   })
 
   it('Should override globally enabled for stage list with local enablement', async () => {
@@ -1107,20 +734,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -1129,14 +743,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should override globally enabled for stage list with local enablement for stage', async () => {
@@ -1158,20 +766,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -1180,14 +775,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should override globally enabled for stage list with local enablement for stage', async () => {
@@ -1209,20 +798,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -1231,14 +807,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should override globally not enabled for stage list with local enablement', async () => {
@@ -1260,20 +830,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -1282,14 +839,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
   })
 
   it('Should override globally not enabled for stage list with local enablement for stage', async () => {
@@ -1311,20 +862,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -1333,14 +871,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
   })
 
   it('Should override globally not enabled for stage list with local enablement for stage', async () => {
@@ -1362,20 +894,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -1384,14 +903,8 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
   })
 
   it('Should use the stage and region from defaults if present', async () => {
@@ -1412,42 +925,19 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-staging-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig({
+        name: 'warmup-test-staging-warmup-plugin'
+      }))
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
     functionTester.executeWarmupFunction()
 
     expect(functionTester.aws.config.region).toBe('eu-west-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(2, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should use the stage and region from provider if present', async () => {
@@ -1469,42 +959,19 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-prod-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig({
+        name: 'warmup-test-prod-warmup-plugin'
+      }))
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
     functionTester.executeWarmupFunction()
 
     expect(functionTester.aws.config.region).toBe('eu-west-2')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(2, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should use the stage and region from options if present', async () => {
@@ -1526,42 +993,19 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-test-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig({
+        name: 'warmup-test-test-warmup-plugin'
+      }))
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
     functionTester.executeWarmupFunction()
 
     expect(functionTester.aws.config.region).toBe('us-west-2')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(2, {
-      ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"source":"serverless-plugin-warmup"}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2'))
   })
 
   it('Should use the folder name from custom config', async () => {
@@ -1582,20 +1026,14 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
+      .toMatchObject(getExpectedFunctionConfig({
         handler: 'test-folder/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
         package: {
           individually: true,
           exclude: ['**'],
           include: ['test-folder/**']
-        },
-        timeout: 10
-      })
+        }
+      }))
   })
 
   it('Should use the service name from options if present', async () => {
@@ -1616,20 +1054,9 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'test-name',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig({
+        name: 'test-name'
+      }))
   })
 
   it('Should use the service roles from options if present', async () => {
@@ -1650,21 +1077,9 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10,
+      .toMatchObject(getExpectedFunctionConfig({
         role: 'test-role'
-      })
+      }))
   })
 
   it('Should use the service tag from options if present', async () => {
@@ -1688,24 +1103,12 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10,
+      .toMatchObject(getExpectedFunctionConfig({
         tags: {
           tag1: 'test-tag-1',
           tag2: 'test-tag-2'
         }
-      })
+      }))
   })
 
   it('Should set the VPC to empty if set to false in options', async () => {
@@ -1726,21 +1129,9 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10,
+      .toMatchObject(getExpectedFunctionConfig({
         vpc: { securityGroupIds: [], subnetIds: [] }
-      })
+      }))
   })
 
   it('Should set the VPC to empty from options if present', async () => {
@@ -1761,24 +1152,12 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10,
+      .toMatchObject(getExpectedFunctionConfig({
         vpc: { securityGroupIds: ['sg-test1', 'sg-test2'], subnetIds: ['sn-test1', 'sn-test2'] }
-      })
+      }))
   })
 
-  it('Should use the service schedule from options if present', async () => {
+  it('Should use the service events from options if present', async () => {
     const serverless = getServerlessConfig({
       service: {
         custom: {
@@ -1796,20 +1175,9 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(10 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig({
+        events: [{ schedule: 'rate(10 minutes)' }]
+      }))
   })
 
   it('Should use the memory size from options if present', async () => {
@@ -1830,20 +1198,9 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 256,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig({
+        memorySize: 256
+      }))
   })
 
   it('Should use the timeout from options if present', async () => {
@@ -1864,20 +1221,9 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
+      .toMatchObject(getExpectedFunctionConfig({
         timeout: 30
-      })
+      }))
   })
 
   it('Should use the source from options if present', async () => {
@@ -1898,42 +1244,23 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
     functionTester.executeWarmupFunction()
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"test":20}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"test":20}'
-    })
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(2, {
-      ClientContext: Buffer.from('{"custom":{"test":20}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"test":20}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
+        ClientContext: Buffer.from('{"custom":{"test":20}}').toString('base64'),
+        Payload: '{"test":20}'
+      }))
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2', {
+        ClientContext: Buffer.from('{"custom":{"test":20}}').toString('base64'),
+        Payload: '{"test":20}'
+      }))
   })
 
   it('Should override source from options if present at the function', async () => {
@@ -1956,42 +1283,23 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
     functionTester.executeWarmupFunction()
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"othersource":"test"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"othersource":"test"}'
-    })
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(2, {
-      ClientContext: Buffer.from('{"custom":{"test":20}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"test":20}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
+        ClientContext: Buffer.from('{"custom":{"othersource":"test"}}').toString('base64'),
+        Payload: '{"othersource":"test"}'
+      }))
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2', {
+        ClientContext: Buffer.from('{"custom":{"test":20}}').toString('base64'),
+        Payload: '{"test":20}'
+      }))
   })
 
   it('Should not stringify the source if the sourceRaw option is present', async () => {
@@ -2013,42 +1321,23 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
     functionTester.executeWarmupFunction()
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{test:20}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{test:20}'
-    })
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(2, {
-      ClientContext: Buffer.from('{"custom":{test:20}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{test:20}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
+        ClientContext: Buffer.from('{"custom":{test:20}}').toString('base64'),
+        Payload: '{test:20}'
+      }))
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2', {
+        ClientContext: Buffer.from('{"custom":{test:20}}').toString('base64'),
+        Payload: '{test:20}'
+      }))
   })
 
   it('Should override sourceRaw option from options if present at the function', async () => {
@@ -2072,42 +1361,23 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
     functionTester.executeWarmupFunction()
 
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2)
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(1, {
-      ClientContext: Buffer.from('{"custom":{"test":"value"}}').toString('base64'),
-      FunctionName: 'someFunc1',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{"test":"value"}'
-    })
-    expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(2, {
-      ClientContext: Buffer.from('{"custom":{test:20}}').toString('base64'),
-      FunctionName: 'someFunc2',
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: '$LATEST',
-      Payload: '{test:20}'
-    })
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
+        ClientContext: Buffer.from('{"custom":{"test":"value"}}').toString('base64'),
+        Payload: '{"test":"value"}'
+      }))
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2', {
+        ClientContext: Buffer.from('{"custom":{test:20}}').toString('base64'),
+        Payload: '{test:20}'
+      }))
   })
 
   it('Should warmup the function using the concurrency from options if present', async () => {
@@ -2128,20 +1398,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
     functionTester.executeWarmupFunction()
@@ -2149,24 +1406,12 @@ describe('Serverless warmup plugin constructor', () => {
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(6)
     for (let i = 1; i <= 3; i += 1) {
-      expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(i, {
-        ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-        FunctionName: 'someFunc1',
-        InvocationType: 'RequestResponse',
-        LogType: 'None',
-        Qualifier: '$LATEST',
-        Payload: '{"source":"serverless-plugin-warmup"}'
-      })
+      expect(functionTester.lambdaInstances[0])
+        .toHaveBeenNthCalledWith(i, getExpectedLambdaCallOptions('someFunc1'))
     }
     for (let i = 4; i <= 6; i += 1) {
-      expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(i, {
-        ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-        FunctionName: 'someFunc2',
-        InvocationType: 'RequestResponse',
-        LogType: 'None',
-        Qualifier: '$LATEST',
-        Payload: '{"source":"serverless-plugin-warmup"}'
-      })
+      expect(functionTester.lambdaInstances[0])
+        .toHaveBeenNthCalledWith(i, getExpectedLambdaCallOptions('someFunc2'))
     }
   })
 
@@ -2190,20 +1435,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject({
-        description: 'Serverless WarmUP Plugin',
-        events: [{ schedule: 'rate(5 minutes)' }],
-        handler: '_warmup/index.warmUp',
-        memorySize: 128,
-        name: 'warmup-test-dev-warmup-plugin',
-        runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: ['_warmup/**']
-        },
-        timeout: 10
-      })
+      .toMatchObject(getExpectedFunctionConfig())
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
     functionTester.executeWarmupFunction()
@@ -2211,24 +1443,12 @@ describe('Serverless warmup plugin constructor', () => {
     expect(functionTester.aws.config.region).toBe('us-east-1')
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(9)
     for (let i = 1; i <= 6; i += 1) {
-      expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(i, {
-        ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-        FunctionName: 'someFunc1',
-        InvocationType: 'RequestResponse',
-        LogType: 'None',
-        Qualifier: '$LATEST',
-        Payload: '{"source":"serverless-plugin-warmup"}'
-      })
+      expect(functionTester.lambdaInstances[0])
+        .toHaveBeenNthCalledWith(i, getExpectedLambdaCallOptions('someFunc1'))
     }
     for (let i = 7; i <= 9; i += 1) {
-      expect(functionTester.lambdaInstances[0]).toHaveBeenNthCalledWith(i, {
-        ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
-        FunctionName: 'someFunc2',
-        InvocationType: 'RequestResponse',
-        LogType: 'None',
-        Qualifier: '$LATEST',
-        Payload: '{"source":"serverless-plugin-warmup"}'
-      })
+      expect(functionTester.lambdaInstances[0])
+        .toHaveBeenNthCalledWith(i, getExpectedLambdaCallOptions('someFunc2'))
     }
   })
 
@@ -2250,20 +1470,7 @@ describe('Serverless warmup plugin constructor', () => {
       await plugin.hooks['after:package:initialize']()
 
       expect(plugin.serverless.service.functions.warmUpPlugin)
-        .toMatchObject({
-          description: 'Serverless WarmUP Plugin',
-          events: [{ schedule: 'rate(5 minutes)' }],
-          handler: '_warmup/index.warmUp',
-          memorySize: 128,
-          name: 'warmup-test-dev-warmup-plugin',
-          runtime: 'nodejs8.10',
-          package: {
-            individually: true,
-            exclude: ['**'],
-            include: ['_warmup/**']
-          },
-          timeout: 10
-        })
+        .toMatchObject(getExpectedFunctionConfig())
     })
 
     it('Should accept backwards compatible "default" as boolean property in place of "enabled"', async () => {
@@ -2283,20 +1490,7 @@ describe('Serverless warmup plugin constructor', () => {
       await plugin.hooks['after:package:initialize']()
 
       expect(plugin.serverless.service.functions.warmUpPlugin)
-        .toMatchObject({
-          description: 'Serverless WarmUP Plugin',
-          events: [{ schedule: 'rate(5 minutes)' }],
-          handler: '_warmup/index.warmUp',
-          memorySize: 128,
-          name: 'warmup-test-dev-warmup-plugin',
-          runtime: 'nodejs8.10',
-          package: {
-            individually: true,
-            exclude: ['**'],
-            include: ['_warmup/**']
-          },
-          timeout: 10
-        })
+        .toMatchObject(getExpectedFunctionConfig())
     })
 
     it('Should accept backwards compatible "default" as boolean property in place of "enabled"', async () => {
@@ -2316,20 +1510,7 @@ describe('Serverless warmup plugin constructor', () => {
       await plugin.hooks['after:package:initialize']()
 
       expect(plugin.serverless.service.functions.warmUpPlugin)
-        .toMatchObject({
-          description: 'Serverless WarmUP Plugin',
-          events: [{ schedule: 'rate(5 minutes)' }],
-          handler: '_warmup/index.warmUp',
-          memorySize: 128,
-          name: 'warmup-test-dev-warmup-plugin',
-          runtime: 'nodejs8.10',
-          package: {
-            individually: true,
-            exclude: ['**'],
-            include: ['_warmup/**']
-          },
-          timeout: 10
-        })
+        .toMatchObject(getExpectedFunctionConfig())
     })
 
     it('Should accept backwards compatible "schedule" property as string in place of "events"', async () => {
@@ -2350,20 +1531,9 @@ describe('Serverless warmup plugin constructor', () => {
       await plugin.hooks['after:package:initialize']()
 
       expect(plugin.serverless.service.functions.warmUpPlugin)
-        .toMatchObject({
-          description: 'Serverless WarmUP Plugin',
-          events: [{ schedule: 'rate(10 minutes)' }],
-          handler: '_warmup/index.warmUp',
-          memorySize: 128,
-          name: 'warmup-test-dev-warmup-plugin',
-          runtime: 'nodejs8.10',
-          package: {
-            individually: true,
-            exclude: ['**'],
-            include: ['_warmup/**']
-          },
-          timeout: 10
-        })
+        .toMatchObject(getExpectedFunctionConfig({
+          events: [{ schedule: 'rate(10 minutes)' }]
+        }))
     })
 
     it('Should accept backwards compatible "schedule" property as array in place of "events"', async () => {
@@ -2384,20 +1554,9 @@ describe('Serverless warmup plugin constructor', () => {
       await plugin.hooks['after:package:initialize']()
 
       expect(plugin.serverless.service.functions.warmUpPlugin)
-        .toMatchObject({
-          description: 'Serverless WarmUP Plugin',
-          events: [{ schedule: 'rate(10 minutes)' }, { schedule: 'rate(30 minutes)' }],
-          handler: '_warmup/index.warmUp',
-          memorySize: 128,
-          name: 'warmup-test-dev-warmup-plugin',
-          runtime: 'nodejs8.10',
-          package: {
-            individually: true,
-            exclude: ['**'],
-            include: ['_warmup/**']
-          },
-          timeout: 10
-        })
+        .toMatchObject(getExpectedFunctionConfig({
+          events: [{ schedule: 'rate(10 minutes)' }, { schedule: 'rate(30 minutes)' }]
+        }))
     })
   })
 })
