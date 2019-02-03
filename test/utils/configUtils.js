@@ -27,7 +27,37 @@ function getOptions (options = {}) {
   return options
 }
 
+function getExpectedFunctionConfig(options = {}) {
+  return Object.assign({
+    description: 'Serverless WarmUP Plugin',
+    events: [{ schedule: 'rate(5 minutes)' }],
+    handler: '_warmup/index.warmUp',
+    memorySize: 128,
+    name: 'warmup-test-dev-warmup-plugin',
+    runtime: 'nodejs8.10',
+    package: {
+      individually: true,
+      exclude: ['**'],
+      include: ['_warmup/**']
+    },
+    timeout: 10
+  }, options)
+}
+
+function getExpectedLambdaCallOptions(funcName, options = {}) {
+  return Object.assign({
+    ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
+    FunctionName: funcName,
+    InvocationType: 'RequestResponse',
+    LogType: 'None',
+    Qualifier: '$LATEST',
+    Payload: '{"source":"serverless-plugin-warmup"}'
+  }, options)
+}
+
 module.exports = {
   getServerlessConfig,
-  getOptions
+  getOptions,
+  getExpectedFunctionConfig,
+  getExpectedLambdaCallOptions
 }
