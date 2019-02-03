@@ -60,7 +60,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -89,7 +89,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -135,7 +135,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -202,7 +202,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -233,7 +233,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -283,7 +283,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -335,7 +335,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -366,7 +366,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -397,7 +397,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -428,7 +428,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -459,7 +459,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -490,7 +490,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -521,7 +521,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -552,7 +552,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -583,7 +583,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -614,7 +614,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -645,7 +645,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -676,7 +676,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -707,7 +707,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -738,7 +738,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -769,7 +769,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -800,7 +800,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -831,7 +831,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -862,7 +862,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
     expect(fs.outputFile).toHaveBeenCalledTimes(1)
     expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
 
@@ -892,7 +892,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig({
+      .toEqual(getExpectedFunctionConfig({
         name: 'warmup-test-staging-warmup-plugin'
       }))
 
@@ -925,7 +925,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig({
+      .toEqual(getExpectedFunctionConfig({
         name: 'warmup-test-prod-warmup-plugin'
       }))
 
@@ -958,7 +958,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig({
+      .toEqual(getExpectedFunctionConfig({
         name: 'warmup-test-test-warmup-plugin'
       }))
 
@@ -990,7 +990,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig({
+      .toEqual(getExpectedFunctionConfig({
         handler: 'test-folder/index.warmUp',
         package: {
           individually: true,
@@ -1017,7 +1017,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig({
+      .toEqual(getExpectedFunctionConfig({
         name: 'test-name'
       }))
   })
@@ -1039,7 +1039,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig({
+      .toEqual(getExpectedFunctionConfig({
         role: 'test-role'
       }))
   })
@@ -1064,7 +1064,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig({
+      .toEqual(getExpectedFunctionConfig({
         tags: {
           tag1: 'test-tag-1',
           tag2: 'test-tag-2'
@@ -1089,7 +1089,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig({
+      .toEqual(getExpectedFunctionConfig({
         vpc: { securityGroupIds: [], subnetIds: [] }
       }))
   })
@@ -1111,7 +1111,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig({
+      .toEqual(getExpectedFunctionConfig({
         vpc: { securityGroupIds: ['sg-test1', 'sg-test2'], subnetIds: ['sn-test1', 'sn-test2'] }
       }))
   })
@@ -1133,7 +1133,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig({
+      .toEqual(getExpectedFunctionConfig({
         events: [{ schedule: 'rate(10 minutes)' }]
       }))
   })
@@ -1155,7 +1155,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig({
+      .toEqual(getExpectedFunctionConfig({
         memorySize: 256
       }))
   })
@@ -1177,7 +1177,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig({
+      .toEqual(getExpectedFunctionConfig({
         timeout: 30
       }))
   })
@@ -1199,7 +1199,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
     functionTester.executeWarmupFunction()
@@ -1237,7 +1237,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
     functionTester.executeWarmupFunction()
@@ -1274,7 +1274,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
     functionTester.executeWarmupFunction()
@@ -1313,7 +1313,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
     functionTester.executeWarmupFunction()
@@ -1349,7 +1349,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
     functionTester.executeWarmupFunction()
@@ -1385,7 +1385,7 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']()
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toMatchObject(getExpectedFunctionConfig())
+      .toEqual(getExpectedFunctionConfig())
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
     functionTester.executeWarmupFunction()
@@ -1419,7 +1419,7 @@ describe('Serverless warmup plugin constructor', () => {
       await plugin.hooks['after:package:initialize']()
 
       expect(plugin.serverless.service.functions.warmUpPlugin)
-        .toMatchObject(getExpectedFunctionConfig())
+        .toEqual(getExpectedFunctionConfig())
     })
 
     it('Should accept backwards compatible "default" as boolean property in place of "enabled"', async () => {
@@ -1438,7 +1438,7 @@ describe('Serverless warmup plugin constructor', () => {
       await plugin.hooks['after:package:initialize']()
 
       expect(plugin.serverless.service.functions.warmUpPlugin)
-        .toMatchObject(getExpectedFunctionConfig())
+        .toEqual(getExpectedFunctionConfig())
     })
 
     it('Should accept backwards compatible "default" as boolean property in place of "enabled"', async () => {
@@ -1457,7 +1457,7 @@ describe('Serverless warmup plugin constructor', () => {
       await plugin.hooks['after:package:initialize']()
 
       expect(plugin.serverless.service.functions.warmUpPlugin)
-        .toMatchObject(getExpectedFunctionConfig())
+        .toEqual(getExpectedFunctionConfig())
     })
 
     it('Should accept backwards compatible "schedule" property as string in place of "events"', async () => {
@@ -1477,7 +1477,7 @@ describe('Serverless warmup plugin constructor', () => {
       await plugin.hooks['after:package:initialize']()
 
       expect(plugin.serverless.service.functions.warmUpPlugin)
-        .toMatchObject(getExpectedFunctionConfig({
+        .toEqual(getExpectedFunctionConfig({
           events: [{ schedule: 'rate(10 minutes)' }]
         }))
     })
@@ -1499,7 +1499,7 @@ describe('Serverless warmup plugin constructor', () => {
       await plugin.hooks['after:package:initialize']()
 
       expect(plugin.serverless.service.functions.warmUpPlugin)
-        .toMatchObject(getExpectedFunctionConfig({
+        .toEqual(getExpectedFunctionConfig({
           events: [{ schedule: 'rate(10 minutes)' }, { schedule: 'rate(30 minutes)' }]
         }))
     })
