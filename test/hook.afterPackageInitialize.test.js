@@ -1366,7 +1366,7 @@ describe('Serverless warmup plugin constructor', () => {
     }
   })
 
-  it('Should override source from options if present at the function', async () => {
+  it('Should override the concurrency from options if present at the function', async () => {
     const serverless = getServerlessConfig({
       service: {
         custom: {
