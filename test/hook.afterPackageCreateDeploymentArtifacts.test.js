@@ -1,7 +1,7 @@
 /* global jest beforeEach describe it expect */
 
 const WarmUP = require('../src/index')
-const { getServerlessConfig, getOptions } = require('./utils/configUtils')
+const { getServerlessConfig } = require('./utils/configUtils')
 
 jest.mock('fs-extra')
 const fs = require('fs-extra')
@@ -23,8 +23,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const options = getOptions()
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     await plugin.hooks['after:package:createDeploymentArtifacts']()
 
@@ -47,8 +46,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const options = getOptions()
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     await plugin.hooks['after:package:createDeploymentArtifacts']()
 
@@ -70,8 +68,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const options = getOptions()
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     await plugin.hooks['after:package:createDeploymentArtifacts']()
 

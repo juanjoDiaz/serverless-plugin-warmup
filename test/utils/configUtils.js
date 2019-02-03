@@ -23,10 +23,6 @@ function getServerlessConfig (serverless = {}) {
   }
 }
 
-function getOptions (options = {}) {
-  return options
-}
-
 function getExpectedFunctionConfig(options = {}) {
   return Object.assign({
     description: 'Serverless WarmUP Plugin',
@@ -57,7 +53,6 @@ function getExpectedLambdaCallOptions(funcName, options = {}) {
 
 module.exports = {
   getServerlessConfig,
-  getOptions,
   getExpectedFunctionConfig,
   getExpectedLambdaCallOptions
 }

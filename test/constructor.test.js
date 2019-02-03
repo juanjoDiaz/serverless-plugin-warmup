@@ -1,14 +1,13 @@
 /* global describe it expect */
 
 const WarmUP = require('../src/index')
-const { getServerlessConfig, getOptions } = require('./utils/configUtils')
+const { getServerlessConfig } = require('./utils/configUtils')
 
 describe('Serverless warmup plugin constructor', () => {
   it('Should work with only defaults (no config overrides specified)', () => {
     const serverless = getServerlessConfig()
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -41,9 +40,8 @@ describe('Serverless warmup plugin constructor', () => {
         defaults: { stage: 'staging', region: 'eu-west-1' }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'staging',
@@ -77,9 +75,8 @@ describe('Serverless warmup plugin constructor', () => {
         defaults: { stage: 'staging', region: 'eu-west-1' }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'prod',
@@ -113,9 +110,8 @@ describe('Serverless warmup plugin constructor', () => {
         defaults: { stage: 'staging', region: 'eu-west-1' }
       }
     })
-    const options = getOptions({ stage: 'test', region: 'us-west-2' })
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, { stage: 'test', region: 'us-west-2' })
 
     const expectedOptions = {
       stage: 'test',
@@ -152,9 +148,8 @@ describe('Serverless warmup plugin constructor', () => {
         }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -191,9 +186,8 @@ describe('Serverless warmup plugin constructor', () => {
         }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -230,9 +224,8 @@ describe('Serverless warmup plugin constructor', () => {
         }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -269,9 +262,8 @@ describe('Serverless warmup plugin constructor', () => {
         }
       }
     })
-    const options = getOptions({ stage: 'test', region: 'us-west-2' })
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, { stage: 'test', region: 'us-west-2' })
 
     const expectedOptions = {
       stage: 'test',
@@ -308,9 +300,8 @@ describe('Serverless warmup plugin constructor', () => {
         }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -350,9 +341,8 @@ describe('Serverless warmup plugin constructor', () => {
         }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -394,9 +384,8 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -436,8 +425,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const options = getOptions()
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -475,9 +463,8 @@ describe('Serverless warmup plugin constructor', () => {
         }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -514,9 +501,8 @@ describe('Serverless warmup plugin constructor', () => {
         }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -553,9 +539,8 @@ describe('Serverless warmup plugin constructor', () => {
         }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -592,9 +577,8 @@ describe('Serverless warmup plugin constructor', () => {
         }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -631,9 +615,8 @@ describe('Serverless warmup plugin constructor', () => {
         }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -672,9 +655,8 @@ describe('Serverless warmup plugin constructor', () => {
         }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -711,9 +693,8 @@ describe('Serverless warmup plugin constructor', () => {
         }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -751,9 +732,8 @@ describe('Serverless warmup plugin constructor', () => {
         }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -791,9 +771,8 @@ describe('Serverless warmup plugin constructor', () => {
         }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -830,9 +809,8 @@ describe('Serverless warmup plugin constructor', () => {
         }
       }
     })
-    const options = getOptions()
 
-    const plugin = new WarmUP(serverless, options)
+    const plugin = new WarmUP(serverless, {})
 
     const expectedOptions = {
       stage: 'dev',
@@ -871,9 +849,8 @@ describe('Serverless warmup plugin constructor', () => {
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
         }
       })
-      const options = getOptions()
 
-      const plugin = new WarmUP(serverless, options)
+      const plugin = new WarmUP(serverless, {})
 
       const expectedOptions = {
         stage: 'dev',
@@ -911,9 +888,8 @@ describe('Serverless warmup plugin constructor', () => {
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
         }
       })
-      const options = getOptions()
 
-      const plugin = new WarmUP(serverless, options)
+      const plugin = new WarmUP(serverless, {})
 
       const expectedOptions = {
         stage: 'dev',
@@ -950,9 +926,8 @@ describe('Serverless warmup plugin constructor', () => {
           }
         }
       })
-      const options = getOptions()
 
-      const plugin = new WarmUP(serverless, options)
+      const plugin = new WarmUP(serverless, {})
 
       const expectedOptions = {
         stage: 'dev',
@@ -989,9 +964,8 @@ describe('Serverless warmup plugin constructor', () => {
           }
         }
       })
-      const options = getOptions()
 
-      const plugin = new WarmUP(serverless, options)
+      const plugin = new WarmUP(serverless, {})
 
       const expectedOptions = {
         stage: 'dev',
@@ -1028,9 +1002,8 @@ describe('Serverless warmup plugin constructor', () => {
           }
         }
       })
-      const options = getOptions()
 
-      const plugin = new WarmUP(serverless, options)
+      const plugin = new WarmUP(serverless, {})
 
       const expectedOptions = {
         stage: 'dev',
