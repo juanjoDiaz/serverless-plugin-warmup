@@ -11,3 +11,12 @@ script:
 after_success:
   - "npm run coveralls"
 sudo: false
+deploy:
+  provider: npm
+  email: juanjo.diazmo@gmail.com
+  api_key:
+    secure: ltjbjfEkxO2lnx0Fwz4VJI26o1wZXQIxS6jpK8u2jxI75sozOLnxJMUzsqlMcpez+b/kGEwxPlIHBe5E6kd41NLsVsUF4K63+Hnoz7qKeASQ/WmIy2gyhaAYXH6ZxfdM1OWGYHr6hDJOH9AvKfi/14325Wdm+3RBIu0dbbTMxxsU/I6IL0c4J8J5fFHaWUSMDHFDY/xMYbf5N3JFhH6NlqZ8ouATX/3Ka6IcKri6oWxIQEeaO+tv+x0BRhT9bnA3ng+mfKa2IJqZBYLVhhwPHVsY29cQRXVPvTishI7YjSG1/bolZ2uUoR46+jNYYFta3+QBBsherNuQOovcjwWooiWlxXE3XRHzOtoHCUQKQmf+1ZVtQegJpC2knrD0CZpAu9d1gLQEla2sooWti83H+kBbAzpfxlklpGzLV00y/D2d//VMLC91vI64sR/XEfZzp9bd/QkI2FEx4h+S7trDtJPvByolinUMJ/hbf655CWGj8e9Wbtfk7oaiF3Kdq8PbzgHGks34AiMRNbH7u8F+Gdee4xEakhfDi8WHhAYnn/Xxz7MU29TMRu80A1ap2v0RxbrgQekIwvT8lVPMD3pLpRSuY4NW3aGxocrDKiOFQft8baiamOBW+JkPcqlxGKTsDsA5Fz0U6kjPW4bwD8sP4GPl+lp+sKMAIfCqMq7FPEM=
+  on:
+    branch: master
+    tags: true
+    repo: FidelLimited/serverless-plugin-warmup
