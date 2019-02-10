@@ -57,16 +57,16 @@ class WarmUP {
    *
    * @return {Promise}
    * */
-  afterPackageInitialize () {
+  async afterPackageInitialize () {
     this.functionsToWarmup = this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
 
     if (!this.functionsToWarmup.length) {
       this.serverless.cli.log('WarmUP: no functions to warm up')
-      return Promise.resolve()
+      return
     }
 
-    return this.createWarmUpFunctionArtifact(this.functionsToWarmup)
-      .then(() => this.addWarmUpFunctionToService())
+    await this.createWarmUpFunctionArtifact(this.functionsToWarmup)
+    return this.addWarmUpFunctionToService()
   }
 
   /**
@@ -77,12 +77,10 @@ class WarmUP {
    *
    * @return {Promise}
    * */
-  afterCreateDeploymentArtifacts () {
-    if (!this.warmupOpts.cleanFolder) {
-      return Promise.resolve()
+  async afterCreateDeploymentArtifacts () {
+    if (this.warmupOpts.cleanFolder) {
+      return this.cleanFolder()
     }
-
-    return this.cleanFolder()
   }
 
   /**
@@ -94,18 +92,16 @@ class WarmUP {
    * @return {Promise}
    * */
   afterDeployFunctions () {
-    this.functionsToWarmup = this.functionsToWarmup || this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
+    if (this.warmupOpts.prewarm) {
+      this.functionsToWarmup = this.functionsToWarmup || this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
 
-    if (!this.warmupOpts.prewarm) {
-      return Promise.resolve()
+      if (this.functionsToWarmup.length <= 0) {
+        this.serverless.cli.log('WarmUP: no functions to prewarm')
+        return
+      }
+
+      return this.warmUpFunctions()
     }
-
-    if (this.functionsToWarmup.length <= 0) {
-      this.serverless.cli.log('WarmUP: no functions to prewarm')
-      return Promise.resolve()
-    }
-
-    return this.warmUpFunctions()
   }
 
   /**
@@ -233,7 +229,7 @@ class WarmUP {
    *
    * @return {Promise}
    * */
-  cleanFolder () {
+  async cleanFolder () {
     return fs.remove(this.warmupOpts.pathFolder)
   }
 
@@ -247,7 +243,7 @@ class WarmUP {
    *
    * @return {Promise}
    * */
-  createWarmUpFunctionArtifact (functions) {
+  async createWarmUpFunctionArtifact (functions) {
     /** Log warmup start */
     this.serverless.cli.log(`WarmUP: setting ${functions.length} lambdas to be warm`)
 
@@ -341,7 +337,7 @@ module.exports.warmUp = async (event, context) => {
    *
    * @return {Promise}
    * */
-  warmUpFunctions () {
+  async warmUpFunctions () {
     this.serverless.cli.log('WarmUP: Pre-warming up your functions')
 
     const params = {
@@ -352,9 +348,12 @@ module.exports.warmUp = async (event, context) => {
       Payload: this.warmupOpts.payload
     }
 
-    return this.provider.request('Lambda', 'invoke', params)
-      .then(() => this.serverless.cli.log('WarmUp: Functions sucessfuly pre-warmed'))
-      .catch(error => this.serverless.cli.log('WarmUp: Error while pre-warming functions', error))
+    try {
+      await this.provider.request('Lambda', 'invoke', params)
+      this.serverless.cli.log('WarmUp: Functions sucessfuly pre-warmed')
+    } catch (err) {
+      this.serverless.cli.log('WarmUp: Error while pre-warming functions', err)
+    }
   }
 }
 
