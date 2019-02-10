@@ -1515,8 +1515,8 @@ describe('Serverless warmup plugin constructor', () => {
         }))
       expect(functionTester.lambdaInstances[0])
         .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2', {
-          ClientContext: Buffer.from('{"custom":{"test":20}}').toString('base64'),
-          Payload: '{"test":20}'
+          ClientContext: Buffer.from('{"custom":"{\\"test\\":20}"}').toString('base64'),
+          Payload: '"{\\"test\\":20}"'
         }))
     })
 
