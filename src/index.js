@@ -96,7 +96,11 @@ class WarmUP {
   afterDeployFunctions () {
     this.functionsToWarmup = this.functionsToWarmup || this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
 
-    if (!this.warmupOpts.prewarm || this.functionsToWarmup.length <= 0) {
+    if (!this.warmupOpts.prewarm) {
+      return Promise.resolve()
+    }
+
+    if (this.functionsToWarmup.length <= 0) {
       this.serverless.cli.log('WarmUP: no functions to prewarm')
       return Promise.resolve()
     }
