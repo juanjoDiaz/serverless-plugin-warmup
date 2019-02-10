@@ -158,6 +158,9 @@ class WarmUP {
     if (config.source) {
       config.payload = possibleConfig.source
     }
+    if (config.sourceRaw) {
+      config.payloadRaw = config.sourceRaw
+    }
 
     return {
       enabled: (typeof config.enabled === 'boolean' ||
@@ -166,7 +169,7 @@ class WarmUP {
         ? config.enabled
         : defaultOpts.enabled,
       payload: (typeof config.payload !== 'undefined')
-        ? (typeof config.payload === 'string' ? config.payload : JSON.stringify(config.payload))
+        ? (config.payloadRaw ? config.payload : JSON.stringify(config.payload))
         : defaultOpts.payload,
       concurrency: (typeof config.concurrency === 'number') ? config.concurrency : defaultOpts.concurrency
     }
