@@ -1,6 +1,6 @@
 /* global jest beforeEach describe it expect */
 
-const WarmUP = require('../src/index')
+const WarmUp = require('../src/index')
 const {
   getServerlessConfig,
   getExpectedFunctionConfig,
@@ -21,7 +21,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -38,7 +38,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -55,7 +55,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -84,7 +84,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -113,7 +113,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -142,7 +142,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -159,7 +159,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -188,7 +188,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -207,7 +207,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -226,7 +226,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -257,7 +257,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -288,7 +288,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -307,7 +307,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -338,7 +338,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -359,7 +359,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -390,7 +390,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -421,7 +421,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -452,7 +452,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -483,7 +483,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -514,7 +514,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -545,7 +545,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -576,7 +576,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -607,7 +607,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -638,7 +638,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -669,7 +669,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -700,7 +700,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -731,7 +731,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -762,7 +762,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -793,7 +793,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -824,7 +824,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -855,7 +855,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -886,7 +886,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -916,7 +916,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -949,7 +949,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -982,7 +982,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, { stage: 'test', region: 'us-west-2' })
+    const plugin = new WarmUp(serverless, { stage: 'test', region: 'us-west-2' })
 
     await plugin.hooks['after:package:initialize']()
 
@@ -1014,7 +1014,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -1041,7 +1041,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, { stage: 'test', region: 'us-west-2' })
+    const plugin = new WarmUp(serverless, { stage: 'test', region: 'us-west-2' })
 
     await plugin.hooks['after:package:initialize']()
 
@@ -1063,7 +1063,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -1088,7 +1088,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -1113,7 +1113,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -1135,7 +1135,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -1157,7 +1157,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -1179,7 +1179,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -1201,7 +1201,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -1223,7 +1223,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -1261,7 +1261,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -1298,7 +1298,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -1337,7 +1337,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -1373,7 +1373,7 @@ describe('Serverless warmup plugin constructor', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -1409,7 +1409,7 @@ describe('Serverless warmup plugin constructor', () => {
           someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:package:initialize']()
 
@@ -1443,7 +1443,7 @@ describe('Serverless warmup plugin constructor', () => {
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
         }
       })
-      const plugin = new WarmUP(serverless, {})
+      const plugin = new WarmUp(serverless, {})
 
       await plugin.hooks['after:package:initialize']()
 
@@ -1462,7 +1462,7 @@ describe('Serverless warmup plugin constructor', () => {
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
         }
       })
-      const plugin = new WarmUP(serverless, {})
+      const plugin = new WarmUp(serverless, {})
 
       await plugin.hooks['after:package:initialize']()
 
@@ -1481,7 +1481,7 @@ describe('Serverless warmup plugin constructor', () => {
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
         }
       })
-      const plugin = new WarmUP(serverless, {})
+      const plugin = new WarmUp(serverless, {})
 
       await plugin.hooks['after:package:initialize']()
 
@@ -1501,7 +1501,7 @@ describe('Serverless warmup plugin constructor', () => {
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
         }
       })
-      const plugin = new WarmUP(serverless, {})
+      const plugin = new WarmUp(serverless, {})
 
       await plugin.hooks['after:package:initialize']()
 
@@ -1525,7 +1525,7 @@ describe('Serverless warmup plugin constructor', () => {
             someFunc2: { name: 'someFunc2' } }
         }
       })
-      const plugin = new WarmUP(serverless, {})
+      const plugin = new WarmUp(serverless, {})
 
       await plugin.hooks['after:package:initialize']()
 
@@ -1565,7 +1565,7 @@ describe('Serverless warmup plugin constructor', () => {
           }
         }
       })
-      const plugin = new WarmUP(serverless, {})
+      const plugin = new WarmUp(serverless, {})
 
       await plugin.hooks['after:package:initialize']()
 
@@ -1601,7 +1601,7 @@ describe('Serverless warmup plugin constructor', () => {
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
         }
       })
-      const plugin = new WarmUP(serverless, {})
+      const plugin = new WarmUp(serverless, {})
 
       await plugin.hooks['after:package:initialize']()
 
