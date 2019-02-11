@@ -66,7 +66,7 @@ class WarmUp {
     }
 
     await this.createWarmUpFunctionArtifact(this.functionsToWarmup)
-    return this.addWarmUpFunctionToService()
+    await this.addWarmUpFunctionToService()
   }
 
   /**
@@ -79,7 +79,7 @@ class WarmUp {
    * */
   async afterCreateDeploymentArtifacts () {
     if (this.warmupOpts.cleanFolder) {
-      return this.cleanFolder()
+      await this.cleanFolder()
     }
   }
 
@@ -91,7 +91,7 @@ class WarmUp {
    *
    * @return {Promise}
    * */
-  afterDeployFunctions () {
+  async afterDeployFunctions () {
     if (this.warmupOpts.prewarm) {
       this.functionsToWarmup = this.functionsToWarmup || this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
 
@@ -100,7 +100,7 @@ class WarmUp {
         return
       }
 
-      return this.warmUpFunctions()
+      await this.warmUpFunctions()
     }
   }
 
