@@ -1,7 +1,7 @@
 {
   "name": "serverless-plugin-warmup",
   "version": "4.3.1-rc.1",
-  "description": "Keep your lambdas warm during Winter.",
+  "description": "Keep your lambdas warm during winter.",
   "main": "src/index.js",
   "scripts": {
     "lint": "standard **/*.js",

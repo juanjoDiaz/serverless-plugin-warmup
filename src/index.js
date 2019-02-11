@@ -12,7 +12,7 @@ const fs = require('fs-extra')
 const path = require('path')
 
 /**
- * @classdesc Keep your lambdas warm during Winter
+ * @classdesc Keep your lambdas warm during winter
  * @class WarmUp
  * */
 class WarmUp {

@@ -8,7 +8,7 @@ Serverless WarmUp Plugin ♨
 [![Dependency Status][dev-badge]][dev-badge-url]
 [![license](https://img.shields.io/npm/l/serverless-plugin-warmup.svg)](https://raw.githubusercontent.com/FidelLimited/serverless-plugin-warmup/master/LICENSE)
 
-Keep your lambdas warm during Winter.
+Keep your lambdas warm during winter.
 
 **Requirements:**
 * Serverless *v1.12.x* or higher (Recommended *v1.33.x* or higher because of [this](https://github.com/FidelLimited/serverless-plugin-warmup/pull/69)).
