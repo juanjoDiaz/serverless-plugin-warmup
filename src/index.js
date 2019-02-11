@@ -46,7 +46,6 @@ class WarmUP {
       (this.serverless.service.defaults && this.serverless.service.defaults.region) ||
       'us-east-1'
 
-    this.warmupOpts = this.configPlugin(this.serverless.service, this.options.stage)
   }
 
   /**
@@ -58,6 +57,7 @@ class WarmUP {
    * @return {Promise}
    * */
   async afterPackageInitialize () {
+    this.warmupOpts = this.configPlugin(this.serverless.service, this.options.stage)
     this.functionsToWarmup = this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
 
     if (!this.functionsToWarmup.length) {
