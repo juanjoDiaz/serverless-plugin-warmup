@@ -216,6 +216,7 @@ class WarmUP {
       .map(config => ({ name: config.name, config: this.getFunctionConfig(config.warmup, warmupOpts) }))
       .filter(({ config: { enabled } }) => (
         enabled === true ||
+        enabled === 'true' ||
         enabled === stage ||
         (Array.isArray(enabled) && enabled.indexOf(stage) !== -1)
       ))

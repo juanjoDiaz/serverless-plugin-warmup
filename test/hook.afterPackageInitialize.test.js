@@ -75,6 +75,35 @@ describe('Serverless warmup plugin constructor', () => {
       .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2'))
   })
 
+  it('Should warmup all functions if globally enabled using boolean as string', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: 'true'
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+      }
+    })
+    const plugin = new WarmUP(serverless, {})
+
+    await plugin.hooks['after:package:initialize']()
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toEqual(getExpectedFunctionConfig())
+    expect(fs.outputFile).toHaveBeenCalledTimes(1)
+    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js')
+
+    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1])
+    functionTester.executeWarmupFunction()
+
+    expect(functionTester.aws.config.region).toBe('us-east-1')
+    expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2)
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'))
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2'))
+  })
+
   it('Should warmup all functions if globally enabled for a stage using shorthand and stage match', async () => {
     const serverless = getServerlessConfig({
       service: {
