@@ -48,6 +48,13 @@ custom:
     enabled: true
 ```
 
+WarmUp also accepts the boolean as a string so you can use environment variables:
+```yml
+custom:
+  warmup:
+    enabled: ${env:WARM_UP_ENABLED} # Where WARM_UP_ENABLED is set to 'true'
+```
+
 For a specific stage:
 
 ```yml
