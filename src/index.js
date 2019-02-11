@@ -45,8 +45,6 @@ class WarmUp {
       this.serverless.service.provider.region ||
       (this.serverless.service.defaults && this.serverless.service.defaults.region) ||
       'us-east-1'
-
-    this.warmupOpts = this.configPlugin(this.serverless.service, this.options.stage)
   }
 
   /**
@@ -58,6 +56,7 @@ class WarmUp {
    * @return {Promise}
    * */
   async afterPackageInitialize () {
+    this.warmupOpts = this.configPlugin(this.serverless.service, this.options.stage)
     this.functionsToWarmup = this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
 
     if (!this.functionsToWarmup.length) {
@@ -78,6 +77,7 @@ class WarmUp {
    * @return {Promise}
    * */
   async afterCreateDeploymentArtifacts () {
+    this.warmupOpts = this.warmupOpts || this.configPlugin(this.serverless.service, this.options.stage)
     if (this.warmupOpts.cleanFolder) {
       await this.cleanFolder()
     }
@@ -92,6 +92,7 @@ class WarmUp {
    * @return {Promise}
    * */
   async afterDeployFunctions () {
+    this.warmupOpts = this.warmupOpts || this.configPlugin(this.serverless.service, this.options.stage)
     if (this.warmupOpts.prewarm) {
       this.functionsToWarmup = this.functionsToWarmup || this.getFunctionsToBeWarmedUp(this.serverless.service, this.options.stage, this.warmupOpts)
 
