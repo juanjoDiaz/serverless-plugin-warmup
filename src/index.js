@@ -341,15 +341,15 @@ module.exports.warmUp = async (event, context) => {
   async warmUpFunctions () {
     this.serverless.cli.log('WarmUp: Pre-warming up your functions')
 
-    const params = {
-      FunctionName: this.warmupOpts.name,
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Qualifier: process.env.SERVERLESS_ALIAS || '$LATEST',
-      Payload: this.warmupOpts.payload
-    }
-
     try {
+      const params = {
+        FunctionName: this.warmupOpts.name,
+        InvocationType: 'RequestResponse',
+        LogType: 'None',
+        Qualifier: process.env.SERVERLESS_ALIAS || '$LATEST',
+        Payload: this.warmupOpts.payload
+      }
+
       await this.provider.request('Lambda', 'invoke', params)
       this.serverless.cli.log('WarmUp: Functions sucessfuly pre-warmed')
     } catch (err) {
