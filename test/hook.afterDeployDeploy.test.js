@@ -1,6 +1,6 @@
 /* global jest describe it expect */
 
-const WarmUP = require('../src/index')
+const WarmUp = require('../src/index')
 const { getServerlessConfig } = require('./utils/configUtils')
 
 describe('Serverless warmup plugin after:deploy:deploy hook', () => {
@@ -18,7 +18,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:deploy:deploy']()
 
@@ -46,7 +46,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:deploy:deploy']()
 
@@ -65,7 +65,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:deploy:deploy']()
 
@@ -86,7 +86,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
       }
     })
-    const plugin = new WarmUP(serverless, {})
+    const plugin = new WarmUp(serverless, {})
 
     await plugin.hooks['after:deploy:deploy']()
 

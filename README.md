@@ -1,4 +1,4 @@
-Serverless WarmUP Plugin ♨
+Serverless WarmUp Plugin ♨
 =============================
 [![Serverless][serverless-badge]](serverless-badge-url)
 [![npm version][npm-version-badge]][npm-version-badge-url]
@@ -16,7 +16,7 @@ Keep your lambdas warm during Winter.
 
 ## How it works
 
-WarmUP solves *cold starts* by creating one schedule event lambda that invokes all the service lambdas you select in a configured time interval (default: 5 minutes) or a specific time, forcing your containers to stay alive.
+WarmUp solves *cold starts* by creating one schedule event lambda that invokes all the service lambdas you select in a configured time interval (default: 5 minutes) or a specific time, forcing your containers to stay alive.
 
 ## Setup
 
@@ -156,7 +156,7 @@ custom:
       Owner: bar 
     vpc: false
     events:
-      - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
+      - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUp every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
     timeout: 20
     prewarm: true # Run WarmUp immediately after a deploymentlambda
     payload: 
@@ -171,7 +171,7 @@ custom:
 * Day cold periods
 * Desire to avoid cold lambdas after a deployment
 
-**Lambdas invoked by WarmUP will have event source `serverless-plugin-warmup` (unless otherwise specified above):**
+**Lambdas invoked by WarmUp will have event source `serverless-plugin-warmup` (unless otherwise specified above):**
 
 ```json
 {
@@ -194,7 +194,7 @@ However, they are listed here only to facilitate upgrading the pluging and we st
 
 ### Permissions
 
-WarmUP requires some permissions to be able to `invoke` lambdas.
+WarmUp requires some permissions to be able to `invoke` lambdas.
 
 ```yaml
 custom:
@@ -205,7 +205,7 @@ custom:
     name: 'make-them-pop'
     role:  myCustRole0
     events:
-      - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUP every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
+      - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUp every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
     timeout: 20
     prewarm: true # Run WarmUp immediately after a deployment
     tags:
@@ -293,9 +293,9 @@ Add an early callback call when the event source is `serverless-plugin-warmup`. 
 
 ```javascript
 module.exports.lambdaToWarm = function(event, context, callback) {
-  /** Immediate response for WarmUP plugin */
+  /** Immediate response for WarmUp plugin */
   if (event.source === 'serverless-plugin-warmup') {
-    console.log('WarmUP - Lambda is warm!')
+    console.log('WarmUp - Lambda is warm!')
     return callback(null, 'Lambda is warm!')
   }
 
@@ -308,7 +308,7 @@ You can also check for the warmup event using the `context` variable. This could
 ...
 
 if(context.custom.source === 'serverless-plugin-warmup'){
-  console.log('WarmUP - Lambda is warm!')
+  console.log('WarmUp - Lambda is warm!')
   return callback(null, 'Lambda is warm!')
 }
 
@@ -319,9 +319,9 @@ If you're using the `concurrency` option you might consider adding a slight dela
 ```javascript
 module.exports.lambdaToWarm = async (event) => {
   if (event.source === 'serverless-plugin-warmup') {
-    /** Slightly delayed (25ms) response for WarmUP plugin to ensure concurrent invocation */
+    /** Slightly delayed (25ms) response for WarmUp plugin to ensure concurrent invocation */
     await new Promise(r => setTimeout(r, 25))
-    console.log('WarmUP - Lambda is warm!')
+    console.log('WarmUp - Lambda is warm!')
     return
   }
 
@@ -330,7 +330,7 @@ module.exports.lambdaToWarm = async (event) => {
 ```
 ## Deployment
 
-Once everything is configured WarmUP will run on SLS `deploy`.
+Once everything is configured WarmUp will run on SLS `deploy`.
 
 ```sh
 serverless deploy
@@ -356,8 +356,8 @@ Lambda pricing [here](https://aws.amazon.com/lambda/pricing/). CloudWatch pricin
 
 #### Example
 
-Free Tier not included + Default WarmUP options + 10 lambdas to warm, each with `memorySize = 1024` and `duration = 10`:
-* WarmUP: runs 8640 times per month = $0.18
+Free Tier not included + Default WarmUp options + 10 lambdas to warm, each with `memorySize = 1024` and `duration = 10`:
+* WarmUp: runs 8640 times per month = $0.18
 * 10 warm lambdas: each invoked 8640 times per month = $14.4
 * Total = $14.58
 

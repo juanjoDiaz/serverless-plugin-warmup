@@ -25,7 +25,7 @@ function getServerlessConfig (serverless = {}) {
 
 function getExpectedFunctionConfig(options = {}) {
   return Object.assign({
-    description: 'Serverless WarmUP Plugin',
+    description: 'Serverless WarmUp Plugin',
     events: [{ schedule: 'rate(5 minutes)' }],
     handler: '_warmup/index.warmUp',
     memorySize: 128,
