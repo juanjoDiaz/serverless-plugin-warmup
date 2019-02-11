@@ -299,34 +299,26 @@ module.exports.warmUp = async (event, context) => {
    * */
   addWarmUpFunctionToService () {
     /** SLS warm up function */
-    this.serverless.service.functions.warmUpPlugin = {
-      description: 'Serverless WarmUp Plugin',
-      events: this.warmupOpts.events,
-      handler: this.warmupOpts.pathHandler,
-      memorySize: this.warmupOpts.memorySize,
-      name: this.warmupOpts.name,
-      runtime: 'nodejs8.10',
-      package: {
-        individually: true,
-        exclude: ['**'],
-        include: [this.warmupOpts.folderName + '/**']
+    this.serverless.service.functions.warmUpPlugin = Object.assign(
+      {
+        description: 'Serverless WarmUp Plugin',
+        events: this.warmupOpts.events,
+        handler: this.warmupOpts.pathHandler,
+        memorySize: this.warmupOpts.memorySize,
+        name: this.warmupOpts.name,
+        runtime: 'nodejs8.10',
+        package: {
+          individually: true,
+          exclude: ['**'],
+          include: [this.warmupOpts.folderName + '/**']
+        },
+        timeout: this.warmupOpts.timeout
       },
-      timeout: this.warmupOpts.timeout
-    }
+      this.warmupOpts.role ? { role: this.warmupOpts.role } : {},
+      this.warmupOpts.tags ? { tags: this.warmupOpts.tags } : {},
+      this.warmupOpts.vpc ? { vpc: this.warmupOpts.vpc } : {}
+    )
 
-    if (this.warmupOpts.role) {
-      this.serverless.service.functions.warmUpPlugin.role = this.warmupOpts.role
-    }
-
-    if (this.warmupOpts.tags) {
-      this.serverless.service.functions.warmUpPlugin.tags = this.warmupOpts.tags
-    }
-
-    if (this.warmupOpts.vpc) {
-      this.serverless.service.functions.warmUpPlugin.vpc = this.warmupOpts.vpc
-    }
-
-    /** Return service function object */
     return this.serverless.service.functions.warmUpPlugin
   }
 
