@@ -56,7 +56,7 @@ class WarmUp {
     }
 
     await this.createWarmUpFunctionArtifact(this.functionsToWarmup, this.resolvedOptions.region, this.warmupOpts.pathFile)
-    await this.addWarmUpFunctionToService()
+    this.addWarmUpFunctionToService()
   }
 
   /**
@@ -307,8 +307,6 @@ module.exports.warmUp = async (event, context) => {
 
   /**
    * @description Add warm up function to service
-   *
-   * @return {Object} Warm up service function object
    * */
   addWarmUpFunctionToService () {
     /** SLS warm up function */
@@ -331,8 +329,6 @@ module.exports.warmUp = async (event, context) => {
       this.warmupOpts.tags ? { tags: this.warmupOpts.tags } : {},
       this.warmupOpts.vpc ? { vpc: this.warmupOpts.vpc } : {}
     )
-
-    return this.serverless.service.functions.warmUpPlugin
   }
 
   /**
