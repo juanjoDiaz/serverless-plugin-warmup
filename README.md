@@ -134,6 +134,7 @@ functions:
 * **events** (default `- schedule: rate(5 minutes)`)
 * **timeout** (default `10` seconds)
 * **prewarm** (default `false`)
+* **packageIndividually** (default `true`)
 
 #### Options that can be overridden per function
 
@@ -159,7 +160,8 @@ custom:
       - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUp every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
     timeout: 20
     prewarm: true # Run WarmUp immediately after a deploymentlambda
-    payload: 
+    packageIndividually: true # Package warmup function individually
+    payload:
       source: my-custom-source
       other: 20
     payloadRaw: true # Won't JSON.stringify() the source, may be necessary for Go/AppSync deployments

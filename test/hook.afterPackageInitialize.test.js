@@ -1431,6 +1431,26 @@ describe('Serverless warmup plugin constructor', () => {
     }
   })
 
+  it('Should not package individually if specified in params', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            enabled: true,
+            packageIndividually: false
+          }
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+      }
+    })
+    const plugin = new WarmUp(serverless, {})
+
+    await plugin.hooks['after:package:initialize']()
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toEqual(getExpectedFunctionConfig({ package: undefined }))
+  })
+
   describe('Backwards compatibility', () => {
     it('Should accept backwards compatible "default" as boolean property in place of "enabled"', async () => {
       const serverless = getServerlessConfig({

@@ -149,7 +149,8 @@ class WarmUp {
       events: (Array.isArray(config.events)) ? config.events : defaultOpts.events,
       memorySize: (typeof config.memorySize === 'number') ? config.memorySize : defaultOpts.memorySize,
       timeout: (typeof config.timeout === 'number') ? config.timeout : defaultOpts.timeout,
-      prewarm: (typeof config.prewarm === 'boolean') ? config.prewarm : defaultOpts.prewarm
+      prewarm: (typeof config.prewarm === 'boolean') ? config.prewarm : defaultOpts.prewarm,
+      packageIndividually: (typeof config.packageIndividually === 'boolean') ? config.packageIndividually : defaultOpts.packageIndividually
     }
   }
 
@@ -201,7 +202,8 @@ class WarmUp {
       name: `${service.service}-${stage}-warmup-plugin`,
       events: [{ schedule: 'rate(5 minutes)' }],
       timeout: 10,
-      prewarm: false
+      prewarm: false,
+      packageIndividually: true
     }
 
     const functionDefaultOpts = {
@@ -274,10 +276,10 @@ const functions = ${JSON.stringify(functions)};
 
 module.exports.warmUp = async (event, context) => {
   console.log("Warm Up Start");
-  
+
   const invokes = await Promise.all(functions.map(async (func) => {
     console.log(\`Warming up function: \${func.name} with concurrency: \${func.config.concurrency}\`);
-    
+
     const params = {
       ClientContext: Buffer.from(\`{"custom":\${func.config.payload}}\`).toString('base64'),
       FunctionName: func.name,
@@ -286,7 +288,7 @@ module.exports.warmUp = async (event, context) => {
       Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",
       Payload: func.config.payload
     };
-    
+
     try {
       await Promise.all(Array(func.config.concurrency).fill(0)
         .map(async _ => await lambda.invoke(params).promise()))
@@ -318,13 +320,15 @@ module.exports.warmUp = async (event, context) => {
         memorySize: this.warmupOpts.memorySize,
         name: this.warmupOpts.name,
         runtime: 'nodejs8.10',
+        timeout: this.warmupOpts.timeout
+      },
+      this.warmupOpts.packageIndividually ? {
         package: {
           individually: true,
           exclude: ['**'],
           include: [this.warmupOpts.folderName + '/**']
-        },
-        timeout: this.warmupOpts.timeout
-      },
+        }
+      } : {},
       this.warmupOpts.role ? { role: this.warmupOpts.role } : {},
       this.warmupOpts.tags ? { tags: this.warmupOpts.tags } : {},
       this.warmupOpts.vpc ? { vpc: this.warmupOpts.vpc } : {}
