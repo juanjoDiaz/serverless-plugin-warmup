@@ -132,6 +132,7 @@ functions:
 * **vpc** (default to vpc in provider, can be set to `false` to deploy the warmup function outside of VPC)
 * **memorySize** (default `128`)
 * **events** (default `- schedule: rate(5 minutes)`)
+* **exclude** (default `['**']`)
 * **timeout** (default `10` seconds)
 * **prewarm** (default `false`)
 
@@ -157,6 +158,9 @@ custom:
     vpc: false
     events:
       - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUp every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
+    exclude: # exclude additional binaries that are included at the serverless package level
+      - ../**
+      - ../../**
     timeout: 20
     prewarm: true # Run WarmUp immediately after a deploymentlambda
     payload: 

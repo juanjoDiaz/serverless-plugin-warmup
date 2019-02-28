@@ -74,4 +74,48 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     expect(fs.remove).not.toHaveBeenCalled()
   })
+
+  it('Should have default global exclude property', async () => {
+    const mockProvider = { request: jest.fn(() => Promise.resolve()) }
+    const serverless = getServerlessConfig({
+      getProvider () { return mockProvider },
+      service: {
+        custom: {
+          warmup: {
+            enabled: true
+          }
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+      }
+    })
+    const plugin = new WarmUp(serverless, {})
+
+    await plugin.hooks['after:package:initialize']()
+
+    expect(plugin.serverless.service.functions.warmUpPlugin.package.exclude)
+      .toEqual(['**'])
+  })
+})
+
+it('Should override global exclude property', async () => {
+  const mockProvider = { request: jest.fn(() => Promise.resolve()) }
+  let expectedExcludes = ['../**', '../../**']
+  const serverless = getServerlessConfig({
+    getProvider () { return mockProvider },
+    service: {
+      custom: {
+        warmup: {
+          enabled: true,
+          exclude: expectedExcludes
+        }
+      },
+      functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+    }
+  })
+  const plugin = new WarmUp(serverless, {})
+
+  await plugin.hooks['after:package:initialize']()
+
+  expect(plugin.serverless.service.functions.warmUpPlugin.package.exclude)
+    .toEqual(expectedExcludes)
 })
