@@ -294,3 +294,34 @@ it('Should use default exclude if missing', async () => {
       }
     }))
 })
+
+it('Should use default individually if missing', async () => {
+  const mockProvider = { request: jest.fn(() => Promise.resolve()) }
+  const serverless = getServerlessConfig({
+    getProvider () { return mockProvider },
+    service: {
+      custom: {
+        warmup: {
+          enabled: true,
+          package: {
+            exclude: ['**']
+          }
+        }
+      },
+      functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+    }
+  })
+  const plugin = new WarmUp(serverless, {})
+
+  await plugin.hooks['after:package:initialize']()
+
+  expect(plugin.serverless.service.functions.warmUpPlugin)
+    .toEqual(getExpectedFunctionConfig({
+      handler: '_warmup/index.warmUp',
+      package: {
+        individually: true,
+        exclude: ['**'],
+        include: ['_warmup/**']
+      }
+    }))
+})
