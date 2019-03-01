@@ -147,11 +147,29 @@ class WarmUp {
       vpc: config.vpc === false ? { securityGroupIds: [], subnetIds: [] }
         : (typeof config.vpc === 'object' ? config.vpc : defaultOpts.vpc),
       events: (Array.isArray(config.events)) ? config.events : defaultOpts.events,
-      exclude: (Array.isArray(config.exclude)) ? config.exclude : defaultOpts.exclude,
+      package: WarmUp.getWarmupPackage((config.package !== undefined) ? config : defaultOpts, folderName),
       memorySize: (typeof config.memorySize === 'number') ? config.memorySize : defaultOpts.memorySize,
       timeout: (typeof config.timeout === 'number') ? config.timeout : defaultOpts.timeout,
       prewarm: (typeof config.prewarm === 'boolean') ? config.prewarm : defaultOpts.prewarm
     }
+  }
+
+  /**
+   * @description returns the warmup package from the config with a proper
+   * @return {Object} - the warmup package
+   * */
+  static getWarmupPackage (config, folderName) {
+    const includeWarmupValue = folderName + '/**'
+
+    let updatedPackage = Object.assign({}, config.package)
+    if (updatedPackage.include === undefined) {
+      updatedPackage.include = []
+    }
+
+    if (!updatedPackage.include.includes(includeWarmupValue)) {
+      updatedPackage.include.push(includeWarmupValue)
+    }
+    return updatedPackage
   }
 
   /**
@@ -201,7 +219,10 @@ class WarmUp {
       memorySize: 128,
       name: `${service.service}-${stage}-warmup-plugin`,
       events: [{ schedule: 'rate(5 minutes)' }],
-      exclude: ['**'],
+      package: {
+        individually: true,
+        exclude: ['**']
+      },
       timeout: 10,
       prewarm: false
     }
@@ -320,11 +341,7 @@ module.exports.warmUp = async (event, context) => {
         memorySize: this.warmupOpts.memorySize,
         name: this.warmupOpts.name,
         runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: this.warmupOpts.exclude,
-          include: [this.warmupOpts.folderName + '/**']
-        },
+        package: this.warmupOpts.package,
         timeout: this.warmupOpts.timeout
       },
       this.warmupOpts.role ? { role: this.warmupOpts.role } : {},

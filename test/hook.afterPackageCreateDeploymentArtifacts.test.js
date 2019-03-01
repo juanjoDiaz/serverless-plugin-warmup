@@ -75,7 +75,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
     expect(fs.remove).not.toHaveBeenCalled()
   })
 
-  it('Should have default global exclude property', async () => {
+  it('Should have default global package property', async () => {
     const mockProvider = { request: jest.fn(() => Promise.resolve()) }
     const serverless = getServerlessConfig({
       getProvider () { return mockProvider },
@@ -92,21 +92,27 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:package:initialize']()
 
-    expect(plugin.serverless.service.functions.warmUpPlugin.package.exclude)
-      .toEqual(['**'])
+    expect(plugin.serverless.service.functions.warmUpPlugin.package)
+      .toEqual({
+        individually: true,
+        exclude: ['**'],
+        include: ['_warmup/**']
+      })
   })
 })
 
-it('Should override global exclude property', async () => {
+it('Should override global package property', async () => {
   const mockProvider = { request: jest.fn(() => Promise.resolve()) }
-  let expectedExcludes = ['../**', '../../**']
   const serverless = getServerlessConfig({
     getProvider () { return mockProvider },
     service: {
       custom: {
         warmup: {
           enabled: true,
-          exclude: expectedExcludes
+          package: {
+            individually: true,
+            exclude: ['../**']
+          }
         }
       },
       functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
@@ -116,6 +122,101 @@ it('Should override global exclude property', async () => {
 
   await plugin.hooks['after:package:initialize']()
 
-  expect(plugin.serverless.service.functions.warmUpPlugin.package.exclude)
-    .toEqual(expectedExcludes)
+  expect(plugin.serverless.service.functions.warmUpPlugin.package)
+    .toEqual({
+      individually: true,
+      include: ['_warmup/**'],
+      exclude: ['../**']
+    })
+})
+
+it('Should override global package property with existing includes', async () => {
+  const mockProvider = { request: jest.fn(() => Promise.resolve()) }
+  const serverless = getServerlessConfig({
+    getProvider () { return mockProvider },
+    service: {
+      custom: {
+        warmup: {
+          enabled: true,
+          package: {
+            individually: true,
+            include: ['test/**'],
+            exclude: ['../**']
+          }
+        }
+      },
+      functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+    }
+  })
+  const plugin = new WarmUp(serverless, {})
+
+  await plugin.hooks['after:package:initialize']()
+
+  expect(plugin.serverless.service.functions.warmUpPlugin.package)
+    .toEqual({
+      individually: true,
+      include: ['test/**', '_warmup/**'],
+      exclude: ['../**']
+    })
+})
+
+it('Should override global package property with existing includes with warmup function', async () => {
+  const mockProvider = { request: jest.fn(() => Promise.resolve()) }
+  const serverless = getServerlessConfig({
+    getProvider () { return mockProvider },
+    service: {
+      custom: {
+        warmup: {
+          enabled: true,
+          package: {
+            individually: true,
+            include: ['test/**', '_warmup/**'],
+            exclude: ['../**']
+          }
+        }
+      },
+      functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+    }
+  })
+  const plugin = new WarmUp(serverless, {})
+
+  await plugin.hooks['after:package:initialize']()
+
+  expect(plugin.serverless.service.functions.warmUpPlugin.package)
+    .toEqual({
+      individually: true,
+      include: ['test/**', '_warmup/**'],
+      exclude: ['../**']
+    })
+})
+
+it('Should override global package property function with a unique folder name', async () => {
+  const mockProvider = { request: jest.fn(() => Promise.resolve()) }
+  const serverless = getServerlessConfig({
+    getProvider () { return mockProvider },
+    service: {
+      custom: {
+        warmup: {
+          enabled: true,
+          folderName: 'test-folder',
+          package: {
+            individually: true,
+            include: ['test/**'],
+            exclude: ['../**']
+          }
+        }
+      },
+      functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } }
+    }
+  })
+  const plugin = new WarmUp(serverless, {})
+
+  await plugin.hooks['after:package:initialize']()
+
+  expect(plugin.serverless.service.functions.warmUpPlugin.package)
+    .toEqual({
+      individually: true,
+      include: ['test/**', 'test-folder/**'],
+      exclude: ['../**']
+    })
 })
