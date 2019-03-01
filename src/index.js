@@ -147,29 +147,19 @@ class WarmUp {
       vpc: config.vpc === false ? { securityGroupIds: [], subnetIds: [] }
         : (typeof config.vpc === 'object' ? config.vpc : defaultOpts.vpc),
       events: (Array.isArray(config.events)) ? config.events : defaultOpts.events,
-      package: WarmUp.getWarmupPackage((config.package !== undefined) ? config : defaultOpts, folderName),
+      package: typeof config.package === 'object'
+        ? {
+          individually: typeof config.package.individually === 'boolean' ? config.package.individually : defaultOpts.package.individually,
+          exclude: Array.isArray(config.package.exclude) ? config.package.exclude : defaultOpts.package.exclude,
+          include: Array.isArray(config.package.include)
+            ? (config.package.include.includes(`${folderName}/**`) ? config.package.include : config.package.include.concat([`${folderName}/**`]))
+            : [`${folderName}/**`]
+        }
+        : Object.assign(defaultOpts.package, { include: [folderName + '/**'] }),
       memorySize: (typeof config.memorySize === 'number') ? config.memorySize : defaultOpts.memorySize,
       timeout: (typeof config.timeout === 'number') ? config.timeout : defaultOpts.timeout,
       prewarm: (typeof config.prewarm === 'boolean') ? config.prewarm : defaultOpts.prewarm
     }
-  }
-
-  /**
-   * @description returns the warmup package from the config with a proper
-   * @return {Object} - the warmup package
-   * */
-  static getWarmupPackage (config, folderName) {
-    const includeWarmupValue = folderName + '/**'
-
-    let updatedPackage = Object.assign({}, config.package)
-    if (updatedPackage.include === undefined) {
-      updatedPackage.include = []
-    }
-
-    if (!updatedPackage.include.includes(includeWarmupValue)) {
-      updatedPackage.include.push(includeWarmupValue)
-    }
-    return updatedPackage
   }
 
   /**

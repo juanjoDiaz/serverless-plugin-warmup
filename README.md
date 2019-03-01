@@ -160,11 +160,11 @@ custom:
       - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUp every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
     package:
       individually: true
-      include:
-        - ./**
       exclude: # exclude additional binaries that are included at the serverless package level
         - ../**
         - ../../**
+      include:
+        - ./**
     timeout: 20
     prewarm: true # Run WarmUp immediately after a deploymentlambda
     payload: 
