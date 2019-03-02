@@ -166,7 +166,7 @@ it('Should use the package inclusions from options if present', async () => {
     }))
 })
 
-it('Should use the package inclusions from options with the warmup folder', async () => {
+it('Should not duplicate the warmup folder inclusion even if manually included', async () => {
   const mockProvider = { request: jest.fn(() => Promise.resolve()) }
   const serverless = getServerlessConfig({
     getProvider () { return mockProvider },

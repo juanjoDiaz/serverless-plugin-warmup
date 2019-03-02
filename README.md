@@ -132,7 +132,7 @@ functions:
 * **vpc** (default to vpc in provider, can be set to `false` to deploy the warmup function outside of VPC)
 * **memorySize** (default `128`)
 * **events** (default `- schedule: rate(5 minutes)`)
-* **package** (default `package: { individually: true, exclude: ['**'] }`)
+* **package** (default `package: { individually: true, exclude: ['**'], include: ['_warmup/**'] }`)
 * **timeout** (default `10` seconds)
 * **prewarm** (default `false`)
 
