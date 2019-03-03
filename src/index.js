@@ -147,6 +147,15 @@ class WarmUp {
       vpc: config.vpc === false ? { securityGroupIds: [], subnetIds: [] }
         : (typeof config.vpc === 'object' ? config.vpc : defaultOpts.vpc),
       events: (Array.isArray(config.events)) ? config.events : defaultOpts.events,
+      package: typeof config.package === 'object'
+        ? {
+          individually: typeof config.package.individually === 'boolean' ? config.package.individually : defaultOpts.package.individually,
+          exclude: Array.isArray(config.package.exclude) ? config.package.exclude : defaultOpts.package.exclude,
+          include: Array.isArray(config.package.include)
+            ? (config.package.include.includes(`${folderName}/**`) ? config.package.include : config.package.include.concat([`${folderName}/**`]))
+            : [`${folderName}/**`]
+        }
+        : Object.assign(defaultOpts.package, { include: [folderName + '/**'] }),
       memorySize: (typeof config.memorySize === 'number') ? config.memorySize : defaultOpts.memorySize,
       timeout: (typeof config.timeout === 'number') ? config.timeout : defaultOpts.timeout,
       prewarm: (typeof config.prewarm === 'boolean') ? config.prewarm : defaultOpts.prewarm
@@ -200,6 +209,10 @@ class WarmUp {
       memorySize: 128,
       name: `${service.service}-${stage}-warmup-plugin`,
       events: [{ schedule: 'rate(5 minutes)' }],
+      package: {
+        individually: true,
+        exclude: ['**']
+      },
       timeout: 10,
       prewarm: false
     }
@@ -318,11 +331,7 @@ module.exports.warmUp = async (event, context) => {
         memorySize: this.warmupOpts.memorySize,
         name: this.warmupOpts.name,
         runtime: 'nodejs8.10',
-        package: {
-          individually: true,
-          exclude: ['**'],
-          include: [this.warmupOpts.folderName + '/**']
-        },
+        package: this.warmupOpts.package,
         timeout: this.warmupOpts.timeout
       },
       this.warmupOpts.role ? { role: this.warmupOpts.role } : {},
