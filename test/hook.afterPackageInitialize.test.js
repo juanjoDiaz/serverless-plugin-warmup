@@ -1230,6 +1230,28 @@ describe('Serverless warmup plugin constructor', () => {
       }));
   });
 
+  it('Should use the layer from options if present', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            enabled: true,
+            layers: ['sampleLayer'],
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toEqual(getExpectedFunctionConfig({
+        layers: ['sampleLayer'],
+      }));
+  });
+
   it('Should use the source from options if present', async () => {
     const serverless = getServerlessConfig({
       service: {
