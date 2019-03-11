@@ -48,6 +48,7 @@ Most options are set under `custom.warmup` in the `serverless.yaml` file.
 * **package** (default `package: { individually: true, exclude: ['**'], include: ['_warmup/**'] }`)
 * **timeout** (default `10` seconds)
 * **prewarm** (default `false`)
+* **layers** (default `undefined`) can add layers used in your project (e.g. shared layer with `node_modules`). When using shared `node_modules` remember to set environment variable `NODE_PATH: "./:/opt/node_modules"`
 
 But there are some options which can also be set under `custom.warmup` to be applied to all lambdas to be warmed up or can be overridden on each individual lambda.
 
@@ -80,6 +81,8 @@ custom:
         - ./**
     timeout: 20
     prewarm: true # Run WarmUp immediately after a deploymentlambda
+    layers: 
+      - myLayerName
     payload: 
       source: my-custom-source
       other: 20
@@ -89,6 +92,8 @@ custom:
 functions:
   myColdfunction:
     handler: 'myColdfunction.handler'
+    layers: 
+      - myLayerName
     events:
       - http:
           path: my-cold-function
