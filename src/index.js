@@ -178,7 +178,9 @@ class WarmUp {
       memorySize: (typeof config.memorySize === 'number') ? config.memorySize : defaultOpts.memorySize,
       timeout: (typeof config.timeout === 'number') ? config.timeout : defaultOpts.timeout,
       prewarm: (typeof config.prewarm === 'boolean') ? config.prewarm : defaultOpts.prewarm,
-      layers: (Array.isArray(config.layers) && config.layers.length > 0) ? config.layers : defaultOpts.layers
+      layers: (Array.isArray(config.layers) && config.layers.length > 0)
+        ? config.layers
+        : defaultOpts.layers,
     };
     /* eslint-enable no-nested-ternary */
   }
@@ -359,7 +361,7 @@ module.exports.warmUp = async (event, context) => {
         runtime: 'nodejs8.10',
         package: this.warmupOpts.package,
         timeout: this.warmupOpts.timeout,
-        layers: this.warmup.layers
+        layers: this.warmupOpts.layers,
       },
       this.warmupOpts.role ? { role: this.warmupOpts.role } : {},
       this.warmupOpts.tags ? { tags: this.warmupOpts.tags } : {},
