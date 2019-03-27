@@ -177,6 +177,7 @@ class WarmUp {
         : Object.assign(defaultOpts.package, { include: [`${folderName}/**`] }),
       memorySize: (typeof config.memorySize === 'number') ? config.memorySize : defaultOpts.memorySize,
       timeout: (typeof config.timeout === 'number') ? config.timeout : defaultOpts.timeout,
+      environment: (typeof config.environment === 'object') ? config.environment : defaultOpts.environment,
       prewarm: (typeof config.prewarm === 'boolean') ? config.prewarm : defaultOpts.prewarm,
     };
     /* eslint-enable no-nested-ternary */
@@ -236,6 +237,8 @@ class WarmUp {
         exclude: ['**'],
       },
       timeout: 10,
+      environment: Object.keys(service.provider.environment || [])
+        .reduce((obj, k) => Object.assign({}, obj, { [k]: undefined }), {}),
       prewarm: false,
     };
 
@@ -358,6 +361,7 @@ module.exports.warmUp = async (event, context) => {
         runtime: 'nodejs8.10',
         package: this.warmupOpts.package,
         timeout: this.warmupOpts.timeout,
+        environment: this.warmupOpts.environment,
       },
       this.warmupOpts.role ? { role: this.warmupOpts.role } : {},
       this.warmupOpts.tags ? { tags: this.warmupOpts.tags } : {},

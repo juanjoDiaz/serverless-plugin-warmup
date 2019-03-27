@@ -1230,6 +1230,98 @@ describe('Serverless warmup plugin constructor', () => {
       }));
   });
 
+  it('Should unset the environment variables from options as default', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        provider: {
+          environment: {
+            test: 'value',
+            other_var: 'other_value',
+          },
+        },
+        custom: {
+          warmup: {
+            enabled: true,
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toEqual(getExpectedFunctionConfig({
+        environment: {
+          test: undefined,
+          other_var: undefined,
+        },
+      }));
+  });
+
+  it('Should be able to unset environment variables from function options', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        provider: {
+          environment: {
+            test: 'value',
+            other_var: 'other_value',
+          },
+        },
+        custom: {
+          warmup: {
+            enabled: true,
+            environment: {
+              test: 'new_value',
+              other_var: undefined,
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toEqual(getExpectedFunctionConfig({
+        environment: {
+          test: 'new_value',
+          other_var: undefined,
+        },
+      }));
+  });
+
+  it('Should use the environment from options if present', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            enabled: true,
+            environment: {
+              test: 'value',
+              other_var: 'other_value',
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toEqual(getExpectedFunctionConfig({
+        environment: {
+          test: 'value',
+          other_var: 'other_value',
+        },
+      }));
+  });
+
   it('Should use the source from options if present', async () => {
     const serverless = getServerlessConfig({
       service: {
