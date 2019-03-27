@@ -47,6 +47,7 @@ Most options are set under `custom.warmup` in the `serverless.yaml` file.
 * **events** (default `- schedule: rate(5 minutes)`, can be any [Serverless event](https://serverless.com/framework/docs/providers/aws/events/))
 * **package** (default `package: { individually: true, exclude: ['**'], include: ['_warmup/**'] }`)
 * **timeout** (default `10` seconds)
+* **environment** (default to unset all package level environment variables. It can be use to set variables or to unset global variables by setting it to undefined. However, you should never have to change the default.)
 * **prewarm** (default `false`)
 
 But there are some options which can also be set under `custom.warmup` to be applied to all lambdas to be warmed up or can be overridden on each individual lambda.
