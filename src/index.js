@@ -28,10 +28,19 @@ class WarmUp {
 
     this.provider = this.serverless.getProvider('aws');
 
+    this.commands = {
+      warmup: {
+        lifecycleEvents: [
+          'prewarm',
+        ],
+      },
+    };
+
     this.hooks = {
       'after:package:initialize': this.afterPackageInitialize.bind(this),
       'after:package:createDeploymentArtifacts': this.afterCreateDeploymentArtifacts.bind(this),
       'after:deploy:deploy': this.afterDeployFunctions.bind(this),
+      'warmup:prewarm': this.afterDeployFunctions.bind(this),
     };
   }
 
