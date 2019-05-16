@@ -329,8 +329,7 @@ module.exports.warmUp = async (event, context) => {
     };
     
     try {
-      await Promise.all(Array(func.config.concurrency).fill(0)
-        .map(async _ => await lambda.invoke(params).promise()))
+      await Promise.all(Array(func.config.concurrency).fill(0).map(async () => await lambda.invoke(params).promise()));
       console.log(\`Warm Up Invoke Success: \${func.name}\`);
       return true;
     } catch (e) {
