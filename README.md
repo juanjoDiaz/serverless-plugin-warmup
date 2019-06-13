@@ -134,6 +134,13 @@ functions:
 * Day cold periods
 * Desire to avoid cold lambdas after a deployment
 
+#### Runtime Configuration
+Concurrency can be modified post-deployment at runtime by use of Lambda environment variables.  
+Two configuration options exist:
+* Globally set the concurrency of all lambdas on a stack (overriding any deployment config function or global values):  
+  Set the environment variable `GLOBAL_WARMUP_CONCURRENCY`
+* Individually set the concurrency per lambda  
+  Set the environment variable `WARMUP_CONCURRENCY_YOUR_FUNCTION_NAME`. `-` is replaced with `_`. Must be all uppercase. 
 
 #### Legacy options
 
