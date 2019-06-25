@@ -62,7 +62,7 @@ class WarmUp {
       this.resolvedOptions.region,
       this.warmupOpts.pathFile,
     );
-    this.addWarmUpFunctionToService();
+    WarmUp.addWarmUpFunctionToService(this.serverless.service, this.warmupOpts);
   }
 
   /**
@@ -106,7 +106,8 @@ class WarmUp {
         return;
       }
 
-      await this.warmUpFunctions();
+      WarmUp.addWarmUpFunctionToService(this.serverless.service, this.warmupOpts);
+      await this.warmUpFunctions(this.serverless.service, this.warmupOpts);
     }
   }
 
@@ -348,23 +349,24 @@ module.exports.warmUp = async (event, context) => {
   /**
    * @description Add warm up function to service
    * */
-  addWarmUpFunctionToService() {
+  static addWarmUpFunctionToService(service, warmupOpts) {
     /** SLS warm up function */
-    this.serverless.service.functions.warmUpPlugin = Object.assign(
+    // eslint-disable-next-line no-param-reassign
+    service.functions.warmUpPlugin = Object.assign(
       {
         description: 'Serverless WarmUp Plugin',
-        events: this.warmupOpts.events,
-        handler: this.warmupOpts.pathHandler,
-        memorySize: this.warmupOpts.memorySize,
-        name: this.warmupOpts.name,
+        events: warmupOpts.events,
+        handler: warmupOpts.pathHandler,
+        memorySize: warmupOpts.memorySize,
+        name: warmupOpts.name,
         runtime: 'nodejs10.x',
-        package: this.warmupOpts.package,
-        timeout: this.warmupOpts.timeout,
-        environment: this.warmupOpts.environment,
+        package: warmupOpts.package,
+        timeout: warmupOpts.timeout,
+        environment: warmupOpts.environment,
       },
-      this.warmupOpts.role ? { role: this.warmupOpts.role } : {},
-      this.warmupOpts.tags ? { tags: this.warmupOpts.tags } : {},
-      this.warmupOpts.vpc ? { vpc: this.warmupOpts.vpc } : {},
+      warmupOpts.role ? { role: warmupOpts.role } : {},
+      warmupOpts.tags ? { tags: warmupOpts.tags } : {},
+      warmupOpts.vpc ? { vpc: warmupOpts.vpc } : {},
     );
   }
 
@@ -376,16 +378,16 @@ module.exports.warmUp = async (event, context) => {
    *
    * @return {Promise}
    * */
-  async warmUpFunctions() {
+  async warmUpFunctions(service, warmupOpts) {
     this.serverless.cli.log('WarmUp: Pre-warming up your functions');
 
     try {
       const params = {
-        FunctionName: this.warmupOpts.name,
+        FunctionName: warmupOpts.name,
         InvocationType: 'RequestResponse',
         LogType: 'None',
-        Qualifier: process.env.SERVERLESS_ALIAS || '$LATEST',
-        Payload: this.warmupOpts.payload,
+        Qualifier: service.getFunction('warmUpPlugin').environment.SERVERLESS_ALIAS || '$LATEST',
+        Payload: warmupOpts.payload,
       };
 
       await this.provider.request('Lambda', 'invoke', params);
