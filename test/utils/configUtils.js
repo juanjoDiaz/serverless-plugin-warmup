@@ -30,7 +30,7 @@ function getExpectedFunctionConfig(options = {}) {
     handler: '_warmup/index.warmUp',
     memorySize: 128,
     name: 'warmup-test-dev-warmup-plugin',
-    runtime: 'nodejs8.10',
+    runtime: 'nodejs10.x',
     package: {
       individually: true,
       exclude: ['**'],
