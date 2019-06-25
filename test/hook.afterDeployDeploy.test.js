@@ -100,4 +100,38 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
     };
     expect(mockProvider.request).toHaveBeenCalledWith('Lambda', 'invoke', params);
   });
+
+  describe('Other plugins integrations', () => {
+    it('Should use the warmup function alias if SERVERLESS_ALIAS env variable is present', async () => {
+      const mockProvider = { request: jest.fn(() => Promise.resolve()) };
+      const serverless = getServerlessConfig({
+        getProvider() { return mockProvider; },
+        service: {
+          custom: {
+            warmup: {
+              enabled: true,
+              prewarm: true,
+              environment: {
+                SERVERLESS_ALIAS: 'TEST_ALIAS',
+              },
+            },
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+        },
+      });
+      const plugin = new WarmUp(serverless, {});
+
+      await plugin.hooks['after:deploy:deploy']();
+
+      expect(mockProvider.request).toHaveBeenCalledTimes(1);
+      const params = {
+        FunctionName: 'warmup-test-dev-warmup-plugin',
+        InvocationType: 'RequestResponse',
+        LogType: 'None',
+        Qualifier: 'TEST_ALIAS',
+        Payload: '{"source":"serverless-plugin-warmup"}',
+      };
+      expect(mockProvider.request).toHaveBeenCalledWith('Lambda', 'invoke', params);
+    });
+  });
 });

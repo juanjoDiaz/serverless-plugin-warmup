@@ -1545,6 +1545,42 @@ describe('Serverless warmup plugin constructor', () => {
     }
   });
 
+
+  describe('Other plugins integrations', () => {
+    it('Should use the warmup function alias if SERVERLESS_ALIAS env variable is present', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              enabled: true,
+            },
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+        },
+      });
+      const plugin = new WarmUp(serverless, {});
+
+      await plugin.hooks['after:package:initialize']();
+
+      expect(plugin.serverless.service.functions.warmUpPlugin)
+        .toEqual(getExpectedFunctionConfig());
+
+      const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+      functionTester.executeWarmupFunction({ env: { SERVERLESS_ALIAS: 'TEST_ALIAS' } });
+
+      expect(functionTester.aws.config.region).toBe('us-east-1');
+      expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
+      expect(functionTester.lambdaInstances[0])
+        .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
+          Qualifier: 'TEST_ALIAS',
+        }));
+      expect(functionTester.lambdaInstances[0])
+        .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2', {
+          Qualifier: 'TEST_ALIAS',
+        }));
+    });
+  });
+
   describe('Backwards compatibility', () => {
     it('Should accept backwards compatible "default" as boolean property in place of "enabled"', async () => {
       const serverless = getServerlessConfig({

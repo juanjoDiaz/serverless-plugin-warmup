@@ -13,7 +13,7 @@ class GeneratedFunctionTester {
   }
 
   generatedWarmupFunction() {
-    return new Function('dependencies', `
+    return new Function('dependencies', 'process', `
       console = {
         log: () => {}
       };
@@ -30,8 +30,8 @@ class GeneratedFunctionTester {
     `)
   }
 
-  executeWarmupFunction() {
-    this.generatedWarmupFunction()({ 'aws-sdk': this.aws })
+  executeWarmupFunction(process) {
+    this.generatedWarmupFunction()({ 'aws-sdk': this.aws }, process || { env: {} })
   }
 } 
 
