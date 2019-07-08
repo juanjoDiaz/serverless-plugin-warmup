@@ -317,15 +317,15 @@ module.exports.warmUp = async (event, context) => {
   console.log("Warm Up Start");
   
   const invokes = await Promise.all(functions.map(async (func) => {
+    let concurrency = func.config.concurrency;
     const functionConcurrency = process.env["WARMUP_CONCURRENCY_" + func.name.toUpperCase().replace(/-/g, '_')]
     
-    let concurrency = func.config.concurrency;
-    if (process.env.GLOBAL_WARMUP_CONCURRENCY) {
-      concurrency = parseInt(process.env.GLOBAL_WARMUP_CONCURRENCY);
-      console.log(\`Global environment variable warmup concurrency found: \${concurrency}. Overwrote configured concurrency for \${func.name}\`);
-    } else if (functionConcurrency) {
+    if (functionConcurrency) {
       concurrency = parseInt(functionConcurrency);
       console.log(\`Function environment variable warmup concurrency found: \${concurrency}. Overwrote configured concurrency for \${func.name}\`);
+    } else if (process.env.WARMUP_CONCURRENCY) {
+      concurrency = parseInt(process.env.WARMUP_CONCURRENCY);
+      console.log(\`Global environment variable warmup concurrency found: \${concurrency}. Overwrote configured concurrency for \${func.name}\`);
     }
     
     console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency}\`);
