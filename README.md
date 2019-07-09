@@ -140,7 +140,7 @@ Two configuration options exist:
 * Globally set the concurrency of all lambdas on the stack (overriding the deployment configuration):  
   Set the environment variable `WARMUP_CONCURRENCY`
 * Individually set the concurrency per lambda  
-  Set the environment variable WARMUP_CONCURRENCY_YOUR_FUNCTION_NAME. Must be all uppercase and hyphens (-) are replaced with underscores (_) 
+  Set the environment variable WARMUP_CONCURRENCY_YOUR_FUNCTION_NAME. Must be all uppercase and hyphens (-) are replaced with underscores (_). If present, it overrides the global concurrency setting. 
 
 #### Legacy options
 

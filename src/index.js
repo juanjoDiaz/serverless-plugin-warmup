@@ -317,18 +317,20 @@ module.exports.warmUp = async (event, context) => {
   console.log("Warm Up Start");
   
   const invokes = await Promise.all(functions.map(async (func) => {
-    let concurrency = func.config.concurrency;
+    let concurrency;
     const functionConcurrency = process.env["WARMUP_CONCURRENCY_" + func.name.toUpperCase().replace(/-/g, '_')]
     
     if (functionConcurrency) {
       concurrency = parseInt(functionConcurrency);
-      console.log(\`Function environment variable warmup concurrency found: \${concurrency}. Overwrote configured concurrency for \${func.name}\`);
+      console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from function-specific environment variable)\`);
     } else if (process.env.WARMUP_CONCURRENCY) {
       concurrency = parseInt(process.env.WARMUP_CONCURRENCY);
-      console.log(\`Global environment variable warmup concurrency found: \${concurrency}. Overwrote configured concurrency for \${func.name}\`);
+      console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from global environment variable)\`);
+    } else {
+      concurrency = func.config.concurrency;
+      console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency}\`);
     }
     
-    console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency}\`);
     
     const params = {
       ClientContext: Buffer.from(\`{"custom":\${func.config.payload}}\`).toString('base64'),
