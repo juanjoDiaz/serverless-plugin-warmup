@@ -318,7 +318,20 @@ module.exports.warmUp = async (event, context) => {
   console.log("Warm Up Start");
   
   const invokes = await Promise.all(functions.map(async (func) => {
-    console.log(\`Warming up function: \${func.name} with concurrency: \${func.config.concurrency}\`);
+    let concurrency;
+    const functionConcurrency = process.env["WARMUP_CONCURRENCY_" + func.name.toUpperCase().replace(/-/g, '_')]
+    
+    if (functionConcurrency) {
+      concurrency = parseInt(functionConcurrency);
+      console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from function-specific environment variable)\`);
+    } else if (process.env.WARMUP_CONCURRENCY) {
+      concurrency = parseInt(process.env.WARMUP_CONCURRENCY);
+      console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from global environment variable)\`);
+    } else {
+      concurrency = func.config.concurrency;
+      console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency}\`);
+    }
+    
     
     const params = {
       ClientContext: Buffer.from(\`{"custom":\${func.config.payload}}\`).toString('base64'),
@@ -330,7 +343,7 @@ module.exports.warmUp = async (event, context) => {
     };
     
     try {
-      await Promise.all(Array(func.config.concurrency).fill(0).map(async () => await lambda.invoke(params).promise()));
+      await Promise.all(Array(concurrency).fill(0).map(async () => await lambda.invoke(params).promise()));
       console.log(\`Warm Up Invoke Success: \${func.name}\`);
       return true;
     } catch (e) {
