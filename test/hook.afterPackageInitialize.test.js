@@ -1545,7 +1545,6 @@ describe('Serverless warmup plugin constructor', () => {
     }
   });
 
-
   describe('Other plugins integrations', () => {
     it('Should use the warmup function alias if SERVERLESS_ALIAS env variable is present', async () => {
       const serverless = getServerlessConfig({

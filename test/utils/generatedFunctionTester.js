@@ -33,6 +33,6 @@ class GeneratedFunctionTester {
   executeWarmupFunction(process) {
     this.generatedWarmupFunction()({ 'aws-sdk': this.aws }, process || { env: {} })
   }
-} 
+}
 
 module.exports = { GeneratedFunctionTester };
