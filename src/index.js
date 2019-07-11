@@ -362,8 +362,8 @@ module.exports.warmUp = async (event, context) => {
         runtime: 'nodejs10.x',
         package: warmupOpts.package,
         timeout: warmupOpts.timeout,
-        environment: warmupOpts.environment,
       },
+      Object.keys(warmupOpts.environment).length ? { environment: warmupOpts.environment } : {},
       warmupOpts.role ? { role: warmupOpts.role } : {},
       warmupOpts.tags ? { tags: warmupOpts.tags } : {},
       warmupOpts.vpc ? { vpc: warmupOpts.vpc } : {},
@@ -382,11 +382,12 @@ module.exports.warmUp = async (event, context) => {
     this.serverless.cli.log('WarmUp: Pre-warming up your functions');
 
     try {
+      const environmentVars = service.getFunction('warmUpPlugin').environment || {};
       const params = {
         FunctionName: warmupOpts.name,
         InvocationType: 'RequestResponse',
         LogType: 'None',
-        Qualifier: service.getFunction('warmUpPlugin').environment.SERVERLESS_ALIAS || '$LATEST',
+        Qualifier: environmentVars.SERVERLESS_ALIAS || '$LATEST',
         Payload: warmupOpts.payload,
       };
 
