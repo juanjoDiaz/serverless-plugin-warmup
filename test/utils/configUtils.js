@@ -37,7 +37,6 @@ function getExpectedFunctionConfig(options = {}) {
       include: ['_warmup/**']
     },
     timeout: 10,
-    environment: {},
   }, options)
 }
 
