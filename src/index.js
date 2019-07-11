@@ -316,11 +316,11 @@ const functions = ${JSON.stringify(functions)};
 
 module.exports.warmUp = async (event, context) => {
   console.log("Warm Up Start");
-  
+
   const invokes = await Promise.all(functions.map(async (func) => {
     let concurrency;
     const functionConcurrency = process.env["WARMUP_CONCURRENCY_" + func.name.toUpperCase().replace(/-/g, '_')]
-    
+
     if (functionConcurrency) {
       concurrency = parseInt(functionConcurrency);
       console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from function-specific environment variable)\`);
@@ -331,8 +331,7 @@ module.exports.warmUp = async (event, context) => {
       concurrency = func.config.concurrency;
       console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency}\`);
     }
-    
-    
+
     const params = {
       ClientContext: Buffer.from(\`{"custom":\${func.config.payload}}\`).toString('base64'),
       FunctionName: func.name,
@@ -341,7 +340,7 @@ module.exports.warmUp = async (event, context) => {
       Qualifier: process.env.SERVERLESS_ALIAS || "$LATEST",
       Payload: func.config.payload
     };
-    
+
     try {
       await Promise.all(Array(concurrency).fill(0).map(async () => await lambda.invoke(params).promise()));
       console.log(\`Warm Up Invoke Success: \${func.name}\`);
