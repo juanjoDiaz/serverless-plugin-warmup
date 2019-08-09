@@ -311,8 +311,8 @@ class WarmUp {
     functions.forEach(func => this.serverless.cli.log(`WarmUp: ${func.name}`));
 
     const warmUpFunction = tsHandler
-      ? WarmUp.getJSWarmupFunction(region, functions)
-      : WarmUp.getTSWarmupFunction(region, functions);
+      ? WarmUp.getTSWarmupFunction(region, functions)
+      : WarmUp.getJSWarmupFunction(region, functions);
 
     /** Write warm up file */
     return fs.outputFile(pathFile, warmUpFunction);
