@@ -141,7 +141,7 @@ class WarmUp {
     const config = (typeof possibleConfig === 'object') ? possibleConfig : {};
     const folderName = (typeof config.folderName === 'string') ? config.folderName : '_warmup';
     const pathFolder = path.join(this.serverless.config.servicePath, folderName);
-    const tsHandler = (typeof config.tsHandler === 'boolean') ? config.tsHandler : false;
+    const tsHandler = (typeof config.tsHandler === 'boolean') ? config.tsHandler : defaultOpts.tsHandler;
 
     /* eslint-disable no-nested-ternary */
     // Keep backwards compatibility for now
@@ -233,6 +233,7 @@ class WarmUp {
     const globalDefaultOpts = {
       folderName: '_warmup',
       cleanFolder: true,
+      tsHandler: false,
       memorySize: 128,
       name: `${service.service}-${stage}-warmup-plugin`,
       events: [{ schedule: 'rate(5 minutes)' }],

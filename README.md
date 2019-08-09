@@ -39,6 +39,7 @@ Most options are set under `custom.warmup` in the `serverless.yaml` file.
 
 * **folderName** (default `_warmup`)
 * **cleanFolder** (default `true`)
+* **tsHandler** (default `false`)
 * **name** (default `${service}-${stage}-warmup-plugin`)
 * **role** (default to role in the provider)
 * **tags** (default to serverless default tags)
@@ -62,6 +63,7 @@ custom:
   warmup:
     enabled: true # Whether to warm up functions by default or not
     folderName: '_warmup' # Name of the folder created for the generated warmup 
+    tsHandler: true # Whether the handler function for warmup should be generated in TS or not
     cleanFolder: false
     memorySize: 256
     name: 'make-them-pop'
