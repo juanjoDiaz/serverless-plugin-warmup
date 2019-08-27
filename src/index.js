@@ -385,7 +385,7 @@ module.exports.warmUp = async (event, context) => {
   /**
    * @description Warm up the functions immediately after deployment
    *
-   * @fulfil {} — Functions warmed up sucessfuly
+   * @fulfil {} — Functions warmed up successfully
    * @reject {Error} Functions couldn't be warmed up
    *
    * @return {Promise}
@@ -404,7 +404,7 @@ module.exports.warmUp = async (event, context) => {
       };
 
       await this.provider.request('Lambda', 'invoke', params);
-      this.serverless.cli.log('WarmUp: Functions sucessfuly pre-warmed');
+      this.serverless.cli.log('WarmUp: Functions successfully pre-warmed');
     } catch (err) {
       this.serverless.cli.log('WarmUp: Error while pre-warming functions', err);
     }
