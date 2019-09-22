@@ -262,6 +262,7 @@ Lambdas invoked by WarmUp will have the event source `serverless-plugin-warmup` 
 
 To minimize cost and avoid running your lambda unnecessarily, you should add an early return call before your lambda logic when that payload is received.
 
+### Javascript
 ```javascript
 // Using the Promise style
 module.exports.lambdaToWarm = async function(event, context) {
@@ -314,6 +315,20 @@ module.exports.lambdaToWarm = async (event, context) => {
   ... add lambda logic after
 }
 ```
+
+### Python
+
+```python
+def lambda_handler(event, context):
+    # early return call when the function is called by warmup plugin
+    if event.get("source") in ["aws.events", "serverless-plugin-warmup"]:
+        print('Lambda is warm!')
+        return {}
+
+    # function logic here
+    ...
+```
+
 ## Deployment
 
 WarmUp supports `serverless deploy`.
