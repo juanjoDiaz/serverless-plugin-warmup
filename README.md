@@ -144,9 +144,9 @@ Two configuration options exist:
 
 #### Legacy options
 
-Over time some options have been removed form the pluging.
+Over time some options have been removed from the plugin.
 For now, we keep backwards compatibility so they still work.
-However, they are listed here only to facilitate upgrading the pluging and we strongly recommend switching to the options defined above as soon as possible.
+However, they are listed here only to facilitate upgrading the plugin and we strongly recommend switching to the options defined above as soon as possible.
 
 * **default** Has been renamed to `enabled`
 * **schedule** `schedule: rate(5 minutes)` is equivalent to `events: - schedule: rate(5 minutes)`.
