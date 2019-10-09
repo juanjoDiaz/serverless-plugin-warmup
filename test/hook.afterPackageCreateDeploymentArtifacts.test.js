@@ -323,4 +323,146 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         },
       }));
   });
+
+  it('Should use specified runtime set by aws provider', async () => {
+    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
+    const serverless = getServerlessConfig({
+      getProvider() { return mockProvider; },
+      service: {
+        provider: {
+          name: 'aws',
+          runtime: 'nodejs12.x',
+        },
+        custom: {
+          warmup: {
+            enabled: true,
+            package: {
+              exclude: ['**'],
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toEqual(getExpectedFunctionConfig({
+        handler: '_warmup/index.warmUp',
+        runtime: 'nodejs12.x',
+        package: {
+          individually: true,
+          exclude: ['**'],
+          include: ['_warmup/**'],
+        },
+      }));
+  });
+
+  it('Should override specified runtime set by aws provider, if function has runtime set', async () => {
+    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
+    const serverless = getServerlessConfig({
+      getProvider() { return mockProvider; },
+      service: {
+        provider: {
+          name: 'aws',
+          runtime: 'nodejs12.x',
+        },
+        custom: {
+          warmup: {
+            runtime: 'nodejs11.x',
+            enabled: true,
+            package: {
+              exclude: ['**'],
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toEqual(getExpectedFunctionConfig({
+        handler: '_warmup/index.warmUp',
+        runtime: 'nodejs11.x',
+        package: {
+          individually: true,
+          exclude: ['**'],
+          include: ['_warmup/**'],
+        },
+      }));
+  });
+
+
+  it('Should use specified runtime if set', async () => {
+    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
+    const serverless = getServerlessConfig({
+      getProvider() { return mockProvider; },
+      service: {
+        custom: {
+          warmup: {
+            runtime: 'nodejs12.x',
+            enabled: true,
+            package: {
+              exclude: ['**'],
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toEqual(getExpectedFunctionConfig({
+        handler: '_warmup/index.warmUp',
+        runtime: 'nodejs12.x',
+        package: {
+          individually: true,
+          exclude: ['**'],
+          include: ['_warmup/**'],
+        },
+      }));
+  });
+
+  it('Should use specified custom runtime if set', async () => {
+    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
+    const serverless = getServerlessConfig({
+      getProvider() { return mockProvider; },
+      service: {
+        custom: {
+          warmup: {
+            runtime: 'provided',
+            layers: ['custom-lambda-arn'],
+            enabled: true,
+            package: {
+              exclude: ['**'],
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toEqual(getExpectedFunctionConfig({
+        handler: '_warmup/index.warmUp',
+        runtime: 'provided',
+        layers: ['custom-lambda-arn'],
+        package: {
+          individually: true,
+          exclude: ['**'],
+          include: ['_warmup/**'],
+        },
+      }));
+  });
 });

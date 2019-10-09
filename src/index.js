@@ -154,6 +154,7 @@ class WarmUp {
       pathFolder,
       pathFile: `${pathFolder}/index.js`,
       pathHandler: `${folderName}/index.warmUp`,
+      runtime: (config.runtime !== undefined) ? config.runtime : defaultOpts.runtime,
       cleanFolder: (typeof config.cleanFolder === 'boolean') ? config.cleanFolder : defaultOpts.cleanFolder,
       name: (config.name !== undefined) ? config.name : defaultOpts.name,
       role: (config.role !== undefined) ? config.role : defaultOpts.role,
@@ -219,6 +220,7 @@ class WarmUp {
       concurrency: (config.concurrency !== undefined)
         ? config.concurrency
         : defaultOpts.concurrency,
+      layers: config.layers,
     };
     /* eslint-enable no-nested-ternary */
   }
@@ -240,6 +242,7 @@ class WarmUp {
         exclude: ['**'],
       },
       timeout: 10,
+      runtime: service.provider.runtime,
       environment: Object.keys(service.provider.environment || [])
         .reduce((obj, k) => ({ ...obj, [k]: undefined }), {}),
       prewarm: false,
@@ -381,6 +384,8 @@ module.exports.warmUp = async (event, context) => {
       ...(warmupOpts.role ? { role: warmupOpts.role } : {}),
       ...(warmupOpts.tags ? { tags: warmupOpts.tags } : {}),
       ...(warmupOpts.vpc ? { vpc: warmupOpts.vpc } : {}),
+      ...(warmupOpts.runtime ? { runtime: warmupOpts.runtime } : {}),
+      ...(warmupOpts.layers ? { layers: warmupOpts.layers } : {}),
     };
   }
 
