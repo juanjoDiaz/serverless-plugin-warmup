@@ -146,7 +146,7 @@ class WarmUp {
     config.events = (typeof config.schedule === 'string')
       ? [{ schedule: config.schedule }]
       : (Array.isArray(config.schedule))
-        ? config.schedule.map(schedule => ({ schedule }))
+        ? config.schedule.map((schedule) => ({ schedule }))
         : config.events;
 
     return {
@@ -239,7 +239,7 @@ class WarmUp {
       },
       timeout: 10,
       environment: Object.keys(service.provider.environment || [])
-        .reduce((obj, k) => Object.assign({}, obj, { [k]: undefined }), {}),
+        .reduce((obj, k) => ({ ...obj, [k]: undefined }), {}),
       prewarm: false,
     };
 
@@ -264,8 +264,8 @@ class WarmUp {
    * */
   static getFunctionsToBeWarmedUp(service, stage, warmupOpts) {
     return service.getAllFunctions()
-      .map(name => service.getFunction(name))
-      .map(config => ({
+      .map((name) => service.getFunction(name))
+      .map((config) => ({
         name: config.name,
         config: WarmUp.getFunctionConfig(config.warmup, warmupOpts),
       }))
@@ -304,7 +304,7 @@ class WarmUp {
     this.serverless.cli.log(`WarmUp: setting ${functions.length} lambdas to be warm`);
 
     /** Log functions being warmed up */
-    functions.forEach(func => this.serverless.cli.log(`WarmUp: ${func.name}`));
+    functions.forEach((func) => this.serverless.cli.log(`WarmUp: ${func.name}`));
 
     const warmUpFunction = `"use strict";
 
@@ -364,22 +364,22 @@ module.exports.warmUp = async (event, context) => {
   static addWarmUpFunctionToService(service, warmupOpts) {
     /** SLS warm up function */
     // eslint-disable-next-line no-param-reassign
-    service.functions.warmUpPlugin = Object.assign(
-      {
-        description: 'Serverless WarmUp Plugin',
-        events: warmupOpts.events,
-        handler: warmupOpts.pathHandler,
-        memorySize: warmupOpts.memorySize,
-        name: warmupOpts.name,
-        runtime: 'nodejs10.x',
-        package: warmupOpts.package,
-        timeout: warmupOpts.timeout,
-      },
-      Object.keys(warmupOpts.environment).length ? { environment: warmupOpts.environment } : {},
-      warmupOpts.role ? { role: warmupOpts.role } : {},
-      warmupOpts.tags ? { tags: warmupOpts.tags } : {},
-      warmupOpts.vpc ? { vpc: warmupOpts.vpc } : {},
-    );
+    service.functions.warmUpPlugin = {
+      description: 'Serverless WarmUp Plugin',
+      events: warmupOpts.events,
+      handler: warmupOpts.pathHandler,
+      memorySize: warmupOpts.memorySize,
+      name: warmupOpts.name,
+      runtime: 'nodejs10.x',
+      package: warmupOpts.package,
+      timeout: warmupOpts.timeout,
+      ...(Object.keys(warmupOpts.environment).length
+        ? { environment: warmupOpts.environment }
+        : {}),
+      ...(warmupOpts.role ? { role: warmupOpts.role } : {}),
+      ...(warmupOpts.tags ? { tags: warmupOpts.tags } : {}),
+      ...(warmupOpts.vpc ? { vpc: warmupOpts.vpc } : {}),
+    };
   }
 
   /**
