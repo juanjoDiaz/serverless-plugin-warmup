@@ -155,15 +155,15 @@ class WarmUp {
       pathFile: `${pathFolder}/index.js`,
       pathHandler: `${folderName}/index.warmUp`,
       cleanFolder: (typeof config.cleanFolder === 'boolean') ? config.cleanFolder : defaultOpts.cleanFolder,
-      name: (typeof config.name === 'string') ? config.name : defaultOpts.name,
-      role: (typeof config.role === 'string') ? config.role : defaultOpts.role,
-      tags: (typeof config.tags === 'object') ? config.tags : defaultOpts.tags,
+      name: (config.name !== undefined) ? config.name : defaultOpts.name,
+      role: (config.role !== undefined) ? config.role : defaultOpts.role,
+      tags: (config.tags !== undefined) ? config.tags : defaultOpts.tags,
       vpc: config.vpc === false ? { securityGroupIds: [], subnetIds: [] }
-        : (typeof config.vpc === 'object' ? config.vpc : defaultOpts.vpc),
+        : (config.vpc !== undefined ? config.vpc : defaultOpts.vpc),
       events: (Array.isArray(config.events)) ? config.events : defaultOpts.events,
       package: typeof config.package === 'object'
         ? {
-          individually: typeof config.package.individually === 'boolean'
+          individually: (config.package.individually !== undefined)
             ? config.package.individually
             : defaultOpts.package.individually,
           exclude: Array.isArray(config.package.exclude)
@@ -176,10 +176,12 @@ class WarmUp {
             : [`${folderName}/**`],
         }
         : Object.assign(defaultOpts.package, { include: [`${folderName}/**`] }),
-      memorySize: (typeof config.memorySize === 'number') ? config.memorySize : defaultOpts.memorySize,
-      timeout: (typeof config.timeout === 'number') ? config.timeout : defaultOpts.timeout,
-      environment: (typeof config.environment === 'object') ? config.environment : defaultOpts.environment,
-      prewarm: (typeof config.prewarm === 'boolean') ? config.prewarm : defaultOpts.prewarm,
+      memorySize: (config.memorySize !== undefined) ? config.memorySize : defaultOpts.memorySize,
+      timeout: (config.timeout !== undefined) ? config.timeout : defaultOpts.timeout,
+      environment: (config.environment !== undefined)
+        ? config.environment
+        : defaultOpts.environment,
+      prewarm: (config.prewarm !== undefined) ? config.prewarm : defaultOpts.prewarm,
     };
     /* eslint-enable no-nested-ternary */
   }
@@ -208,15 +210,15 @@ class WarmUp {
 
     /* eslint-disable no-nested-ternary */
     return {
-      enabled: (typeof config.enabled === 'boolean'
-          || typeof config.enabled === 'string'
-          || Array.isArray(config.enabled))
+      enabled: (config.enabled !== undefined)
         ? config.enabled
         : defaultOpts.enabled,
-      payload: (typeof config.payload !== 'undefined')
+      payload: (config.payload !== undefined)
         ? (config.payloadRaw ? config.payload : JSON.stringify(config.payload))
         : defaultOpts.payload,
-      concurrency: (typeof config.concurrency === 'number') ? config.concurrency : defaultOpts.concurrency,
+      concurrency: (config.concurrency !== undefined)
+        ? config.concurrency
+        : defaultOpts.concurrency,
     };
     /* eslint-enable no-nested-ternary */
   }
@@ -394,12 +396,12 @@ module.exports.warmUp = async (event, context) => {
     this.serverless.cli.log('WarmUp: Pre-warming up your functions');
 
     try {
-      const environmentVars = service.getFunction('warmUpPlugin').environment || {};
+      const { SERVERLESS_ALIAS } = service.getFunction('warmUpPlugin').environment || {};
       const params = {
         FunctionName: warmupOpts.name,
         InvocationType: 'RequestResponse',
         LogType: 'None',
-        Qualifier: environmentVars.SERVERLESS_ALIAS || '$LATEST',
+        Qualifier: SERVERLESS_ALIAS || '$LATEST',
         Payload: warmupOpts.payload,
       };
 
