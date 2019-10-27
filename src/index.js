@@ -330,7 +330,7 @@ module.exports.warmUp = async (event, context) => {
       concurrency = parseInt(process.env.WARMUP_CONCURRENCY);
       console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from global environment variable)\`);
     } else {
-      concurrency = func.config.concurrency;
+      concurrency = parseInt(func.config.concurrency);
       console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency}\`);
     }
 
