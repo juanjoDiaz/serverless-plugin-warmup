@@ -195,7 +195,7 @@ resources:
             PolicyDocument:
               Version: '2017'
               Statement:
-                - Effect: Allow # WarmUp lamda to send logs to CloudWatch
+                - Effect: Allow # WarmUp lambda to send logs to CloudWatch
                   Action:
                     - logs:CreateLogGroup
                     - logs:CreateLogStream
@@ -208,14 +208,14 @@ resources:
                         - Ref: 'AWS::Region'
                         - Ref: 'AWS::AccountId'
                         - 'log-group:/aws/lambda/*:*:*'
-                - Effect: Allow # WarmUp lamda to manage ENIS (only needed if deploying to VPC, https://docs.aws.amazon.com/lambda/latest/dg/vpc.html)
+                - Effect: Allow # WarmUp lambda to manage ENIS (only needed if deploying to VPC, https://docs.aws.amazon.com/lambda/latest/dg/vpc.html)
                   Action:
                     - ec2:CreateNetworkInterface
                     - ec2:DescribeNetworkInterfaces
                     - ec2:DetachNetworkInterface
                     - ec2:DeleteNetworkInterface
                   Resource: "*"
-                - Effect: 'Allow' # WarmUp lamda to invoke the functions to be warmed
+                - Effect: 'Allow' # WarmUp lambda to invoke the functions to be warmed
                   Action:
                     - 'lambda:InvokeFunction'
                   Resource:
