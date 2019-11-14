@@ -183,7 +183,7 @@ resources:
         Path: /my/cust/path/
         RoleName: MyCustRole0
         AssumeRolePolicyDocument:
-          Version: '2017'
+          Version: '2012-10-17'
           Statement:
             - Effect: Allow
               Principal:
@@ -193,7 +193,7 @@ resources:
         Policies:
           - PolicyName: myPolicyName
             PolicyDocument:
-              Version: '2017'
+              Version: '2012-10-17'
               Statement:
                 - Effect: Allow # WarmUp lambda to send logs to CloudWatch
                   Action:
