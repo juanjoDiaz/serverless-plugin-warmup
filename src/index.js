@@ -61,6 +61,7 @@ class WarmUp {
       this.functionsToWarmup,
       this.resolvedOptions.region,
       this.warmupOpts.pathFile,
+      this.warmupOpts.timeout,
     );
     WarmUp.addWarmUpFunctionToService(this.serverless.service, this.warmupOpts);
   }
@@ -301,7 +302,7 @@ class WarmUp {
    *
    * @return {Promise}
    * */
-  async createWarmUpFunctionArtifact(functions, region, pathFile) {
+  async createWarmUpFunctionArtifact(functions, region, pathFile, timeout) {
     /** Log warmup start */
     this.serverless.cli.log(`WarmUp: setting ${functions.length} lambdas to be warm`);
 
@@ -316,10 +317,22 @@ aws.config.region = "${region}";
 const lambda = new aws.Lambda();
 const functions = ${JSON.stringify(functions)};
 
+Promise.delay = function(t, val) {
+  return new Promise(resolve => {
+    setTimeout(resolve.bind(null, val), t);
+  });
+};
+
+Promise.raceAll = function(timeoutTime, timeoutVal, promises) {
+  return Promise.all(promises.map(p => {
+    return Promise.race([p, Promise.delay(timeoutTime, timeoutVal)]);
+  }));
+};
+
 module.exports.warmUp = async (event, context) => {
   console.log("Warm Up Start");
 
-  const invokes = await Promise.all(functions.map(async (func) => {
+  const invokes = await Promise.raceAll(${timeout * 1000}, null, functions.map(async (func) => {
     let concurrency;
     const functionConcurrency = process.env["WARMUP_CONCURRENCY_" + func.name.toUpperCase().replace(/-/g, '_')]
 
@@ -353,7 +366,7 @@ module.exports.warmUp = async (event, context) => {
     }
   }));
 
-  console.log(\`Warm Up Finished with \${invokes.filter(r => !r).length} invoke errors\`);
+  console.log(\`Warm Up Finished with \${invokes.filter(r => r === false).length} invoke errors and \${invokes.filter(r => r === null).length} timeouts\`);
 }`;
 
     /** Write warm up file */
