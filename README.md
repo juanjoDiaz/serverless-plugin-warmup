@@ -1,5 +1,4 @@
-Serverless WarmUp Plugin ♨
-=============================
+# Serverless WarmUp Plugin ♨
 [![Serverless][serverless-badge]](serverless-badge-url)
 [![npm version][npm-version-badge]][npm-version-badge-url]
 [![npm monthly downloads][npm-downloads-badge]][npm-version-badge-url]
@@ -37,25 +36,25 @@ plugins:
 
 Most options are set under `custom.warmup` in the `serverless.yaml` file.
 
-* **folderName** (default `_warmup`)
-* **cleanFolder** (default `true`)
-* **name** (default `${service}-${stage}-warmup-plugin`)
-* **role** (default to role in the provider)
-* **tags** (default to serverless default tags)
-* **vpc** (default to vpc in provider, can be set to `false` to deploy the warmup function outside of VPC)
-* **memorySize** (default `128`)
-* **events** (default `- schedule: rate(5 minutes)`, can be any [Serverless event](https://serverless.com/framework/docs/providers/aws/events/))
-* **package** (default `package: { individually: true, exclude: ['**'], include: ['_warmup/**'] }`)
-* **timeout** (default `10` seconds)
-* **environment** (default to unset all package level environment variables. It can be used to set variables or to unset global variables by setting it to undefined. However, you should never have to change the default.)
-* **prewarm** (default `false`)
+* **folderName** Folder to temporarily store the generated code (defaults to `_warmup`)
+* **cleanFolder** Whether to automatically delete the generated code folder. you might want to keep it if you are doing some custom packaging (defaults to `true`)
+* **name** Name of the generated warmer lambda (defaults to `${service}-${stage}-warmup-plugin`)
+* **role** Role to apply to the warmer lambda (defaults to the role in the provider)
+* **tags** Tag to apply to the generated warmer lambda(defaults to the serverless default tags)
+* **vpc** The VPC and subnets in which to deploy. Can be any [Serverless VPC configuration](https://serverless.com/framework/docs/providers/aws/guide/functions#vpc-configuration) or be set to `false` in order to deploy the warmup function outside of a VPC (defaults to the vpc in the provider)
+* **memorySize** The memory to be assigned to the lambda (defaults to `128`)
+* **events** The event that triggers the warmer lambda. Can be any [Serverless event](https://serverless.com/framework/docs/providers/aws/events/) (defaults to `- schedule: rate(5 minutes)`)
+* **package** The package configuration. Can be any [Serverless package configuration](https://serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration) (defaults to `{ individually: true, exclude: ['**'], include: ['_warmup/**'] }`)
+* **timeout** The timeout to apply to the lambda in seconds. (defaults to `10`)
+* **environment** The environment variables to pass to the warmer lambda. It can be used to set variables or to unset variables configured at the provider by setting them to `undefined`. However, you should never have to change the default. (defaults to unset all package level environment variables. )
+* **prewarm** If set to true, it warms up your lambdas right after deploying (defaults to `false`)
 
 But there are some options which can also be set under `custom.warmup` to be applied to all lambdas to be warmed up or can be overridden on each individual lambda.
 
-* **enabled** (default `false`,an be a boolean, a stage or a list of stages.)
-* **payload** (default `{ "source": "serverless-plugin-warmup" }`, payload will be stringified)
-* **payloadRaw** (default `false`)
-* **concurrency** (default `1`)
+* **enabled** Whether the lambda should be warmed up or not. Can be a boolean, a stage for which the lambda will be warmed up or a list of stages for which the lambda will be warmed up (defaults to `false`)
+* **payload** The payload to send to the lambda. This helps the lambda identifying the the call comes from this plugin (defaults to `{ "source": "serverless-plugin-warmup" }`, )
+* **payloadRaw** Whether the payload is already stringified JSON or it should be stringified (defaults to `false`)
+* **concurrency** The number of times that the lambda will be called in parallel. This allows to force AWS to spin up more parallel containers for your lambda. See [below](https://github.com/FidelLimited/serverless-plugin-warmup#javascript) for more details on how to handle it on the function side (defaults to `1`)
 
 ```yaml
 custom:
