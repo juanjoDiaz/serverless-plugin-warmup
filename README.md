@@ -37,24 +37,24 @@ plugins:
 Most options are set under `custom.warmup` in the `serverless.yaml` file.
 
 * **folderName** Folder to temporarily store the generated code (defaults to `_warmup`)
-* **cleanFolder** Whether to automatically delete the generated code folder. you might want to keep it if you are doing some custom packaging (defaults to `true`)
+* **cleanFolder** Whether to automatically delete the generated code folder. You might want to keep it if you are doing some custom packaging (defaults to `true`)
 * **name** Name of the generated warmer lambda (defaults to `${service}-${stage}-warmup-plugin`)
 * **role** Role to apply to the warmer lambda (defaults to the role in the provider)
-* **tags** Tag to apply to the generated warmer lambda(defaults to the serverless default tags)
+* **tags** Tag to apply to the generated warmer lambda (defaults to the serverless default tags)
 * **vpc** The VPC and subnets in which to deploy. Can be any [Serverless VPC configuration](https://serverless.com/framework/docs/providers/aws/guide/functions#vpc-configuration) or be set to `false` in order to deploy the warmup function outside of a VPC (defaults to the vpc in the provider)
-* **memorySize** The memory to be assigned to the lambda (defaults to `128`)
+* **memorySize** The memory to be assigned to the warmer lambda (defaults to `128`)
 * **events** The event that triggers the warmer lambda. Can be any [Serverless event](https://serverless.com/framework/docs/providers/aws/events/) (defaults to `- schedule: rate(5 minutes)`)
 * **package** The package configuration. Can be any [Serverless package configuration](https://serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration) (defaults to `{ individually: true, exclude: ['**'], include: ['_warmup/**'] }`)
-* **timeout** The timeout to apply to the lambda in seconds. (defaults to `10`)
-* **environment** The environment variables to pass to the warmer lambda. It can be used to set variables or to unset variables configured at the provider by setting them to `undefined`. However, you should never have to change the default. (defaults to unset all package level environment variables. )
+* **timeout** How many seconds until the warmer lambda times out. (defaults to `10`)
+* **environment** Can be used to set environment variables in the warmer lambda. You can also unset variables configured at the provider by setting them to undefined. However, you should almost never have to change the default. (defaults to unset all package level environment variables. )
 * **prewarm** If set to true, it warms up your lambdas right after deploying (defaults to `false`)
 
-But there are some options which can also be set under `custom.warmup` to be applied to all lambdas to be warmed up or can be overridden on each individual lambda.
+There are also some options which can be set under `custom.warmup` to be applied to all your lambdas or under `yourLambda.warmup` to  overridde the global configuration for that particular lambda.
 
-* **enabled** Whether the lambda should be warmed up or not. Can be a boolean, a stage for which the lambda will be warmed up or a list of stages for which the lambda will be warmed up (defaults to `false`)
-* **payload** The payload to send to the lambda. This helps the lambda identifying the the call comes from this plugin (defaults to `{ "source": "serverless-plugin-warmup" }`, )
-* **payloadRaw** Whether the payload is already stringified JSON or it should be stringified (defaults to `false`)
-* **concurrency** The number of times that the lambda will be called in parallel. This allows to force AWS to spin up more parallel containers for your lambda. See [below](https://github.com/FidelLimited/serverless-plugin-warmup#javascript) for more details on how to handle it on the function side (defaults to `1`)
+* **enabled** Whether your lambda should be warmed up or not. Can be a boolean, a stage for which the lambda will be warmed up or a list of stages for which your lambda will be warmed up (defaults to `false`)
+* **payload** The payload to send to your lambda. This helps your lambda identify when the call comes from this plugin (defaults to `{ "source": "serverless-plugin-warmup" }`, )
+* **payloadRaw** Whether to leave the payload as-is. If false, the payload will be stringified into JSON. (defaults to `false`)
+* **concurrency** The number of times that each of your lambda functions will be called in parallel. This can be used in a best-effort attempt to force AWS to spin up more parallel containers for your lambda. (defaults to `1`)
 
 ```yaml
 custom:
@@ -134,12 +134,12 @@ functions:
 * Desire to avoid cold lambdas after a deployment
 
 #### Runtime Configuration
-Concurrency can be modified post-deployment at runtime by using Lambda environment variables.  
+Concurrency can be modified post-deployment at runtime by setting the warmer lambda environment variables.  
 Two configuration options exist:
-* Globally set the concurrency of all lambdas on the stack (overriding the deployment configuration):  
+* Globally set the concurrency for all lambdas on the stack (overriding the deployment-time configuration):  
   Set the environment variable `WARMUP_CONCURRENCY`
 * Individually set the concurrency per lambda  
-  Set the environment variable WARMUP_CONCURRENCY_YOUR_FUNCTION_NAME. Must be all uppercase and hyphens (-) are replaced with underscores (_). If present, it overrides the global concurrency setting. 
+  Set the environment variable `WARMUP_CONCURRENCY_YOUR_FUNCTION_NAME`. Must be all uppercase and hyphens (-) must be replaced with underscores (_). If present for one of your lambdas, it overrides the global concurrency setting. 
 
 #### Legacy options
 
@@ -194,7 +194,7 @@ resources:
             PolicyDocument:
               Version: '2012-10-17'
               Statement:
-                - Effect: Allow # WarmUp lambda to send logs to CloudWatch
+                - Effect: Allow # Warmer lambda to send logs to CloudWatch
                   Action:
                     - logs:CreateLogGroup
                     - logs:CreateLogStream
@@ -207,14 +207,14 @@ resources:
                         - Ref: 'AWS::Region'
                         - Ref: 'AWS::AccountId'
                         - 'log-group:/aws/lambda/*:*:*'
-                - Effect: Allow # WarmUp lambda to manage ENIS (only needed if deploying to VPC, https://docs.aws.amazon.com/lambda/latest/dg/vpc.html)
+                - Effect: Allow # Warmer lambda to manage ENIS (only needed if deploying to VPC, https://docs.aws.amazon.com/lambda/latest/dg/vpc.html)
                   Action:
                     - ec2:CreateNetworkInterface
                     - ec2:DescribeNetworkInterfaces
                     - ec2:DetachNetworkInterface
                     - ec2:DeleteNetworkInterface
                   Resource: "*"
-                - Effect: 'Allow' # WarmUp lambda to invoke the functions to be warmed
+                - Effect: 'Allow' # Warmer lambda to invoke the functions to be warmed
                   Action:
                     - 'lambda:InvokeFunction'
                   Resource:
@@ -244,12 +244,12 @@ provider:
           - Ref: AWS::AccountId
           - function:${self:service}-${opt:stage, self:provider.stage}-*
 ```
-If using pre-warm, the deployment user also needs a similar policy so it can run the WarmUp lambda.
+If using pre-warm, the deployment user also needs a similar policy so it can run the warmer lambda.
 
 
 ## On the function side
 
-Lambdas invoked by WarmUp will have the event source `serverless-plugin-warmup` (unless otherwise specified using the `payload` option):
+When invoked by WarmUp, your lambdas will have the event source `serverless-plugin-warmup` (unless otherwise specified using the `payload` option):
 
 ```json
 {
