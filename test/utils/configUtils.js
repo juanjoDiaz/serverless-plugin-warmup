@@ -23,6 +23,17 @@ function getServerlessConfig (serverless = {}) {
   }
 }
 
+function getExpectedLambdaClientConfig(options = {}) {
+ return Object.assign({
+    apiVersion: '2015-03-31',
+    region: 'us-east-1',
+    httpOptions: {
+      connectTimeout: 1000,
+      timeout: 8700
+    }
+  }, options);
+}
+
 function getExpectedFunctionConfig(options = {}) {
   return Object.assign({
     description: 'Serverless WarmUp Plugin',
@@ -53,6 +64,7 @@ function getExpectedLambdaCallOptions(funcName, options = {}) {
 
 module.exports = {
   getServerlessConfig,
+  getExpectedLambdaClientConfig,
   getExpectedFunctionConfig,
   getExpectedLambdaCallOptions
 }
