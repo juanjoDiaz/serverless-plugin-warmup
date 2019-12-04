@@ -372,7 +372,7 @@ module.exports.warmUp = async (event, context) => {
       handler: warmupOpts.pathHandler,
       memorySize: warmupOpts.memorySize,
       name: warmupOpts.name,
-      runtime: 'nodejs10.x',
+      runtime: 'nodejs12.x',
       package: warmupOpts.package,
       timeout: warmupOpts.timeout,
       ...(Object.keys(warmupOpts.environment).length
