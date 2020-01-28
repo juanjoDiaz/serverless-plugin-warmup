@@ -128,7 +128,10 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       .toEqual(getExpectedFunctionConfig({
         package: {
           individually: true,
-          include: ['_warmup/**'],
+          include: [
+            '_warmup/**',
+            'node_modules/aws-xray-sdk-core',
+          ],
           exclude: ['../**'],
         },
       }));
@@ -161,7 +164,11 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         package: {
           individually: true,
           exclude: ['../**'],
-          include: ['test/**', '_warmup/**'],
+          include: [
+            'test/**',
+            '_warmup/**',
+            'node_modules/aws-xray-sdk-core/**',
+          ],
         },
       }));
   });
@@ -193,7 +200,11 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         package: {
           individually: true,
           exclude: ['../**'],
-          include: ['test/**', '_warmup/**'],
+          include: [
+            'test/**',
+            '_warmup/**',
+            'node_modules/aws-xray-sdk-core/**',
+          ],
         },
       }));
   });
@@ -227,7 +238,11 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         package: {
           individually: true,
           exclude: ['../**'],
-          include: ['test/**', 'test-folder/**'],
+          include: [
+            'test/**',
+            'test-folder/**',
+            'node_modules/aws-xray-sdk-core/**',
+          ],
         },
       }));
   });
@@ -259,7 +274,10 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         package: {
           individually: false,
           exclude: ['../**'],
-          include: ['_warmup/**'],
+          include: [
+            '_warmup/**',
+            'node_modules/aws-xray-sdk-core',
+          ],
         },
       }));
   });
@@ -290,7 +308,10 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         package: {
           individually: true,
           exclude: ['**'],
-          include: ['_warmup/**'],
+          include: [
+            '_warmup/**',
+            'node_modules/aws-xray-sdk-core',
+          ],
         },
       }));
   });
@@ -321,7 +342,10 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         package: {
           individually: true,
           exclude: ['**'],
-          include: ['_warmup/**'],
+          include: [
+            '_warmup/**',
+            'node_modules/aws-xray-sdk-core',
+          ],
         },
       }));
   });
