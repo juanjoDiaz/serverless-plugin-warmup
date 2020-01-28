@@ -36,23 +36,23 @@ plugins:
 
 Most options are set under `custom.warmup` in the `serverless.yaml` file.
 
-* **folderName** Folder to temporarily store the generated code (defaults to `_warmup`)
-* **cleanFolder** Whether to automatically delete the generated code folder. You might want to keep it if you are doing some custom packaging (defaults to `true`)
-* **name** Name of the generated warmer lambda (defaults to `${service}-${stage}-warmup-plugin`)
-* **role** Role to apply to the warmer lambda (defaults to the role in the provider)
-* **tags** Tag to apply to the generated warmer lambda (defaults to the serverless default tags)
-* **vpc** The VPC and subnets in which to deploy. Can be any [Serverless VPC configuration](https://serverless.com/framework/docs/providers/aws/guide/functions#vpc-configuration) or be set to `false` in order to deploy the warmup function outside of a VPC (defaults to the vpc in the provider)
-* **memorySize** The memory to be assigned to the warmer lambda (defaults to `128`)
-* **events** The event that triggers the warmer lambda. Can be any [Serverless event](https://serverless.com/framework/docs/providers/aws/events/) (defaults to `- schedule: rate(5 minutes)`)
+* **folderName** Folder to temporarily store the generated code. (defaults to `_warmup`)
+* **cleanFolder** Whether to automatically delete the generated code folder. You might want to keep it if you are doing some custom packaging. (defaults to `true`)
+* **name** Name of the generated warmer lambda. (defaults to `${service}-${stage}-warmup-plugin`)
+* **role** Role to apply to the warmer lambda. (defaults to the role in the provider)
+* **tags** Tag to apply to the generated warmer lambda. (defaults to the Serverless default tags)
+* **vpc** The VPC and subnets in which to deploy. Can be any [Serverless VPC configuration](https://serverless.com/framework/docs/providers/aws/guide/functions#vpc-configuration) or be set to `false` in order to deploy the warmup function outside of a VPC. (defaults to the vpc in the provider)
+* **memorySize** The memory to be assigned to the warmer lambda. (defaults to `128`)
+* **events** The event that triggers the warmer lambda. Can be any [Serverless event](https://serverless.com/framework/docs/providers/aws/events/). (defaults to `- schedule: rate(5 minutes)`)
 * **package** The package configuration. Can be any [Serverless package configuration](https://serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration) (defaults to `{ individually: true, exclude: ['**'], include: ['_warmup/**'] }`)
 * **timeout** How many seconds until the warmer lambda times out. (defaults to `10`)
 * **environment** Can be used to set environment variables in the warmer lambda. You can also unset variables configured at the provider by setting them to undefined. However, you should almost never have to change the default. (defaults to unset all package level environment variables. )
-* **prewarm** If set to true, it warms up your lambdas right after deploying (defaults to `false`)
+* **prewarm** If set to true, it warms up your lambdas right after deploying. (defaults to `false`)
 
-There are also some options which can be set under `custom.warmup` to be applied to all your lambdas or under `yourLambda.warmup` to  overridde the global configuration for that particular lambda.
+There are also some options which can be set under `custom.warmup` to be applied to all your lambdas or under `yourLambda.warmup` to override the global configuration for that particular lambda.
 
-* **enabled** Whether your lambda should be warmed up or not. Can be a boolean, a stage for which the lambda will be warmed up or a list of stages for which your lambda will be warmed up (defaults to `false`)
-* **payload** The payload to send to your lambda. This helps your lambda identify when the call comes from this plugin (defaults to `{ "source": "serverless-plugin-warmup" }`, )
+* **enabled** Whether your lambda should be warmed up or not. Can be a boolean, a stage for which the lambda will be warmed up or a list of stages for which your lambda will be warmed up. (defaults to `false`)
+* **payload** The payload to send to your lambda. This helps your lambda identify when the call comes from this plugin. (defaults to `{ "source": "serverless-plugin-warmup" }`)
 * **payloadRaw** Whether to leave the payload as-is. If false, the payload will be stringified into JSON. (defaults to `false`)
 * **concurrency** The number of times that each of your lambda functions will be called in parallel. This can be used in a best-effort attempt to force AWS to spin up more parallel containers for your lambda. (defaults to `1`)
 
@@ -261,7 +261,7 @@ When invoked by WarmUp, your lambdas will have the event source `serverless-plug
 
 To minimize cost and avoid running your lambda unnecessarily, you should add an early return call before your lambda logic when that payload is received.
 
-### Javascript
+### JavaScript
 ```javascript
 // Using the Promise style
 module.exports.lambdaToWarm = async function(event, context) {
@@ -336,14 +336,14 @@ WarmUp supports `serverless deploy`.
 
 WarmUp supports `serverless package`.
 
-By default, the WarmUp function is packaged individually and it uses a folder named `_warmup` to store duiring the packaging process, which is deleted at the end of the process.
+By default, the WarmUp function is packaged individually and it uses a folder named `_warmup` to store during the packaging process, which is deleted at the end of the process.
 
 If you are doing your own [package artifact](https://serverless.com/framework/docs/providers/aws/guide/packaging#artifact) you can set the `cleanFolder` option to `false` and include the `_warmup` folder in your custom artifact.
 
 ## Gotchas
 
 The WarmUp function use normal calls to the AWS SDK in order to keep your lambdas warm.
-By deafult, the WarmUp function is deployed outside of any VPC so it can reach AWS API.
+By default, the WarmUp function is deployed outside of any VPC so it can reach AWS API.
 If you use the VPC option to deploy your WarmUp function to a VPC subnet it will need internet access. You can do it by using an [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) or a [Network Address Translation (NAT) gateway](http://docs.aws.amazon.com/lambda/latest/dg/vpc.html). 
 
 ## Cost
