@@ -1,5 +1,7 @@
 /* global jest beforeEach describe it expect */
 
+const path = require('path');
+
 jest.mock('fs-extra');
 const fs = require('fs-extra');
 const WarmUp = require('../src/index');
@@ -63,7 +65,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -92,7 +94,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -121,7 +123,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -167,7 +169,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -234,7 +236,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -265,7 +267,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -315,7 +317,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -368,7 +370,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -400,7 +402,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -432,7 +434,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -464,7 +466,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -496,7 +498,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -528,7 +530,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -560,7 +562,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -592,7 +594,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -624,7 +626,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -656,7 +658,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -688,7 +690,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -720,7 +722,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -752,7 +754,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -784,7 +786,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -816,7 +818,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -848,7 +850,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -880,7 +882,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -912,7 +914,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe('testPath/_warmup/index.js');
+    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();

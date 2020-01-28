@@ -152,7 +152,7 @@ class WarmUp {
     return {
       folderName,
       pathFolder,
-      pathFile: `${pathFolder}/index.js`,
+      pathFile: path.join(pathFolder, 'index.js'),
       pathHandler: `${folderName}/index.warmUp`,
       cleanFolder: (typeof config.cleanFolder === 'boolean') ? config.cleanFolder : defaultOpts.cleanFolder,
       name: (config.name !== undefined) ? config.name : defaultOpts.name,
