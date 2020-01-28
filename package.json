@@ -4,8 +4,8 @@
   "description": "Keep your lambdas warm during winter.",
   "main": "src/index.js",
   "scripts": {
-    "lint": "eslint '**/*.js'",
-    "lint:fix": "eslint --fix '**/*.js'",
+    "lint": "eslint '**/*.js' --no-error-on-unmatched-pattern",
+    "lint:fix": "eslint --fix '**/*.js' --no-error-on-unmatched-pattern",
     "test": "jest test",
     "test-with-coverage": "jest --coverage --collectCoverageFrom=src/**/*.js test",
     "coveralls": "cat coverage/lcov.info | coveralls"
