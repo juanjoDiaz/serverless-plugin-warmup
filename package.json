@@ -45,5 +45,8 @@
       "pre-commit": "npm run lint",
       "pre-push": "npm run test"
     }
+  },
+  "optionalDependencies": {
+    "aws-xray-sdk-core": "^2.5.0"
   }
 }
