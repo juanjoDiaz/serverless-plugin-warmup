@@ -1,18 +1,21 @@
+/* global jest */
+
 class GeneratedFunctionTester {
   constructor(func) {
-    this.func = func
-    this.lambdaInstances = []
+    this.func = func;
+    this.lambdaInstances = [];
     this.aws = {
       config: {},
       Lambda: jest.fn().mockImplementation(() => {
-        const invoke = jest.fn().mockReturnValue(Promise.resolve())
-        this.lambdaInstances.push(invoke)
-        return { invoke }
-      })
-    }
+        const invoke = jest.fn().mockReturnValue(Promise.resolve());
+        this.lambdaInstances.push(invoke);
+        return { invoke };
+      }),
+    };
   }
 
   generatedWarmupFunction() {
+    // eslint-disable-next-line no-new-func
     return new Function('dependencies', 'process', `
       console = {
         log: () => {}
@@ -27,11 +30,11 @@ class GeneratedFunctionTester {
       const module = { exports: {} };
       ${this.func}
       module.exports.warmUp();
-    `)
+    `);
   }
 
   executeWarmupFunction(process) {
-    this.generatedWarmupFunction()({ 'aws-sdk': this.aws }, process || { env: {} })
+    this.generatedWarmupFunction()({ 'aws-sdk': this.aws }, process || { env: {} });
   }
 }
 

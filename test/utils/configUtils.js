@@ -1,11 +1,11 @@
-function getServerlessConfig (serverless = {}) {
+function getServerlessConfig(serverless = {}) {
   return {
     getProvider: serverless.getProvider || (() => {}),
     config: {
-      servicePath: (serverless.config && serverless.config.servicePath) ? serverless.config.servicePath : 'testPath'
+      servicePath: (serverless.config && serverless.config.servicePath) ? serverless.config.servicePath : 'testPath',
     },
     cli: {
-      log() {}
+      log() {},
     },
     service: {
       provider: (serverless.service && serverless.service.provider)
@@ -16,15 +16,17 @@ function getServerlessConfig (serverless = {}) {
         : { stage: '', region: '' },
       service: 'warmup-test',
       custom: serverless.service ? serverless.service.custom : undefined,
-      getAllFunctions() { return Object.keys(this.functions) },
-      getFunction(name) { return this.functions[name] },
-      functions: (serverless.service && serverless.service.functions) ? serverless.service.functions : {}
-    }
-  }
+      getAllFunctions() { return Object.keys(this.functions); },
+      getFunction(name) { return this.functions[name]; },
+      functions: (serverless.service && serverless.service.functions)
+        ? serverless.service.functions
+        : {},
+    },
+  };
 }
 
 function getExpectedFunctionConfig(options = {}) {
-  return Object.assign({
+  return {
     description: 'Serverless WarmUp Plugin',
     events: [{ schedule: 'rate(5 minutes)' }],
     handler: '_warmup/index.warmUp',
@@ -34,25 +36,27 @@ function getExpectedFunctionConfig(options = {}) {
     package: {
       individually: true,
       exclude: ['**'],
-      include: ['_warmup/**']
+      include: ['_warmup/**'],
     },
     timeout: 10,
-  }, options)
+    ...options,
+  };
 }
 
 function getExpectedLambdaCallOptions(funcName, options = {}) {
-  return Object.assign({
+  return {
     ClientContext: Buffer.from('{"custom":{"source":"serverless-plugin-warmup"}}').toString('base64'),
     FunctionName: funcName,
     InvocationType: 'RequestResponse',
     LogType: 'None',
     Qualifier: '$LATEST',
-    Payload: '{"source":"serverless-plugin-warmup"}'
-  }, options)
+    Payload: '{"source":"serverless-plugin-warmup"}',
+    ...options,
+  };
 }
 
 module.exports = {
   getServerlessConfig,
   getExpectedFunctionConfig,
-  getExpectedLambdaCallOptions
-}
+  getExpectedLambdaCallOptions,
+};
