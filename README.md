@@ -48,6 +48,7 @@ Most options are set under `custom.warmup` in the `serverless.yaml` file.
 * **timeout** How many seconds until the warmer lambda times out. (defaults to `10`)
 * **environment** Can be used to set environment variables in the warmer lambda. You can also unset variables configured at the provider by setting them to undefined. However, you should almost never have to change the default. (defaults to unset all package level environment variables. )
 * **prewarm** If set to true, it warms up your lambdas right after deploying. (defaults to `false`)
+* **tracing** If set to true, attempts to utilize the AWS X-Ray SDK, enabling you to follow the execution of the lambdas in CloudWatch. Requires that the optional package `aws-xray-sdk-core` be installed - note that installing the `aws-xray-sdk` package automatically includes `aws-xray-sdk-core`. (defaults to `false`)
 
 There are also some options which can be set under `custom.warmup` to be applied to all your lambdas or under `yourLambda.warmup` to override the global configuration for that particular lambda.
 
