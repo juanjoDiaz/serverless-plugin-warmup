@@ -145,6 +145,7 @@ class WarmUp {
     let xRaySdkInstalled = true;
     try {
       // eslint-disable-next-line global-require,import/no-extraneous-dependencies
+      // eslint-disable-next-line global-require,import/no-unresolved
       require('aws-xray-sdk-core');
     } catch (e) {
       xRaySdkInstalled = false;
