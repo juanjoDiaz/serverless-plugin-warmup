@@ -1,5 +1,7 @@
 /* global jest beforeEach describe it expect */
 
+const path = require('path');
+
 jest.mock('fs-extra');
 const fs = require('fs-extra');
 const WarmUp = require('../src/index');
@@ -27,7 +29,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
     await plugin.hooks['after:package:createDeploymentArtifacts']();
 
     expect(fs.remove).toHaveBeenCalledTimes(1);
-    expect(fs.remove).toHaveBeenCalledWith('testPath/_warmup');
+    expect(fs.remove).toHaveBeenCalledWith(path.join('testPath', '_warmup'));
   });
 
   it('Should clean the custom temporary folder if cleanFolder is set to true', async () => {
@@ -50,7 +52,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
     await plugin.hooks['after:package:createDeploymentArtifacts']();
 
     expect(fs.remove).toHaveBeenCalledTimes(1);
-    expect(fs.remove).toHaveBeenCalledWith('testPath/test-folder');
+    expect(fs.remove).toHaveBeenCalledWith(path.join('testPath', 'test-folder'));
   });
 
   it('Should not clean the temporary folder if cleanFolder is set to false', async () => {
