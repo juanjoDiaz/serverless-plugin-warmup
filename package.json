@@ -30,15 +30,15 @@
   },
   "homepage": "https://github.com/FidelLimited/serverless-plugin-warmup",
   "dependencies": {
-    "fs-extra": "^8.1.0"
+    "fs-extra": "^9.0.0"
   },
   "devDependencies": {
-    "coveralls": "^3.0.9",
+    "coveralls": "^3.0.11",
     "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-import": "^2.20.0",
-    "husky": "^4.0.10",
-    "jest": "^24.9.0"
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.2",
+    "husky": "^4.2.3",
+    "jest": "^25.2.7"
   },
   "husky": {
     "hooks": {
