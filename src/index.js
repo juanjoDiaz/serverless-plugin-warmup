@@ -213,6 +213,9 @@ class WarmUp {
       enabled: (config.enabled !== undefined)
         ? config.enabled
         : defaultOpts.enabled,
+      clientContext: (config.clientContext !== undefined)
+        ? config.clientContext && JSON.stringify(config.clientContext)
+        : defaultOpts.clientContext,
       payload: (config.payload !== undefined)
         ? (config.payloadRaw ? config.payload : JSON.stringify(config.payload))
         : defaultOpts.payload,
@@ -247,6 +250,7 @@ class WarmUp {
 
     const functionDefaultOpts = {
       enabled: false,
+      clientContext: undefined,
       payload: JSON.stringify({ source: 'serverless-plugin-warmup' }),
       concurrency: 1,
     };
@@ -335,8 +339,14 @@ module.exports.warmUp = async (event, context) => {
       console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency}\`);
     }
 
+    const clientContext = func.config.clientContext !== undefined
+      ? func.config.clientContext
+      : func.config.payload;
+
     const params = {
-      ClientContext: Buffer.from(\`{"custom":\${func.config.payload}}\`).toString('base64'),
+      ClientContext: clientContext
+        ? Buffer.from(\`{"custom":\${clientContext}}\`).toString('base64')
+        : undefined,
       FunctionName: func.name,
       InvocationType: 'RequestResponse',
       LogType: 'None',

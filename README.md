@@ -52,7 +52,8 @@ Most options are set under `custom.warmup` in the `serverless.yaml` file.
 There are also some options which can be set under `custom.warmup` to be applied to all your lambdas or under `yourLambda.warmup` to  overridde the global configuration for that particular lambda.
 
 * **enabled** Whether your lambda should be warmed up or not. Can be a boolean, a stage for which the lambda will be warmed up or a list of stages for which your lambda will be warmed up (defaults to `false`)
-* **payload** The payload to send to your lambda. This helps your lambda identify when the call comes from this plugin (defaults to `{ "source": "serverless-plugin-warmup" }`, )
+* **clientContext** Custom data to send as client context to the data. It should be an object where all the values are strings. (defaults to the payload. Set it to `false` to avoid sending any client context custom data)
+* **payload** The payload to send to your lambda. This helps your lambda identify when the call comes from this plugin (defaults to `{ "source": "serverless-plugin-warmup" }`)
 * **payloadRaw** Whether to leave the payload as-is. If false, the payload will be stringified into JSON. (defaults to `false`)
 * **concurrency** The number of times that each of your lambda functions will be called in parallel. This can be used in a best-effort attempt to force AWS to spin up more parallel containers for your lambda. (defaults to `1`)
 
@@ -80,6 +81,9 @@ custom:
         - ./**
     timeout: 20
     prewarm: true # Run WarmUp immediately after a deploymentlambda
+    clientContext:
+      source: my-custom-source
+      other: '20'
     payload: 
       source: my-custom-source
       other: 20
