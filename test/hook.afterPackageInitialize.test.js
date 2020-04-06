@@ -1324,6 +1324,147 @@ describe('Serverless warmup plugin constructor', () => {
       }));
   });
 
+  it('Should use the client context from options if present', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            enabled: true,
+            clientContext: { test: 'data' },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toEqual(getExpectedFunctionConfig());
+
+    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    functionTester.executeWarmupFunction();
+
+    expect(functionTester.aws.config.region).toBe('us-east-1');
+    expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
+        ClientContext: Buffer.from('{"custom":{"test":"data"}}').toString('base64'),
+      }));
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2', {
+        ClientContext: Buffer.from('{"custom":{"test":"data"}}').toString('base64'),
+      }));
+  });
+
+  it('Should override client context from options if present at the function', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            enabled: true,
+            clientContext: { test: 'data' },
+          },
+        },
+        functions: {
+          someFunc1: { name: 'someFunc1', warmup: { clientContext: { othersource: 'test' } } },
+          someFunc2: { name: 'someFunc2' },
+        },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toEqual(getExpectedFunctionConfig());
+
+    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    functionTester.executeWarmupFunction();
+
+    expect(functionTester.aws.config.region).toBe('us-east-1');
+    expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
+        ClientContext: Buffer.from('{"custom":{"othersource":"test"}}').toString('base64'),
+      }));
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2', {
+        ClientContext: Buffer.from('{"custom":{"test":"data"}}').toString('base64'),
+      }));
+  });
+
+  it('Should not send the client context if set to false', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            enabled: true,
+            clientContext: false,
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toEqual(getExpectedFunctionConfig());
+
+    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    functionTester.executeWarmupFunction();
+
+    expect(functionTester.aws.config.region).toBe('us-east-1');
+    expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
+        ClientContext: undefined,
+      }));
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2', {
+        ClientContext: undefined,
+      }));
+  });
+
+  it('Should use the payload as client context if it\'s not set', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            enabled: true,
+            payload: { test: 'data' },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toEqual(getExpectedFunctionConfig());
+
+    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    functionTester.executeWarmupFunction();
+
+    expect(functionTester.aws.config.region).toBe('us-east-1');
+    expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
+        ClientContext: Buffer.from('{"custom":{"test":"data"}}').toString('base64'),
+        Payload: '{"test":"data"}',
+      }));
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2', {
+        ClientContext: Buffer.from('{"custom":{"test":"data"}}').toString('base64'),
+        Payload: '{"test":"data"}',
+      }));
+  });
+
   it('Should use the source from options if present', async () => {
     const serverless = getServerlessConfig({
       service: {
