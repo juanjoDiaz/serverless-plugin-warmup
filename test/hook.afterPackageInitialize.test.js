@@ -1465,7 +1465,7 @@ describe('Serverless warmup plugin constructor', () => {
       }));
   });
 
-  it('Should use the source from options if present', async () => {
+  it('Should use the payload from options if present', async () => {
     const serverless = getServerlessConfig({
       service: {
         custom: {
@@ -1501,7 +1501,7 @@ describe('Serverless warmup plugin constructor', () => {
       }));
   });
 
-  it('Should override source from options if present at the function', async () => {
+  it('Should override payload from options if present at the function', async () => {
     const serverless = getServerlessConfig({
       service: {
         custom: {
