@@ -3,10 +3,10 @@
  *
  * @see {@link https://serverless.com/framework/docs/providers/aws/guide/plugins/}
  *
- * @requires 'fs-extra'
+ * @requires 'fs'
  * @requires 'path'
  * */
-const fs = require('fs-extra');
+const fs = require('fs').promises;
 const path = require('path');
 
 /**
@@ -56,6 +56,8 @@ class WarmUp {
       this.serverless.cli.log('WarmUp: no functions to warm up');
       return;
     }
+
+    await fs.mkdir(this.warmupOpts.pathFolder, { recursive: true });
 
     await this.createWarmUpFunctionArtifact(
       this.functionsToWarmup,
@@ -292,7 +294,7 @@ class WarmUp {
    * @return {Promise}
    * */
   async cleanFolder() {
-    return fs.remove(this.warmupOpts.pathFolder);
+    return fs.rmdir(this.warmupOpts.pathFolder);
   }
 
   /**
@@ -368,7 +370,7 @@ module.exports.warmUp = async (event, context) => {
 }`;
 
     /** Write warm up file */
-    return fs.outputFile(pathFile, warmUpFunction);
+    await fs.write(pathFile, warmUpFunction);
   }
 
   /**

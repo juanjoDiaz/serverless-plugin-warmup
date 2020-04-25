@@ -1,14 +1,19 @@
 /* global jest beforeEach describe it expect */
 
+jest.mock('fs', () => ({
+  promises: {
+    mkdir: jest.fn(),
+    write: jest.fn(),
+    rmdir: jest.fn(),
+  },
+}));
+const fs = require('fs').promises;
 const path = require('path');
-
-jest.mock('fs-extra');
-const fs = require('fs-extra');
 const WarmUp = require('../src/index');
 const { getServerlessConfig, getExpectedFunctionConfig } = require('./utils/configUtils');
 
 describe('Serverless warmup plugin after:deploy:deploy hook', () => {
-  beforeEach(() => fs.remove.mockClear());
+  beforeEach(() => fs.rmdir.mockClear());
 
   it('Should clean the temporary folder if cleanFolder is set to true', async () => {
     const mockProvider = { request: jest.fn(() => Promise.resolve()) };
@@ -28,8 +33,8 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:package:createDeploymentArtifacts']();
 
-    expect(fs.remove).toHaveBeenCalledTimes(1);
-    expect(fs.remove).toHaveBeenCalledWith(path.join('testPath', '_warmup'));
+    expect(fs.rmdir).toHaveBeenCalledTimes(1);
+    expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', '_warmup'));
   });
 
   it('Should clean the custom temporary folder if cleanFolder is set to true', async () => {
@@ -51,8 +56,8 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:package:createDeploymentArtifacts']();
 
-    expect(fs.remove).toHaveBeenCalledTimes(1);
-    expect(fs.remove).toHaveBeenCalledWith(path.join('testPath', 'test-folder'));
+    expect(fs.rmdir).toHaveBeenCalledTimes(1);
+    expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', 'test-folder'));
   });
 
   it('Should not clean the temporary folder if cleanFolder is set to false', async () => {
@@ -73,7 +78,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:package:createDeploymentArtifacts']();
 
-    expect(fs.remove).not.toHaveBeenCalled();
+    expect(fs.rmdir).not.toHaveBeenCalled();
   });
 
   it('Should package only the lambda handler by default', async () => {

@@ -1,9 +1,14 @@
 /* global jest beforeEach describe it expect */
 
+jest.mock('fs', () => ({
+  promises: {
+    mkdir: jest.fn(),
+    write: jest.fn(),
+    rmdir: jest.fn(),
+  },
+}));
+const fs = require('fs').promises;
 const path = require('path');
-
-jest.mock('fs-extra');
-const fs = require('fs-extra');
 const WarmUp = require('../src/index');
 const {
   getServerlessConfig,
@@ -13,10 +18,12 @@ const {
 const { GeneratedFunctionTester } = require('./utils/generatedFunctionTester');
 
 
-fs.outputFile.mockReturnValue(Promise.resolve());
+fs.mkdir.mockReturnValue(Promise.resolve());
+fs.write.mockReturnValue(Promise.resolve());
 
 describe('Serverless warmup plugin constructor', () => {
-  beforeEach(() => fs.outputFile.mockClear());
+  beforeEach(() => fs.mkdir.mockClear());
+  beforeEach(() => fs.write.mockClear());
 
   it('Should work with only defaults and do nothing', async () => {
     const serverless = getServerlessConfig({
@@ -29,7 +36,8 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']();
 
     expect(plugin.serverless.service.functions.warmUpPlugin).toBeUndefined();
-    expect(fs.outputFile).not.toHaveBeenCalled();
+    expect(fs.mkdir).not.toHaveBeenCalled();
+    expect(fs.write).not.toHaveBeenCalled();
   });
 
   it('Should do nothing if globally disabled using shorthand', async () => {
@@ -46,7 +54,8 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']();
 
     expect(plugin.serverless.service.functions.warmUpPlugin).toBeUndefined();
-    expect(fs.outputFile).not.toHaveBeenCalled();
+    expect(fs.mkdir).not.toHaveBeenCalled();
+    expect(fs.write).not.toHaveBeenCalled();
   });
 
   it('Should warmup all functions if globally enabled using shorthand', async () => {
@@ -64,10 +73,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -93,10 +104,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -122,10 +135,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -150,7 +165,8 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']();
 
     expect(plugin.serverless.service.functions.warmUpPlugin).toBeUndefined();
-    expect(fs.outputFile).not.toHaveBeenCalled();
+    expect(fs.mkdir).not.toHaveBeenCalled();
+    expect(fs.write).not.toHaveBeenCalled();
   });
 
   it('Should warmup all functions if globally enabled for a stage list using shorthand and a stage match', async () => {
@@ -168,10 +184,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -196,7 +214,8 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']();
 
     expect(plugin.serverless.service.functions.warmUpPlugin).toBeUndefined();
-    expect(fs.outputFile).not.toHaveBeenCalled();
+    expect(fs.mkdir).not.toHaveBeenCalled();
+    expect(fs.write).not.toHaveBeenCalled();
   });
 
   it('Should do nothing if globally disabled', async () => {
@@ -215,7 +234,8 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']();
 
     expect(plugin.serverless.service.functions.warmUpPlugin).toBeUndefined();
-    expect(fs.outputFile).not.toHaveBeenCalled();
+    expect(fs.mkdir).not.toHaveBeenCalled();
+    expect(fs.write).not.toHaveBeenCalled();
   });
 
   it('Should warmup all functions if globally enabled', async () => {
@@ -235,10 +255,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -266,10 +288,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -296,7 +320,8 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']();
 
     expect(plugin.serverless.service.functions.warmUpPlugin).toBeUndefined();
-    expect(fs.outputFile).not.toHaveBeenCalled();
+    expect(fs.mkdir).not.toHaveBeenCalled();
+    expect(fs.write).not.toHaveBeenCalled();
   });
 
   it('Should warmup all functions if globally enabled for a stage list and a stage match', async () => {
@@ -316,10 +341,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -346,7 +373,8 @@ describe('Serverless warmup plugin constructor', () => {
     await plugin.hooks['after:package:initialize']();
 
     expect(plugin.serverless.service.functions.warmUpPlugin).toBeUndefined();
-    expect(fs.outputFile).not.toHaveBeenCalled();
+    expect(fs.mkdir).not.toHaveBeenCalled();
+    expect(fs.write).not.toHaveBeenCalled();
   });
 
   it('Should override globally enabled option with local enablement', async () => {
@@ -369,10 +397,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -401,10 +431,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -433,10 +465,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -465,10 +499,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -497,10 +533,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -529,10 +567,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -561,10 +601,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -593,10 +635,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -625,10 +669,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -657,10 +703,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -689,10 +737,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -721,10 +771,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -753,10 +805,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -785,10 +839,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -817,10 +873,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -849,10 +907,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -881,10 +941,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -913,10 +975,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
-    expect(fs.outputFile).toHaveBeenCalledTimes(1);
-    expect(fs.outputFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.write).toHaveBeenCalledTimes(1);
+    expect(fs.write.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -946,7 +1010,7 @@ describe('Serverless warmup plugin constructor', () => {
         name: 'warmup-test-staging-warmup-plugin',
       }));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('eu-west-1');
@@ -979,7 +1043,7 @@ describe('Serverless warmup plugin constructor', () => {
         name: 'warmup-test-prod-warmup-plugin',
       }));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('eu-west-2');
@@ -1012,7 +1076,7 @@ describe('Serverless warmup plugin constructor', () => {
         name: 'warmup-test-test-warmup-plugin',
       }));
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-west-2');
@@ -1343,7 +1407,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -1380,7 +1444,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -1414,7 +1478,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -1448,7 +1512,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -1484,7 +1548,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -1523,7 +1587,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -1560,7 +1624,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -1600,7 +1664,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -1636,7 +1700,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -1673,7 +1737,7 @@ describe('Serverless warmup plugin constructor', () => {
     expect(plugin.serverless.service.functions.warmUpPlugin)
       .toEqual(getExpectedFunctionConfig());
 
-    const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+    const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
     expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -1707,7 +1771,7 @@ describe('Serverless warmup plugin constructor', () => {
       expect(plugin.serverless.service.functions.warmUpPlugin)
         .toEqual(getExpectedFunctionConfig());
 
-      const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+      const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
       functionTester.executeWarmupFunction({ env: { SERVERLESS_ALIAS: 'TEST_ALIAS' } });
 
       expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -1825,7 +1889,7 @@ describe('Serverless warmup plugin constructor', () => {
       expect(plugin.serverless.service.functions.warmUpPlugin)
         .toEqual(getExpectedFunctionConfig());
 
-      const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+      const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
       functionTester.executeWarmupFunction();
 
       expect(functionTester.aws.config.region).toBe('us-east-1');
@@ -1865,7 +1929,7 @@ describe('Serverless warmup plugin constructor', () => {
       expect(plugin.serverless.service.functions.warmUpPlugin)
         .toEqual(getExpectedFunctionConfig());
 
-      const functionTester = new GeneratedFunctionTester(fs.outputFile.mock.calls[0][1]);
+      const functionTester = new GeneratedFunctionTester(fs.write.mock.calls[0][1]);
       functionTester.executeWarmupFunction();
 
       expect(functionTester.aws.config.region).toBe('us-east-1');
