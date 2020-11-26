@@ -277,13 +277,6 @@ class WarmUp {
     const pathFolder = path.join(this.serverless.config.servicePath, folderName);
 
     /* eslint-disable no-nested-ternary */
-    // Keep backwards compatibility for now
-    config.events = (typeof config.schedule === 'string')
-      ? [{ schedule: config.schedule }]
-      : (Array.isArray(config.schedule))
-        ? config.schedule.map((schedule) => ({ schedule }))
-        : config.events;
-
     return {
       folderName,
       pathFolder,
@@ -334,17 +327,6 @@ class WarmUp {
     const config = (['boolean', 'string'].includes(typeof possibleConfig) || Array.isArray(possibleConfig))
       ? { enabled: possibleConfig }
       : (possibleConfig || {});
-
-    // Keep backwards compatibility for now
-    if (config.default) {
-      config.enabled = possibleConfig.default;
-    }
-    if (config.source) {
-      config.payload = possibleConfig.source;
-    }
-    if (config.sourceRaw) {
-      config.payloadRaw = config.sourceRaw;
-    }
 
     /* eslint-disable no-nested-ternary */
     return {
