@@ -3,7 +3,9 @@
 jest.mock('fs', () => ({
   promises: {
     mkdir: jest.fn(),
-    write: jest.fn(),
+    readdir: jest.fn(),
+    unlink: jest.fn(),
+    writeFile: jest.fn(),
     rmdir: jest.fn(),
   },
 }));
@@ -16,6 +18,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
   beforeEach(() => fs.rmdir.mockClear());
 
   it('Should clean the temporary folder if cleanFolder is set to true', async () => {
+    fs.readdir.mockReturnValueOnce(Promise.resolve([]));
     const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
       getProvider() { return mockProvider; },
@@ -38,6 +41,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
   });
 
   it('Should clean the custom temporary folder if cleanFolder is set to true', async () => {
+    fs.readdir.mockReturnValueOnce(Promise.resolve([]));
     const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
       getProvider() { return mockProvider; },
