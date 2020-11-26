@@ -107,7 +107,10 @@ functions:
           path: my-low-concurrency-function
           method: post
     warmup:
-      payload: different-source-only-for-this-lambda
+      clientContext:
+        source: different-source-only-for-this-lambda
+      payload:
+        source: different-source-only-for-this-lambda
       concurrency: 1
    
   myProductionOnlyFunction:
