@@ -294,9 +294,14 @@ class WarmUp {
    * @return {Promise}
    * */
   async cleanFolder() {
-    const files = await fs.readdir(this.warmupOpts.pathFolder);
-    await Promise.all(files.map((file) => fs.unlink(path.join(this.warmupOpts.pathFolder, file))));
-    await fs.rmdir(this.warmupOpts.pathFolder);
+    try {
+      const files = await fs.readdir(this.warmupOpts.pathFolder);
+      await Promise.all(files
+        .map((file) => fs.unlink(path.join(this.warmupOpts.pathFolder, file))));
+      await fs.rmdir(this.warmupOpts.pathFolder);
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err;
+    }
   }
 
   /**

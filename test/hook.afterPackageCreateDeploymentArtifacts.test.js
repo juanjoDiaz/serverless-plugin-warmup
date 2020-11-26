@@ -64,6 +64,31 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
     expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', 'test-folder'));
   });
 
+  it('Should ignore cleaning the custom temporary folder if there was nothing to clean', async () => {
+    const err = new Error('Folder doesn\'t exist');
+    err.code = 'ENOENT';
+    fs.readdir.mockReturnValueOnce(Promise.reject(err));
+    const mockProvider = { request: jest.fn(() => Promise.reject()) };
+    const serverless = getServerlessConfig({
+      getProvider() { return mockProvider; },
+      service: {
+        custom: {
+          warmup: {
+            enabled: true,
+            folderName: 'test-folder',
+            cleanFolder: true,
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:createDeploymentArtifacts']();
+
+    expect(fs.rmdir).not.toHaveBeenCalled();
+  });
+
   it('Should not clean the temporary folder if cleanFolder is set to false', async () => {
     const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
