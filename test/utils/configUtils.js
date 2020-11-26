@@ -1,6 +1,10 @@
 function getServerlessConfig(serverless = {}) {
   return {
     getProvider: serverless.getProvider || (() => {}),
+    configSchemaHandler: {
+      defineCustomProperties() {},
+      defineFunctionProperties() {},
+    },
     config: {
       servicePath: (serverless.config && serverless.config.servicePath) ? serverless.config.servicePath : 'testPath',
     },
