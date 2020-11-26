@@ -146,18 +146,7 @@ Two configuration options exist:
 * Globally set the concurrency for all lambdas on the stack (overriding the deployment-time configuration):  
   Set the environment variable `WARMUP_CONCURRENCY`
 * Individually set the concurrency per lambda  
-  Set the environment variable `WARMUP_CONCURRENCY_YOUR_FUNCTION_NAME`. Must be all uppercase and hyphens (-) must be replaced with underscores (_). If present for one of your lambdas, it overrides the global concurrency setting. 
-
-#### Legacy options
-
-Over time some options have been removed from the plugin.
-For now, we keep backwards compatibility so they still work.
-However, they are listed here only to facilitate upgrading the plugin and we strongly recommend switching to the options defined above as soon as possible.
-
-* **default** Has been renamed to `enabled`
-* **schedule** `schedule: rate(5 minutes)` is equivalent to `events: - schedule: rate(5 minutes)`.
-* **source** Has been renamed to `payload`
-* **sourceRaw** Has been renamed to `payloadRaw`
+  Set the environment variable `WARMUP_CONCURRENCY_YOUR_FUNCTION_NAME`. Must be all uppercase and hyphens (-) must be replaced with underscores (_). If present for one of your lambdas, it overrides the global concurrency setting.
 
 ### Permissions
 
@@ -382,6 +371,17 @@ If you are doing your own [package artifact](https://serverless.com/framework/do
 The WarmUp function use normal calls to the AWS SDK in order to keep your lambdas warm.
 By deafult, the WarmUp function is deployed outside of any VPC so it can reach AWS API.
 If you use the VPC option to deploy your WarmUp function to a VPC subnet it will need internet access. You can do it by using an [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) or a [Network Address Translation (NAT) gateway](http://docs.aws.amazon.com/lambda/latest/dg/vpc.html). 
+
+## Migrations
+
+### v4.X to v5.X
+
+The following legacy options have been completely removed:
+
+* **default** Has been renamed to `enabled`
+* **schedule** `schedule: rate(5 minutes)` is equivalent to `events: - schedule: rate(5 minutes)`.
+* **source** Has been renamed to `payload`
+* **sourceRaw** Has been renamed to `payloadRaw`
 
 ## Cost
 
