@@ -294,7 +294,9 @@ class WarmUp {
    * @return {Promise}
    * */
   async cleanFolder() {
-    return fs.rmdir(this.warmupOpts.pathFolder);
+    const files = await fs.readdir(this.warmupOpts.pathFolder);
+    await Promise.all(files.map((file) => fs.unlink(path.join(this.warmupOpts.pathFolder, file))));
+    await fs.rmdir(this.warmupOpts.pathFolder);
   }
 
   /**
@@ -370,7 +372,7 @@ module.exports.warmUp = async (event, context) => {
 }`;
 
     /** Write warm up file */
-    await fs.write(pathFile, warmUpFunction);
+    await fs.writeFile(pathFile, warmUpFunction);
   }
 
   /**
