@@ -1754,6 +1754,69 @@ describe('Serverless warmup plugin constructor', () => {
     }
   });
 
+  it('Should override the default concurrency from function if scheduler-specific is present', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            enabled: true,
+            events: [
+              {
+                name: 'scheduler1',
+                rate: 'rate(5 minutes)',
+              },
+              {
+                name: 'scheduler2',
+                rate: 'rate(5 minutes)',
+              },
+            ],
+            concurrency: 3,
+          },
+        },
+        functions: {
+          someFunc1: {
+            name: 'someFunc1',
+            warmup: {
+              concurrency: {
+                scheduler1: 1,
+              },
+            },
+          },
+          someFunc2: { name: 'someFunc2' },
+        },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toEqual(getExpectedFunctionConfig({
+        events: [
+          {
+            name: 'scheduler1',
+            rate: 'rate(5 minutes)',
+          },
+          {
+            name: 'scheduler2',
+            rate: 'rate(5 minutes)',
+          },
+        ],
+      }));
+
+    const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
+    functionTester.executeWarmupFunction({ event: { resources: ['fake.arn:rule/scheduler1'] } });
+
+    expect(functionTester.aws.config.region).toBe('us-east-1');
+    expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(4);
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
+    for (let i = 2; i <= 4; i += 1) {
+      expect(functionTester.lambdaInstances[0])
+        .toHaveBeenNthCalledWith(i, getExpectedLambdaCallOptions('someFunc2'));
+    }
+  });
+
   describe('Other plugins integrations', () => {
     it('Should use the warmup function alias if SERVERLESS_ALIAS env variable is present', async () => {
       const serverless = getServerlessConfig({
@@ -1774,7 +1837,7 @@ describe('Serverless warmup plugin constructor', () => {
         .toEqual(getExpectedFunctionConfig());
 
       const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
-      functionTester.executeWarmupFunction({ env: { SERVERLESS_ALIAS: 'TEST_ALIAS' } });
+      functionTester.executeWarmupFunction({ process: { env: { SERVERLESS_ALIAS: 'TEST_ALIAS' } } });
 
       expect(functionTester.aws.config.region).toBe('us-east-1');
       expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);

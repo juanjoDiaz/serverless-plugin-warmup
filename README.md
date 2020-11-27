@@ -55,7 +55,7 @@ There are also some options which can be set under `custom.warmup` to be applied
 * **clientContext** Custom data to send as client context to the data. It should be an object where all the values are strings. (defaults to the payload. Set it to `false` to avoid sending any client context custom data)
 * **payload** The payload to send to your lambda. This helps your lambda identify when the call comes from this plugin (defaults to `{ "source": "serverless-plugin-warmup" }`)
 * **payloadRaw** Whether to leave the payload as-is. If false, the payload will be stringified into JSON. (defaults to `false`)
-* **concurrency** The number of times that each of your lambda functions will be called in parallel. This can be used in a best-effort attempt to force AWS to spin up more parallel containers for your lambda. (defaults to `1`)
+* **concurrency** The number of times that each of your lambda functions will be called in parallel. This can be used in a best-effort attempt to force AWS to spin up more parallel containers for your lambda. (defaults to `1`) You can use the scheduled event input to set up different concurrencies for different schedules (See the advanced concurrency section)
 
 ```yaml
 custom:
@@ -140,8 +140,52 @@ functions:
 * Day cold periods
 * Desire to avoid cold lambdas after a deployment
 
-#### Runtime Configuration
-Concurrency can be modified post-deployment at runtime by setting the warmer lambda environment variables.  
+#### Advanced concurency Configuration
+
+##### Schedule-specific concurrency
+
+You might want to have different concurrency settings during office hours and the rest of the hours.
+You can achieve this by using named schedule rules and named concurrency settings. You can also have a default concurrency, and, as with most other properties, you can override the global values in each function.
+
+```yaml
+custom:
+  warmup:
+    enabled: true # Whether to warm up functions by default or not
+    events:
+      - name: 'officehours',
+        rate: 'rate(5 minutes)'
+      - name: 'outofofficehours',
+        rate: 'rate(5 minutes)'
+    concurrency:
+      default: 3 # This is the same as setting `concurrency: 3`. It applies to all schedule rules that don't have a concurrency declared here.
+      officehours: 10
+
+functions:
+  myFunction:
+    handler: 'myFunction.handler'
+    events:
+      - http:
+          path: my-function
+          method: post
+    warmup:
+      concurrency:
+  myOutOfOFficeFunction:
+    handler: 'myFunction.handler'
+    events:
+      - http:
+          path: my-function
+          method: post
+    warmup:
+      concurrency:
+        officehours: 3
+        outofofficehours: 10
+```
+
+
+##### Runtime modification of concurrency
+
+You might want to modify the concurrency settings of your deployed warmer, for example, if you monitor CloudWatch and tweak the concurrency settings based on the data.
+This can be achieved by setting the warmer lambda environment variables.
 Two configuration options exist:
 * Globally set the concurrency for all lambdas on the stack (overriding the deployment-time configuration):  
   Set the environment variable `WARMUP_CONCURRENCY`

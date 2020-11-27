@@ -7,7 +7,11 @@ class GeneratedFunctionTester {
     this.aws = {
       config: {},
       Lambda: jest.fn().mockImplementation(() => {
-        const invoke = jest.fn().mockReturnValue(Promise.resolve());
+        const invoke = jest.fn().mockReturnValue({
+          promise() {
+            return Promise.resolve();
+          },
+        });
         this.lambdaInstances.push(invoke);
         return { invoke };
       }),
@@ -16,7 +20,7 @@ class GeneratedFunctionTester {
 
   generatedWarmupFunction() {
     // eslint-disable-next-line no-new-func
-    return new Function('dependencies', 'process', `
+    return new Function('dependencies', 'process', 'event', `
       console = {
         log: () => {}
       };
@@ -29,12 +33,12 @@ class GeneratedFunctionTester {
       };
       const module = { exports: {} };
       ${this.func}
-      module.exports.warmUp();
+      module.exports.warmUp(event);
     `);
   }
 
-  executeWarmupFunction(process) {
-    this.generatedWarmupFunction()({ 'aws-sdk': this.aws }, process || { env: {} });
+  executeWarmupFunction({ process = { env: {} }, event = {} } = {}) {
+    this.generatedWarmupFunction()({ 'aws-sdk': this.aws }, process, event);
   }
 }
 

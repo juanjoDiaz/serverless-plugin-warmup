@@ -142,7 +142,12 @@ class WarmUp {
       clientContext: { type: 'object' }, // any
       payload: { type: 'object' }, // any
       payloadRaw: { type: 'boolean' },
-      concurrency: { type: 'integer' },
+      concurrency: {
+        anyOf: [
+          { type: 'integer' },
+          { type: 'object' },
+        ],
+      },
     };
 
     this.serverless.configSchemaHandler.defineCustomProperties({
@@ -355,7 +360,7 @@ class WarmUp {
         ? (config.payloadRaw ? config.payload : JSON.stringify(config.payload))
         : defaultOpts.payload,
       concurrency: (config.concurrency !== undefined)
-        ? config.concurrency
+        ? (typeof config.concurrency === 'object' ? config.concurrency : { default: config.concurrency })
         : defaultOpts.concurrency,
     };
     /* eslint-enable no-nested-ternary */
@@ -387,7 +392,7 @@ class WarmUp {
       enabled: false,
       clientContext: undefined,
       payload: JSON.stringify({ source: 'serverless-plugin-warmup' }),
-      concurrency: 1,
+      concurrency: { default: 1 },
     };
 
     const customConfig = service.custom ? service.custom.warmup : undefined;
@@ -463,23 +468,38 @@ aws.config.region = '${region}';
 const lambda = new aws.Lambda();
 const functions = ${JSON.stringify(functions)};
 
+function getConcurrency(func, event, envVars) {
+  const functionConcurrency = envVars[\`WARMUP_CONCURRENCY_\${func.name.toUpperCase().replace(/-/g, '_')}\`];
+
+  if (functionConcurrency) {
+    const concurrency = parseInt(functionConcurrency);
+    console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from function-specific environment variable)\`);
+    return concurrency;
+  }
+
+  if (envVars.WARMUP_CONCURRENCY) {
+    const concurrency = parseInt(envVars.WARMUP_CONCURRENCY);
+    console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from global environment variable)\`);
+    return concurrency;
+  }
+  
+  const schedulerConcurrency = event.resources ? func.config.concurrency[event.resources[0].split('/').pop()] : undefined;
+  if (schedulerConcurrency) {
+    const concurrency = parseInt(schedulerConcurrency);
+    console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency}\`);
+    return concurrency;
+  }
+  
+  const concurrency = parseInt(func.config.concurrency.default);
+  console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency}\`);
+  return concurrency;
+}
+
 module.exports.warmUp = async (event, context) => {
   console.log('Warm Up Start');
 
   const invokes = await Promise.all(functions.map(async (func) => {
-    let concurrency;
-    const functionConcurrency = process.env[\`WARMUP_CONCURRENCY_\${func.name.toUpperCase().replace(/-/g, '_')}\`];
-
-    if (functionConcurrency) {
-      concurrency = parseInt(functionConcurrency);
-      console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from function-specific environment variable)\`);
-    } else if (process.env.WARMUP_CONCURRENCY) {
-      concurrency = parseInt(process.env.WARMUP_CONCURRENCY);
-      console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from global environment variable)\`);
-    } else {
-      concurrency = parseInt(func.config.concurrency);
-      console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency}\`);
-    }
+    const concurrency = getConcurrency(func, event, process.env);
 
     const clientContext = func.config.clientContext !== undefined
       ? func.config.clientContext
