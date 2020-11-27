@@ -266,8 +266,10 @@ When invoked by WarmUp, your lambdas will have the event source `serverless-plug
 To minimize cost and avoid running your lambda unnecessarily, you should add an early return call before your lambda logic when that payload is received.
 
 ### Javascript
-```javascript
-// Using the Promise style
+
+Using the Promise style:
+
+```js
 module.exports.lambdaToWarm = async function(event, context) {
   /** Immediate response for WarmUp plugin */
   if (event.source === 'serverless-plugin-warmup') {
@@ -277,8 +279,11 @@ module.exports.lambdaToWarm = async function(event, context) {
 
   ... add lambda logic after
 }
+```
 
-// Using the Callback style
+Using the Callback style:
+
+```js
 module.exports.lambdaToWarm = function(event, context, callback) {
   /** Immediate response for WarmUp plugin */
   if (event.source === 'serverless-plugin-warmup') {
@@ -288,9 +293,11 @@ module.exports.lambdaToWarm = function(event, context, callback) {
 
   ... add lambda logic after
 }
+```
 
-// Using context.
-// This could be useful if you are handling the raw input and output streams.
+Using the context. This could be useful if you are handling the raw input and output streams.
+
+```js
 module.exports.lambdaToWarm = async function(event, context) {
   /** Immediate response for WarmUp plugin */
   if (context.custom.source === 'serverless-plugin-warmup') {
@@ -304,7 +311,7 @@ module.exports.lambdaToWarm = async function(event, context) {
 
 If you're using the `concurrency` option you might want to add a slight delay before returning on warmup calls to ensure that your function doesn't return before all concurrent requests have been started:
 
-```javascript
+```jss
 module.exports.lambdaToWarm = async (event, context) => {
   if (event.source === 'serverless-plugin-warmup') {
     console.log('WarmUp - Lambda is warm!');
@@ -321,6 +328,8 @@ module.exports.lambdaToWarm = async (event, context) => {
 
 ### Python
 
+You can handle it in your function:
+
 ```python
 def lambda_handler(event, context):
     # early return call when the function is called by warmup plugin
@@ -328,6 +337,27 @@ def lambda_handler(event, context):
         print('Lambda is warm!')
         return {}
 
+    # function logic here
+    ...
+```
+
+Or you could use a decorator to avoid the redundant logic in all your functions:
+
+```python
+def skip_execution_if_warmup_call(func):
+    def warmup_wrapper(event, context):
+      if event.get("source") in ["aws.events", "serverless-plugin-warmup"]:
+        print("Lambda is warm!")
+        return {}
+
+      return func(event, context)
+
+    return warmup_wrapper
+
+# ...
+
+@skip_execution_if_warmup_call
+def lambda_handler(event, context):
     # function logic here
     ...
 ```
