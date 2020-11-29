@@ -27,7 +27,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       FunctionName: 'warmup-test-dev-warmup-plugin',
       InvocationType: 'RequestResponse',
       LogType: 'None',
-      Qualifier: '$LATEST',
+      Qualifier: undefined,
       Payload: '{"source":"serverless-plugin-warmup"}',
     };
     expect(mockProvider.request).toHaveBeenCalledWith('Lambda', 'invoke', params);
@@ -95,7 +95,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       FunctionName: 'warmup-test-dev-warmup-plugin',
       InvocationType: 'RequestResponse',
       LogType: 'None',
-      Qualifier: '$LATEST',
+      Qualifier: undefined,
       Payload: '{"source":"serverless-plugin-warmup"}',
     };
     expect(mockProvider.request).toHaveBeenCalledWith('Lambda', 'invoke', params);
