@@ -307,10 +307,13 @@ class WarmUp {
           include: Array.isArray(config.package.include)
             ? (config.package.include.includes(`${folderName}/**`)
               ? config.package.include
-              : config.package.include.concat([`${folderName}/**`]))
-            : [`${folderName}/**`],
+              : [...config.package.include, `${folderName}/**`])
+            : [...defaultOpts.package.include, `${folderName}/**`],
         }
-        : Object.assign(defaultOpts.package, { include: [`${folderName}/**`] }),
+        : {
+          ...defaultOpts.package,
+          include: [...defaultOpts.package.include, `${folderName}/**`],
+        },
       memorySize: (config.memorySize !== undefined) ? config.memorySize : defaultOpts.memorySize,
       timeout: (config.timeout !== undefined) ? config.timeout : defaultOpts.timeout,
       environment: (config.environment !== undefined)
@@ -375,6 +378,12 @@ class WarmUp {
       events: [{ schedule: 'rate(5 minutes)' }],
       package: {
         individually: true,
+        // Negating the includes to work around https://github.com/serverless/serverless/issues/8093
+        include: service.package && service.package.include
+          ? service.package.include
+            .filter((pattern) => !pattern.startsWith('!'))
+            .map((pattern) => `!${pattern}`)
+          : [],
         exclude: ['**'],
       },
       timeout: 10,
