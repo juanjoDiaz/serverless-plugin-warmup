@@ -19,6 +19,7 @@ function getServerlessConfig(serverless = {}) {
         ? serverless.service.defaults
         : { stage: '', region: '' },
       service: 'warmup-test',
+      package: serverless.service.package,
       custom: serverless.service ? serverless.service.custom : undefined,
       getAllFunctions() { return Object.keys(this.functions); },
       getFunction(name) { return this.functions[name]; },

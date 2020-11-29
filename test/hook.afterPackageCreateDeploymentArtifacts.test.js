@@ -137,6 +137,36 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       }));
   });
 
+  it('Should exclude files included at the service level', async () => {
+    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
+    const serverless = getServerlessConfig({
+      getProvider() { return mockProvider; },
+      service: {
+        package: {
+          include: ['../**'],
+        },
+        custom: {
+          warmup: {
+            enabled: true,
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPlugin)
+      .toEqual(getExpectedFunctionConfig({
+        package: {
+          individually: true,
+          include: ['!../**', '_warmup/**'],
+          exclude: ['**'],
+        },
+      }));
+  });
+
   it('Should use the package exclusions from options if present', async () => {
     const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
