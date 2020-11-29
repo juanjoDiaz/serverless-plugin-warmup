@@ -53,7 +53,6 @@ function getExpectedLambdaCallOptions(funcName, options = {}) {
     FunctionName: funcName,
     InvocationType: 'RequestResponse',
     LogType: 'None',
-    Qualifier: '$LATEST',
     Payload: '{"source":"serverless-plugin-warmup"}',
     ...options,
   };
