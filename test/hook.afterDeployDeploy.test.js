@@ -11,8 +11,10 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            prewarm: true,
+            default: {
+              enabled: true,
+              prewarm: true,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -24,7 +26,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     expect(mockProvider.request).toHaveBeenCalledTimes(1);
     const params = {
-      FunctionName: 'warmup-test-dev-warmup-plugin',
+      FunctionName: 'warmup-test-dev-warmup-plugin-default',
       InvocationType: 'RequestResponse',
       LogType: 'None',
       Qualifier: undefined,
@@ -40,9 +42,39 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            prewarm: true,
+            default: {
+              enabled: true,
+              prewarm: true,
+            },
           },
+        },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:deploy:deploy']();
+
+    expect(mockProvider.request).not.toHaveBeenCalled();
+  });
+
+  it('Should not prewarm the functions if prewarm is set to true and there are no functions for specific warmer', async () => {
+    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
+    const serverless = getServerlessConfig({
+      getProvider() { return mockProvider; },
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+            },
+            secondary: {
+              prewarm: true,
+            },
+          },
+        },
+        functions: {
+          someFunc1: { name: 'someFunc1', warmup: { secondary: { enabled: false } } },
+          someFunc2: { name: 'someFunc2', warmup: { secondary: { enabled: false } } },
         },
       },
     });
@@ -60,7 +92,9 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       service: {
         custom: {
           warmup: {
-            prewarm: false,
+            default: {
+              prewarm: false,
+            },
           },
         },
       },
@@ -79,8 +113,10 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            prewarm: true,
+            default: {
+              enabled: true,
+              prewarm: true,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -92,7 +128,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     expect(mockProvider.request).toHaveBeenCalledTimes(1);
     const params = {
-      FunctionName: 'warmup-test-dev-warmup-plugin',
+      FunctionName: 'warmup-test-dev-warmup-plugin-default',
       InvocationType: 'RequestResponse',
       LogType: 'None',
       Qualifier: undefined,
@@ -109,10 +145,12 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         service: {
           custom: {
             warmup: {
-              enabled: true,
-              prewarm: true,
-              environment: {
-                SERVERLESS_ALIAS: 'TEST_ALIAS',
+              default: {
+                enabled: true,
+                prewarm: true,
+                environment: {
+                  SERVERLESS_ALIAS: 'TEST_ALIAS',
+                },
               },
             },
           },
@@ -125,7 +163,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
       expect(mockProvider.request).toHaveBeenCalledTimes(1);
       const params = {
-        FunctionName: 'warmup-test-dev-warmup-plugin',
+        FunctionName: 'warmup-test-dev-warmup-plugin-default',
         InvocationType: 'RequestResponse',
         LogType: 'None',
         Qualifier: 'TEST_ALIAS',
