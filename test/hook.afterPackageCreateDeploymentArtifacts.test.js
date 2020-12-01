@@ -14,19 +14,27 @@ const path = require('path');
 const WarmUp = require('../src/index');
 const { getServerlessConfig, getExpectedFunctionConfig } = require('./utils/configUtils');
 
-describe('Serverless warmup plugin after:deploy:deploy hook', () => {
-  beforeEach(() => fs.rmdir.mockClear());
+const files = ['index.js'];
+
+describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook', () => {
+  beforeEach(() => {
+    fs.readdir.mockClear();
+    fs.unlink.mockClear();
+    fs.rmdir.mockClear();
+  });
 
   it('Should clean the temporary folder if cleanFolder is set to true', async () => {
-    fs.readdir.mockReturnValueOnce(Promise.resolve([]));
+    fs.readdir.mockResolvedValueOnce(files);
     const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
       getProvider() { return mockProvider; },
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            cleanFolder: true,
+            default: {
+              enabled: true,
+              cleanFolder: true,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -36,21 +44,25 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:package:createDeploymentArtifacts']();
 
+    expect(fs.unlink).toHaveBeenCalledTimes(files.length);
+    files.forEach((file, i) => expect(fs.unlink).toHaveBeenNthCalledWith(i + 1, path.join('testPath', '_warmup', 'default', file)));
     expect(fs.rmdir).toHaveBeenCalledTimes(1);
-    expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', '_warmup'));
+    expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', '_warmup', 'default'));
   });
 
   it('Should clean the custom temporary folder if cleanFolder is set to true', async () => {
-    fs.readdir.mockReturnValueOnce(Promise.resolve([]));
+    fs.readdir.mockResolvedValueOnce(files);
     const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
       getProvider() { return mockProvider; },
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            folderName: 'test-folder',
-            cleanFolder: true,
+            default: {
+              enabled: true,
+              folderName: 'test-folder',
+              cleanFolder: true,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -60,6 +72,8 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:package:createDeploymentArtifacts']();
 
+    expect(fs.unlink).toHaveBeenCalledTimes(files.length);
+    files.forEach((file, i) => expect(fs.unlink).toHaveBeenNthCalledWith(i + 1, path.join('testPath', 'test-folder', file)));
     expect(fs.rmdir).toHaveBeenCalledTimes(1);
     expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', 'test-folder'));
   });
@@ -67,16 +81,18 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
   it('Should ignore cleaning the custom temporary folder if there was nothing to clean', async () => {
     const err = new Error('Folder doesn\'t exist');
     err.code = 'ENOENT';
-    fs.readdir.mockReturnValueOnce(Promise.reject(err));
+    fs.readdir.mockRejectedValueOnce(err);
     const mockProvider = { request: jest.fn(() => Promise.reject()) };
     const serverless = getServerlessConfig({
       getProvider() { return mockProvider; },
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            folderName: 'test-folder',
-            cleanFolder: true,
+            default: {
+              enabled: true,
+              folderName: 'test-folder',
+              cleanFolder: true,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -89,6 +105,32 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
     expect(fs.rmdir).not.toHaveBeenCalled();
   });
 
+
+  it('Should not error if couldn\'t clean up the custom temporary folder', async () => {
+    fs.readdir.mockResolvedValueOnce(files);
+    fs.rmdir.mockRejectedValueOnce(new Error('Folder couldn\'t be cleaned'));
+    const mockProvider = { request: jest.fn(() => Promise.reject()) };
+    const serverless = getServerlessConfig({
+      getProvider() { return mockProvider; },
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:createDeploymentArtifacts']();
+
+    expect(fs.rmdir).toHaveBeenCalledTimes(1);
+    expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', '_warmup', 'default'));
+  });
+
   it('Should not clean the temporary folder if cleanFolder is set to false', async () => {
     const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
@@ -96,8 +138,10 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            cleanFolder: false,
+            default: {
+              enabled: true,
+              cleanFolder: false,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -117,7 +161,9 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
+            default: {
+              enabled: true,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -127,12 +173,12 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         package: {
           individually: true,
           exclude: ['**'],
-          include: ['_warmup/**'],
+          include: ['_warmup/default/**'],
         },
       }));
   });
@@ -147,7 +193,9 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         },
         custom: {
           warmup: {
-            enabled: true,
+            default: {
+              enabled: true,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -157,11 +205,11 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         package: {
           individually: true,
-          include: ['!../**', '_warmup/**'],
+          include: ['!../**', '_warmup/default/**'],
           exclude: ['**'],
         },
       }));
@@ -174,10 +222,12 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            package: {
-              individually: true,
-              exclude: ['../**'],
+            default: {
+              enabled: true,
+              package: {
+                individually: true,
+                exclude: ['../**'],
+              },
             },
           },
         },
@@ -188,11 +238,11 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         package: {
           individually: true,
-          include: ['_warmup/**'],
+          include: ['_warmup/default/**'],
           exclude: ['../**'],
         },
       }));
@@ -205,11 +255,13 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            package: {
-              individually: true,
-              exclude: ['../**'],
-              include: ['test/**'],
+            default: {
+              enabled: true,
+              package: {
+                individually: true,
+                exclude: ['../**'],
+                include: ['test/**'],
+              },
             },
           },
         },
@@ -220,12 +272,12 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         package: {
           individually: true,
           exclude: ['../**'],
-          include: ['test/**', '_warmup/**'],
+          include: ['test/**', '_warmup/default/**'],
         },
       }));
   });
@@ -237,11 +289,13 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            package: {
-              individually: true,
-              exclude: ['../**'],
-              include: ['test/**', '_warmup/**'],
+            default: {
+              enabled: true,
+              package: {
+                individually: true,
+                exclude: ['../**'],
+                include: ['test/**', '_warmup/default/**'],
+              },
             },
           },
         },
@@ -252,12 +306,12 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         package: {
           individually: true,
           exclude: ['../**'],
-          include: ['test/**', '_warmup/**'],
+          include: ['test/**', '_warmup/default/**'],
         },
       }));
   });
@@ -269,12 +323,14 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            folderName: 'test-folder',
-            package: {
-              individually: true,
-              exclude: ['../**'],
-              include: ['test/**'],
+            default: {
+              enabled: true,
+              folderName: 'test-folder',
+              package: {
+                individually: true,
+                exclude: ['../**'],
+                include: ['test/**'],
+              },
             },
           },
         },
@@ -285,7 +341,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         handler: 'test-folder/index.warmUp',
         package: {
@@ -303,10 +359,12 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            package: {
-              individually: false,
-              exclude: ['../**'],
+            default: {
+              enabled: true,
+              package: {
+                individually: false,
+                exclude: ['../**'],
+              },
             },
           },
         },
@@ -317,13 +375,13 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
-        handler: '_warmup/index.warmUp',
+        handler: '_warmup/default/index.warmUp',
         package: {
           individually: false,
           exclude: ['../**'],
-          include: ['_warmup/**'],
+          include: ['_warmup/default/**'],
         },
       }));
   });
@@ -335,9 +393,11 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            package: {
-              individually: true,
+            default: {
+              enabled: true,
+              package: {
+                individually: true,
+              },
             },
           },
         },
@@ -348,13 +408,13 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
-        handler: '_warmup/index.warmUp',
+        handler: '_warmup/default/index.warmUp',
         package: {
           individually: true,
           exclude: ['**'],
-          include: ['_warmup/**'],
+          include: ['_warmup/default/**'],
         },
       }));
   });
@@ -366,9 +426,11 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            package: {
-              exclude: ['**'],
+            default: {
+              enabled: true,
+              package: {
+                exclude: ['**'],
+              },
             },
           },
         },
@@ -379,13 +441,13 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
-        handler: '_warmup/index.warmUp',
+        handler: '_warmup/default/index.warmUp',
         package: {
           individually: true,
           exclude: ['**'],
-          include: ['_warmup/**'],
+          include: ['_warmup/default/**'],
         },
       }));
   });

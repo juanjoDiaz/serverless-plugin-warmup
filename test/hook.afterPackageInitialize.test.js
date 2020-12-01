@@ -20,12 +20,136 @@ const {
 const { GeneratedFunctionTester } = require('./utils/generatedFunctionTester');
 
 
-fs.mkdir.mockReturnValue(Promise.resolve());
-fs.writeFile.mockReturnValue(Promise.resolve());
-
 describe('Serverless warmup plugin constructor', () => {
-  beforeEach(() => fs.mkdir.mockClear());
-  beforeEach(() => fs.writeFile.mockClear());
+  beforeEach(() => {
+    fs.mkdir.mockClear();
+    fs.mkdir.mockResolvedValue(undefined);
+    fs.writeFile.mockClear();
+    fs.writeFile.mockResolvedValue(undefined);
+  });
+
+  it('Should support multiple warmers', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+            },
+            secondary: {
+              enabled: true,
+            },
+            tertiary: {
+              enabled: true,
+            },
+          },
+        },
+        functions: {
+          someFunc1: { name: 'someFunc1' },
+          someFunc2: { name: 'someFunc2', warmup: { tertiary: { enabled: false } } },
+          someFunc3: { name: 'someFunc3', warmup: { secondary: { enabled: false }, tertiary: { enabled: false } } },
+        },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
+      .toEqual(getExpectedFunctionConfig());
+    expect(fs.mkdir).toHaveBeenCalledTimes(3);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(2, path.join('testPath', '_warmup', 'secondary'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(3, path.join('testPath', '_warmup', 'tertiary'), { recursive: true });
+    expect(fs.writeFile).toHaveBeenCalledTimes(3);
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
+    expect(fs.writeFile.mock.calls[1][0]).toBe(path.join('testPath', '_warmup', 'secondary', 'index.js'));
+    expect(fs.writeFile.mock.calls[2][0]).toBe(path.join('testPath', '_warmup', 'tertiary', 'index.js'));
+
+    const function1Tester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
+    function1Tester.executeWarmupFunction();
+
+    expect(function1Tester.aws.config.region).toBe('us-east-1');
+    expect(function1Tester.lambdaInstances[0]).toHaveBeenCalledTimes(3);
+    expect(function1Tester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
+    expect(function1Tester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2'));
+    expect(function1Tester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(3, getExpectedLambdaCallOptions('someFunc3'));
+
+    const function2Tester = new GeneratedFunctionTester(fs.writeFile.mock.calls[1][1]);
+    function2Tester.executeWarmupFunction();
+
+    expect(function2Tester.aws.config.region).toBe('us-east-1');
+    expect(function2Tester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
+    expect(function2Tester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
+    expect(function2Tester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2'));
+
+    const function3Tester = new GeneratedFunctionTester(fs.writeFile.mock.calls[2][1]);
+    function3Tester.executeWarmupFunction();
+
+    expect(function3Tester.aws.config.region).toBe('us-east-1');
+    expect(function3Tester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
+    expect(function3Tester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
+  });
+
+  it('Should error if unknown warmers are used in a function', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1', warmup: { unknown: { enabled: true } } }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    try {
+      await plugin.hooks['after:package:initialize']();
+    } catch (err) {
+      expect(err.message).toEqual('WarmUp: Invalid function-level warmup configuration (unknown) in function someFunc1. Every warmer should be declared in the custom section.');
+      expect(fs.mkdir).not.toHaveBeenCalled();
+      expect(fs.writeFile).not.toHaveBeenCalled();
+    }
+  });
+
+  it('Should do nothing if globally enabled but no functions are enabled', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+            },
+            secondary: {
+              enabled: true,
+            },
+          },
+        },
+        functions: {
+          someFunc1: { name: 'someFunc1', warmup: { secondary: { enabled: false } } },
+          someFunc2: { name: 'someFunc2', warmup: { secondary: { enabled: false } } },
+        },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPluginSecondary).toBeUndefined();
+    expect(fs.mkdir).toHaveBeenCalledTimes(1);
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
+    expect(fs.writeFile).toHaveBeenCalledTimes(1);
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
+  });
 
   it('Should work with only defaults and do nothing', async () => {
     const serverless = getServerlessConfig({
@@ -37,7 +161,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin).toBeUndefined();
+    expect(plugin.serverless.service.functions.warmUpPluginDefault).toBeUndefined();
     expect(fs.mkdir).not.toHaveBeenCalled();
     expect(fs.writeFile).not.toHaveBeenCalled();
   });
@@ -46,7 +170,9 @@ describe('Serverless warmup plugin constructor', () => {
     const serverless = getServerlessConfig({
       service: {
         custom: {
-          warmup: false,
+          warmup: {
+            default: false,
+          },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
@@ -55,7 +181,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin).toBeUndefined();
+    expect(plugin.serverless.service.functions.warmUpPluginDefault).toBeUndefined();
     expect(fs.mkdir).not.toHaveBeenCalled();
     expect(fs.writeFile).not.toHaveBeenCalled();
   });
@@ -64,7 +190,9 @@ describe('Serverless warmup plugin constructor', () => {
     const serverless = getServerlessConfig({
       service: {
         custom: {
-          warmup: true,
+          warmup: {
+            default: true,
+          },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
@@ -73,12 +201,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -95,7 +223,9 @@ describe('Serverless warmup plugin constructor', () => {
     const serverless = getServerlessConfig({
       service: {
         custom: {
-          warmup: 'true',
+          warmup: {
+            default: 'true',
+          },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
@@ -104,12 +234,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -126,7 +256,9 @@ describe('Serverless warmup plugin constructor', () => {
     const serverless = getServerlessConfig({
       service: {
         custom: {
-          warmup: 'dev',
+          warmup: {
+            default: 'dev',
+          },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
@@ -135,12 +267,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -157,7 +289,9 @@ describe('Serverless warmup plugin constructor', () => {
     const serverless = getServerlessConfig({
       service: {
         custom: {
-          warmup: 'staging',
+          warmup: {
+            default: 'staging',
+          },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
@@ -166,7 +300,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin).toBeUndefined();
+    expect(plugin.serverless.service.functions.warmUpPluginDefault).toBeUndefined();
     expect(fs.mkdir).not.toHaveBeenCalled();
     expect(fs.writeFile).not.toHaveBeenCalled();
   });
@@ -175,7 +309,9 @@ describe('Serverless warmup plugin constructor', () => {
     const serverless = getServerlessConfig({
       service: {
         custom: {
-          warmup: ['dev', 'staging'],
+          warmup: {
+            default: ['dev', 'staging'],
+          },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
@@ -184,12 +320,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -206,7 +342,9 @@ describe('Serverless warmup plugin constructor', () => {
     const serverless = getServerlessConfig({
       service: {
         custom: {
-          warmup: ['staging', 'prod'],
+          warmup: {
+            default: ['staging', 'prod'],
+          },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
@@ -215,7 +353,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin).toBeUndefined();
+    expect(plugin.serverless.service.functions.warmUpPluginDefault).toBeUndefined();
     expect(fs.mkdir).not.toHaveBeenCalled();
     expect(fs.writeFile).not.toHaveBeenCalled();
   });
@@ -225,7 +363,9 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: false,
+            default: {
+              enabled: false,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -235,7 +375,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin).toBeUndefined();
+    expect(plugin.serverless.service.functions.warmUpPluginDefault).toBeUndefined();
     expect(fs.mkdir).not.toHaveBeenCalled();
     expect(fs.writeFile).not.toHaveBeenCalled();
   });
@@ -245,7 +385,9 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
+            default: {
+              enabled: true,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -255,12 +397,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -278,7 +420,9 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: 'dev',
+            default: {
+              enabled: 'dev',
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -288,12 +432,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -311,7 +455,9 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: 'staging',
+            default: {
+              enabled: 'staging',
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -321,7 +467,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin).toBeUndefined();
+    expect(plugin.serverless.service.functions.warmUpPluginDefault).toBeUndefined();
     expect(fs.mkdir).not.toHaveBeenCalled();
     expect(fs.writeFile).not.toHaveBeenCalled();
   });
@@ -331,7 +477,9 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: ['dev', 'staging'],
+            default: {
+              enabled: ['dev', 'staging'],
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -341,12 +489,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -364,7 +512,9 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: ['staging', 'prod'],
+            default: {
+              enabled: ['staging', 'prod'],
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -374,7 +524,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin).toBeUndefined();
+    expect(plugin.serverless.service.functions.warmUpPluginDefault).toBeUndefined();
     expect(fs.mkdir).not.toHaveBeenCalled();
     expect(fs.writeFile).not.toHaveBeenCalled();
   });
@@ -384,11 +534,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
+            default: {
+              enabled: true,
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: false } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: false } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -397,12 +549,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -418,11 +570,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
+            default: {
+              enabled: true,
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: 'staging' } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: 'staging' } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -431,12 +585,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -452,11 +606,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
+            default: {
+              enabled: true,
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: ['staging', 'prod'] } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: ['staging', 'prod'] } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -465,12 +621,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -486,11 +642,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: false,
+            default: {
+              enabled: false,
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: true } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: true } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -499,12 +657,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -520,11 +678,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: false,
+            default: {
+              enabled: false,
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: 'dev' } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: 'dev' } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -533,12 +693,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -554,11 +714,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: false,
+            default: {
+              enabled: false,
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: ['dev', 'staging'] } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: ['dev', 'staging'] } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -567,12 +729,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -588,11 +750,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: 'dev',
+            default: {
+              enabled: 'dev',
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: false } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: false } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -601,12 +765,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -622,11 +786,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: 'dev',
+            default: {
+              enabled: 'dev',
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: 'staging' } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: 'staging' } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -635,12 +801,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -656,11 +822,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: 'dev',
+            default: {
+              enabled: 'dev',
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: ['staging', 'prod'] } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: ['staging', 'prod'] } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -669,12 +837,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -690,11 +858,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: 'staging',
+            default: {
+              enabled: 'staging',
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: true } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: true } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -703,12 +873,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -724,11 +894,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: 'stage',
+            default: {
+              enabled: 'stage',
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: 'dev' } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: 'dev' } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -737,12 +909,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -758,11 +930,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: 'staging',
+            default: {
+              enabled: 'staging',
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: ['dev', 'staging'] } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: ['dev', 'staging'] } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -771,12 +945,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -792,11 +966,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: ['dev', 'staging'],
+            default: {
+              enabled: ['dev', 'staging'],
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: false } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: false } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -805,12 +981,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -826,11 +1002,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: ['dev', 'staging'],
+            default: {
+              enabled: ['dev', 'staging'],
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: 'staging' } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: 'staging' } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -839,12 +1017,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -860,11 +1038,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: ['dev', 'staging'],
+            default: {
+              enabled: ['dev', 'staging'],
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: ['staging', 'prod'] } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: ['staging', 'prod'] } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -873,12 +1053,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -894,11 +1074,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: ['staging', 'prod'],
+            default: {
+              enabled: ['staging', 'prod'],
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: true } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: true } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -907,12 +1089,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -928,11 +1110,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: ['staging', 'prod'],
+            default: {
+              enabled: ['staging', 'prod'],
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: 'dev' } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: 'dev' } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -941,12 +1125,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -962,11 +1146,13 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: ['staging', 'prod'],
+            default: {
+              enabled: ['staging', 'prod'],
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { enabled: ['dev', 'staging'] } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { enabled: ['dev', 'staging'] } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -975,12 +1161,12 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
-    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup'), { recursive: true });
+    expect(fs.mkdir).toHaveBeenNthCalledWith(1, path.join('testPath', '_warmup', 'default'), { recursive: true });
     expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'index.js'));
+    expect(fs.writeFile.mock.calls[0][0]).toBe(path.join('testPath', '_warmup', 'default', 'index.js'));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
@@ -996,7 +1182,9 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: 'staging',
+            default: {
+              enabled: 'staging',
+            },
           },
         },
         defaults: { stage: 'staging', region: 'eu-west-1' },
@@ -1007,9 +1195,9 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
-        name: 'warmup-test-staging-warmup-plugin',
+        name: 'warmup-test-staging-warmup-plugin-default',
       }));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
@@ -1028,7 +1216,9 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: 'prod',
+            default: {
+              enabled: 'prod',
+            },
           },
         },
         provider: { stage: 'prod', region: 'eu-west-2' },
@@ -1040,9 +1230,9 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
-        name: 'warmup-test-prod-warmup-plugin',
+        name: 'warmup-test-prod-warmup-plugin-default',
       }));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
@@ -1061,7 +1251,9 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: ['test'],
+            default: {
+              enabled: ['test'],
+            },
           },
         },
         provider: { stage: 'prod', region: 'eu-west-2' },
@@ -1073,9 +1265,9 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
-        name: 'warmup-test-test-warmup-plugin',
+        name: 'warmup-test-test-warmup-plugin-default',
       }));
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
@@ -1094,8 +1286,10 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            folderName: 'test-folder',
+            default: {
+              enabled: true,
+              folderName: 'test-folder',
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -1105,7 +1299,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         handler: 'test-folder/index.warmUp',
         package: {
@@ -1121,8 +1315,10 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            name: 'test-name',
+            default: {
+              enabled: true,
+              name: 'test-name',
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -1132,7 +1328,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         name: 'test-name',
       }));
@@ -1143,32 +1339,9 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            role: 'test-role',
-          },
-        },
-        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
-      },
-    });
-    const plugin = new WarmUp(serverless, {});
-
-    await plugin.hooks['after:package:initialize']();
-
-    expect(plugin.serverless.service.functions.warmUpPlugin)
-      .toEqual(getExpectedFunctionConfig({
-        role: 'test-role',
-      }));
-  });
-
-  it('Should use the service tag from options if present', async () => {
-    const serverless = getServerlessConfig({
-      service: {
-        custom: {
-          warmup: {
-            enabled: true,
-            tags: {
-              tag1: 'test-tag-1',
-              tag2: 'test-tag-2',
+            default: {
+              enabled: true,
+              role: 'test-role',
             },
           },
         },
@@ -1179,7 +1352,34 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
+      .toEqual(getExpectedFunctionConfig({
+        role: 'test-role',
+      }));
+  });
+
+  it('Should use the service tag from options if present', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+              tags: {
+                tag1: 'test-tag-1',
+                tag2: 'test-tag-2',
+              },
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         tags: {
           tag1: 'test-tag-1',
@@ -1193,8 +1393,10 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            vpc: false,
+            default: {
+              enabled: true,
+              vpc: false,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -1204,7 +1406,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         vpc: { securityGroupIds: [], subnetIds: [] },
       }));
@@ -1215,8 +1417,10 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            vpc: { securityGroupIds: ['sg-test1', 'sg-test2'], subnetIds: ['sn-test1', 'sn-test2'] },
+            default: {
+              enabled: true,
+              vpc: { securityGroupIds: ['sg-test1', 'sg-test2'], subnetIds: ['sn-test1', 'sn-test2'] },
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -1226,7 +1430,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         vpc: { securityGroupIds: ['sg-test1', 'sg-test2'], subnetIds: ['sn-test1', 'sn-test2'] },
       }));
@@ -1237,8 +1441,10 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            events: [{ schedule: 'rate(10 minutes)' }],
+            default: {
+              enabled: true,
+              events: [{ schedule: 'rate(10 minutes)' }],
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -1248,7 +1454,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         events: [{ schedule: 'rate(10 minutes)' }],
       }));
@@ -1259,8 +1465,10 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            memorySize: 256,
+            default: {
+              enabled: true,
+              memorySize: 256,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -1270,7 +1478,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         memorySize: 256,
       }));
@@ -1281,8 +1489,10 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            timeout: 30,
+            default: {
+              enabled: true,
+              timeout: 30,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -1292,7 +1502,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         timeout: 30,
       }));
@@ -1309,7 +1519,9 @@ describe('Serverless warmup plugin constructor', () => {
         },
         custom: {
           warmup: {
-            enabled: true,
+            default: {
+              enabled: true,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -1319,7 +1531,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         environment: {
           test: undefined,
@@ -1339,10 +1551,12 @@ describe('Serverless warmup plugin constructor', () => {
         },
         custom: {
           warmup: {
-            enabled: true,
-            environment: {
-              test: 'new_value',
-              other_var: undefined,
+            default: {
+              enabled: true,
+              environment: {
+                test: 'new_value',
+                other_var: undefined,
+              },
             },
           },
         },
@@ -1353,7 +1567,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         environment: {
           test: 'new_value',
@@ -1367,10 +1581,12 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            environment: {
-              test: 'value',
-              other_var: 'other_value',
+            default: {
+              enabled: true,
+              environment: {
+                test: 'value',
+                other_var: 'other_value',
+              },
             },
           },
         },
@@ -1381,7 +1597,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
         environment: {
           test: 'value',
@@ -1395,8 +1611,10 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            clientContext: { test: 'data' },
+            default: {
+              enabled: true,
+              clientContext: { test: 'data' },
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -1406,7 +1624,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
@@ -1429,12 +1647,14 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            clientContext: { test: 'data' },
+            default: {
+              enabled: true,
+              clientContext: { test: 'data' },
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { clientContext: { othersource: 'test' } } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { clientContext: { othersource: 'test' } } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -1443,7 +1663,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
@@ -1466,8 +1686,10 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            clientContext: false,
+            default: {
+              enabled: true,
+              clientContext: false,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -1477,7 +1699,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
@@ -1500,8 +1722,10 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            payload: { test: 'data' },
+            default: {
+              enabled: true,
+              payload: { test: 'data' },
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -1511,7 +1735,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
@@ -1536,8 +1760,10 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            payload: { test: 20 },
+            default: {
+              enabled: true,
+              payload: { test: 20 },
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -1547,7 +1773,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
@@ -1572,12 +1798,14 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            payload: { test: 20 },
+            default: {
+              enabled: true,
+              payload: { test: 20 },
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { payload: { othersource: 'test' } } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { payload: { othersource: 'test' } } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -1586,7 +1814,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
@@ -1611,9 +1839,11 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            payload: '{test:20}',
-            payloadRaw: true,
+            default: {
+              enabled: true,
+              payload: '{test:20}',
+              payloadRaw: true,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -1623,7 +1853,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
@@ -1648,13 +1878,15 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            payload: '{test:20}',
-            payloadRaw: true,
+            default: {
+              enabled: true,
+              payload: '{test:20}',
+              payloadRaw: true,
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { payload: { test: 'value' }, payloadRaw: false } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { payload: { test: 'value' }, payloadRaw: false } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -1663,7 +1895,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
@@ -1688,8 +1920,10 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            concurrency: 3,
+            default: {
+              enabled: true,
+              concurrency: 3,
+            },
           },
         },
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -1699,7 +1933,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
@@ -1722,12 +1956,14 @@ describe('Serverless warmup plugin constructor', () => {
       service: {
         custom: {
           warmup: {
-            enabled: true,
-            concurrency: 3,
+            default: {
+              enabled: true,
+              concurrency: 3,
+            },
           },
         },
         functions: {
-          someFunc1: { name: 'someFunc1', warmup: { concurrency: 6 } },
+          someFunc1: { name: 'someFunc1', warmup: { default: { concurrency: 6 } } },
           someFunc2: { name: 'someFunc2' },
         },
       },
@@ -1736,7 +1972,7 @@ describe('Serverless warmup plugin constructor', () => {
 
     await plugin.hooks['after:package:initialize']();
 
-    expect(plugin.serverless.service.functions.warmUpPlugin)
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
 
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
@@ -1760,7 +1996,9 @@ describe('Serverless warmup plugin constructor', () => {
         service: {
           custom: {
             warmup: {
-              enabled: true,
+              default: {
+                enabled: true,
+              },
             },
           },
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
@@ -1770,7 +2008,7 @@ describe('Serverless warmup plugin constructor', () => {
 
       await plugin.hooks['after:package:initialize']();
 
-      expect(plugin.serverless.service.functions.warmUpPlugin)
+      expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig());
 
       const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);

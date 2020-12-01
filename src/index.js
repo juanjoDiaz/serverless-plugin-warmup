@@ -9,6 +9,8 @@
 const fs = require('fs').promises;
 const path = require('path');
 
+const capitalize = (name) => name.charAt(0).toUpperCase() + name.slice(1);
+
 /**
  * @classdesc Keep your lambdas warm during winter
  * @class WarmUp
@@ -149,9 +151,11 @@ class WarmUp {
       type: 'object',
       properties: {
         warmup: {
-          type: 'object',
-          properties: { ...globalConfigSchemaProperties, ...functionConfigSchemaProperties },
-          additionalProperties: false,
+          '.*': {
+            type: 'object',
+            properties: { ...globalConfigSchemaProperties, ...functionConfigSchemaProperties },
+            additionalProperties: false,
+          },
         },
       },
     });
@@ -160,9 +164,11 @@ class WarmUp {
       type: 'object',
       properties: {
         warmup: {
-          type: 'object',
-          properties: { functionConfigSchemaProperties },
-          additionalProperties: false,
+          '.*': {
+            type: 'object',
+            properties: { functionConfigSchemaProperties },
+            additionalProperties: false,
+          },
         },
       },
     });
@@ -178,26 +184,28 @@ class WarmUp {
    * */
   async afterPackageInitialize() {
     this.resolvedOptions = this.getResolvedStageAndRegion();
-    this.warmupOpts = this.configPlugin(this.serverless.service, this.resolvedOptions.stage);
-    this.functionsToWarmup = WarmUp.getFunctionsToBeWarmedUp(
+    this.warmupConfigByWarmer = this.configPlugin(
       this.serverless.service,
       this.resolvedOptions.stage,
-      this.warmupOpts,
     );
 
-    if (!this.functionsToWarmup.length) {
-      this.serverless.cli.log('WarmUp: no functions to warm up');
+    this.functionsByWarmer = WarmUp.getFunctionsByWarmer(
+      this.serverless.service,
+      this.resolvedOptions.stage,
+      this.warmupConfigByWarmer,
+    );
+
+    if (Object.keys(this.functionsByWarmer).length === 0) {
+      this.serverless.cli.log('WarmUp: no functions to warm up for any warmer');
       return;
     }
 
-    await fs.mkdir(this.warmupOpts.pathFolder, { recursive: true });
-
-    await this.createWarmUpFunctionArtifact(
-      this.functionsToWarmup,
-      this.resolvedOptions.region,
-      this.warmupOpts.pathFile,
-    );
-    WarmUp.addWarmUpFunctionToService(this.serverless.service, this.warmupOpts);
+    await Promise.all(Object.entries(this.warmupConfigByWarmer)
+      .map(([warmerName, warmerConfig]) => this.configureWarmer(
+        warmerName,
+        warmerConfig,
+        this.functionsByWarmer[warmerName],
+      )));
   }
 
   /**
@@ -210,11 +218,22 @@ class WarmUp {
    * */
   async afterCreateDeploymentArtifacts() {
     this.resolvedOptions = this.resolvedOptions || this.getResolvedStageAndRegion();
-    this.warmupOpts = this.warmupOpts
+    this.warmupConfigByWarmer = this.warmupConfigByWarmer
       || this.configPlugin(this.serverless.service, this.resolvedOptions.stage);
-    if (this.warmupOpts.cleanFolder) {
-      await this.cleanFolder();
-    }
+
+    const foldersToClean = Array.from(new Set(Object.values(this.warmupConfigByWarmer)
+      .filter((config) => config.cleanFolder)
+      .map((config) => config.pathFolder)));
+
+    await Promise.all(foldersToClean.map(async (folderToClean) => {
+      try {
+        await WarmUp.cleanFolder(folderToClean);
+      } catch (err) {
+        if (err.code !== 'ENOENT') {
+          this.serverless.cli.log(`WarmUp: couldn't clean up temporary folder ${folderToClean}`);
+        }
+      }
+    }));
   }
 
   /**
@@ -227,23 +246,26 @@ class WarmUp {
    * */
   async afterDeployFunctions() {
     this.resolvedOptions = this.resolvedOptions || this.getResolvedStageAndRegion();
-    this.warmupOpts = this.warmupOpts
+    this.warmupConfigByWarmer = this.warmupConfigByWarmer
       || this.configPlugin(this.serverless.service, this.resolvedOptions.stage);
-    if (this.warmupOpts.prewarm) {
-      this.functionsToWarmup = this.functionsToWarmup || WarmUp.getFunctionsToBeWarmedUp(
-        this.serverless.service,
-        this.resolvedOptions.stage,
-        this.warmupOpts,
-      );
 
-      if (this.functionsToWarmup.length <= 0) {
-        this.serverless.cli.log('WarmUp: no functions to prewarm');
-        return;
-      }
+    this.functionsByWarmer = this.functionsToWarmup || WarmUp.getFunctionsByWarmer(
+      this.serverless.service,
+      this.resolvedOptions.stage,
+      this.warmupConfigByWarmer,
+    );
 
-      WarmUp.addWarmUpFunctionToService(this.serverless.service, this.warmupOpts);
-      await this.warmUpFunctions(this.serverless.service, this.warmupOpts);
+    if (Object.keys(this.functionsByWarmer).length === 0) {
+      this.serverless.cli.log('WarmUp: no functions to prewarm');
+      return;
     }
+
+    await Promise.all(Object.entries(this.warmupConfigByWarmer)
+      .filter(([, warmerConfig]) => warmerConfig.prewarm)
+      .map(async ([warmerName, warmerConfig]) => {
+        WarmUp.addWarmUpFunctionToService(this.serverless.service, warmerName, warmerConfig);
+        await this.invokeWarmer(warmerName, warmerConfig, this.functionsByWarmer[warmerName]);
+      }));
   }
 
   /**
@@ -271,9 +293,9 @@ class WarmUp {
    *
    * @return {Object} - Global configuration options
    * */
-  getGlobalConfig(possibleConfig, defaultOpts) {
+  getWarmerConfig(possibleConfig, defaultOpts) {
     const config = (typeof possibleConfig === 'object') ? possibleConfig : {};
-    const folderName = (typeof config.folderName === 'string') ? config.folderName : '_warmup';
+    const folderName = path.join((typeof config.folderName === 'string') ? config.folderName : defaultOpts.folderName);
     const pathFolder = path.join(this.serverless.config.servicePath, folderName);
 
     /* eslint-disable no-nested-ternary */
@@ -352,11 +374,11 @@ class WarmUp {
    * @return {Object} - Configuration options to be used by the plugin
    * */
   configPlugin(service, stage) {
-    const globalDefaultOpts = {
-      folderName: '_warmup',
+    const getWarmerDefaultOpts = (warmerName) => ({
+      folderName: path.join('_warmup', warmerName),
       cleanFolder: true,
       memorySize: 128,
-      name: `${service.service}-${stage}-warmup-plugin`,
+      name: `${service.service}-${stage}-warmup-plugin-${warmerName}`,
       events: [{ schedule: 'rate(5 minutes)' }],
       package: {
         individually: true,
@@ -372,7 +394,7 @@ class WarmUp {
       environment: Object.keys(service.provider.environment || [])
         .reduce((obj, k) => ({ ...obj, [k]: undefined }), {}),
       prewarm: false,
-    };
+    });
 
     const functionDefaultOpts = {
       enabled: false,
@@ -381,12 +403,14 @@ class WarmUp {
       concurrency: 1,
     };
 
-    const customConfig = service.custom ? service.custom.warmup : undefined;
-
-    return Object.assign(
-      this.getGlobalConfig(customConfig, globalDefaultOpts),
-      WarmUp.getFunctionConfig(customConfig, functionDefaultOpts),
-    );
+    return Object.entries(service.custom ? service.custom.warmup : {})
+      .reduce((warmers, [warmerName, warmerConfig]) => ({
+        ...warmers,
+        [warmerName]: {
+          ...this.getWarmerConfig(warmerConfig, getWarmerDefaultOpts(warmerName)),
+          ...WarmUp.getFunctionConfig(warmerConfig, functionDefaultOpts),
+        },
+      }), {});
   }
 
   /**
@@ -394,19 +418,54 @@ class WarmUp {
    *
    * @return {Array} - List of functions to be warmed up and their specific configs
    * */
-  static getFunctionsToBeWarmedUp(service, stage, warmupOpts) {
-    return service.getAllFunctions()
+  static getFunctionsByWarmer(service, stage, warmupConfigByWarmer) {
+    const functions = service.getAllFunctions()
       .map((name) => service.getFunction(name))
-      .map((config) => ({
-        name: config.name,
-        config: WarmUp.getFunctionConfig(config.warmup, warmupOpts),
-      }))
-      .filter(({ config: { enabled } }) => (
-        enabled === true
-        || enabled === 'true'
-        || enabled === stage
-        || (Array.isArray(enabled) && enabled.indexOf(stage) !== -1)
-      ));
+      .map((config) => {
+        if (config.warmup === undefined) {
+          return {
+            name: config.name,
+            config: Object.entries(warmupConfigByWarmer)
+              .reduce((warmers, [warmerName, warmerConfig]) => ({
+                ...warmers,
+                [warmerName]: WarmUp.getFunctionConfig({}, warmerConfig),
+              }), {}),
+          };
+        }
+
+        const unknownWarmers = Object.keys(config.warmup)
+          .filter((warmerName) => warmupConfigByWarmer[warmerName] === undefined);
+        if (unknownWarmers.length > 0) {
+          throw new Error(`WarmUp: Invalid function-level warmup configuration (${unknownWarmers.join(', ')}) in function ${config.name}. Every warmer should be declared in the custom section.`);
+        }
+
+        return {
+          name: config.name,
+          config: Object.entries(warmupConfigByWarmer)
+            .reduce((warmers, [warmerName, warmerConfig]) => ({
+              ...warmers,
+              [warmerName]: WarmUp.getFunctionConfig(config.warmup[warmerName], warmerConfig),
+            }), {}),
+        };
+      });
+
+    function isEnabled(enabled) {
+      return enabled === true
+         || enabled === 'true'
+         || enabled === stage
+         || (Array.isArray(enabled) && enabled.indexOf(stage) !== -1);
+    }
+
+    return functions.reduce((warmersAcc, fn) => {
+      Object.entries(fn.config)
+        .forEach(([warmerName, config]) => {
+          if (!isEnabled(config.enabled)) return;
+          // eslint-disable-next-line no-param-reassign
+          if (!warmersAcc[warmerName]) warmersAcc[warmerName] = [];
+          warmersAcc[warmerName].push({ name: fn.name, config });
+        });
+      return warmersAcc;
+    }, {});
   }
 
   /**
@@ -417,19 +476,14 @@ class WarmUp {
    *
    * @return {Promise}
    * */
-  async cleanFolder() {
-    try {
-      const files = await fs.readdir(this.warmupOpts.pathFolder);
-      await Promise.all(files
-        .map((file) => fs.unlink(path.join(this.warmupOpts.pathFolder, file))));
-      await fs.rmdir(this.warmupOpts.pathFolder);
-    } catch (err) {
-      if (err.code !== 'ENOENT') throw err;
-    }
+  static async cleanFolder(folderToClean) {
+    const files = await fs.readdir(folderToClean);
+    await Promise.all(files.map((file) => fs.unlink(path.join(folderToClean, file))));
+    await fs.rmdir(folderToClean);
   }
 
   /**
-   * @description Write warm up ES6 function
+   * @description Create warm up function code and write it to the handler file
    *
    * @param {Array} functions - Functions to be warmed up
    *
@@ -438,13 +492,7 @@ class WarmUp {
    *
    * @return {Promise}
    * */
-  async createWarmUpFunctionArtifact(functions, region, pathFile) {
-    /** Log warmup start */
-    this.serverless.cli.log(`WarmUp: setting ${functions.length} lambdas to be warm`);
-
-    /** Log functions being warmed up */
-    functions.forEach((func) => this.serverless.cli.log(`WarmUp: ${func.name}`));
-
+  static async createWarmUpFunctionArtifact(functions, region, pathFile) {
     const warmUpFunction = `'use strict';
 
 /** Generated by Serverless WarmUp Plugin at ${new Date().toISOString()} */
@@ -505,54 +553,74 @@ module.exports.warmUp = async (event, context) => {
   }
 
   /**
-   * @description Add warm up function to service
+   * @description Add warmer function to service
    * */
-  static addWarmUpFunctionToService(service, warmupOpts) {
-    /** SLS warm up function */
+  static addWarmUpFunctionToService(service, warmerName, warmerConfig) {
     // eslint-disable-next-line no-param-reassign
-    service.functions.warmUpPlugin = {
+    service.functions[`warmUpPlugin${capitalize(warmerName)}`] = {
       description: 'Serverless WarmUp Plugin',
-      events: warmupOpts.events,
-      handler: warmupOpts.pathHandler,
-      memorySize: warmupOpts.memorySize,
-      name: warmupOpts.name,
+      events: warmerConfig.events,
+      handler: warmerConfig.pathHandler,
+      memorySize: warmerConfig.memorySize,
+      name: warmerConfig.name,
       runtime: 'nodejs12.x',
-      package: warmupOpts.package,
-      timeout: warmupOpts.timeout,
-      ...(Object.keys(warmupOpts.environment).length
-        ? { environment: warmupOpts.environment }
+      package: warmerConfig.package,
+      timeout: warmerConfig.timeout,
+      ...(Object.keys(warmerConfig.environment).length
+        ? { environment: warmerConfig.environment }
         : {}),
-      ...(warmupOpts.role ? { role: warmupOpts.role } : {}),
-      ...(warmupOpts.tags ? { tags: warmupOpts.tags } : {}),
-      ...(warmupOpts.vpc ? { vpc: warmupOpts.vpc } : {}),
+      ...(warmerConfig.role ? { role: warmerConfig.role } : {}),
+      ...(warmerConfig.tags ? { tags: warmerConfig.tags } : {}),
+      ...(warmerConfig.vpc ? { vpc: warmerConfig.vpc } : {}),
     };
   }
 
   /**
-   * @description Warm up the functions immediately after deployment
-   *
-   * @fulfil {} — Functions warmed up successfully
-   * @reject {Error} Functions couldn't be warmed up
-   *
-   * @return {Promise}
+   * @description Create warm up function code and write it to the handler file
+   * and add warm up function to the service
    * */
-  async warmUpFunctions(service, warmupOpts) {
-    this.serverless.cli.log('WarmUp: Pre-warming up your functions');
+  async configureWarmer(warmerName, warmerConfig, functions) {
+    if (functions === undefined || functions.length === 0) {
+      this.serverless.cli.log(`WarmUp: no functions to warm up for warmer ${warmerName}`);
+      return;
+    }
+
+    this.serverless.cli.log(`WarmUp: setting warmer "${warmerName}" to warm up ${functions.length} lambdas`);
+    functions.forEach((func) => this.serverless.cli.log(`WarmUp: ${func.name}`));
+
+    await fs.mkdir(warmerConfig.pathFolder, { recursive: true });
+
+    await WarmUp.createWarmUpFunctionArtifact(
+      functions,
+      this.resolvedOptions.region,
+      warmerConfig.pathFile,
+    );
+
+    WarmUp.addWarmUpFunctionToService(this.serverless.service, warmerName, warmerConfig);
+  }
+
+  async invokeWarmer(warmerName, warmerConfig, functions) {
+    if (functions === undefined || functions.length === 0) {
+      this.serverless.cli.log(`WarmUp: no functions to warm up for warmer ${warmerName}`);
+      return;
+    }
+
+    this.serverless.cli.log(`WarmUp: Pre-warming up you functions using warmer "${warmerName}"`);
 
     try {
-      const { SERVERLESS_ALIAS } = service.getFunction('warmUpPlugin').environment || {};
+      const { SERVERLESS_ALIAS } = this.serverless.service.getFunction(`warmUpPlugin${capitalize(warmerName)}`).environment || {};
       const params = {
-        FunctionName: warmupOpts.name,
+        FunctionName: warmerConfig.name,
         InvocationType: 'RequestResponse',
         LogType: 'None',
         Qualifier: SERVERLESS_ALIAS,
-        Payload: warmupOpts.payload,
+        Payload: warmerConfig.payload,
       };
 
       await this.provider.request('Lambda', 'invoke', params);
-      this.serverless.cli.log('WarmUp: Functions successfully pre-warmed');
+      this.serverless.cli.log(`WarmUp: Warmer "${warmerName}" successfully pre-warmed your functions`);
     } catch (err) {
-      this.serverless.cli.log('WarmUp: Error while pre-warming functions', err);
+      this.serverless.cli.log(`WarmUp: Error while pre-warming your functions using warmer "${warmerName}"`, err);
     }
   }
 }

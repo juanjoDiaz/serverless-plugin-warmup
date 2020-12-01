@@ -31,17 +31,19 @@ function getServerlessConfig(serverless = {}) {
 }
 
 function getExpectedFunctionConfig(options = {}) {
+  const warmerName = options.warmerName || 'default';
+
   return {
     description: 'Serverless WarmUp Plugin',
     events: [{ schedule: 'rate(5 minutes)' }],
-    handler: '_warmup/index.warmUp',
+    handler: `_warmup/${warmerName}/index.warmUp`,
     memorySize: 128,
-    name: 'warmup-test-dev-warmup-plugin',
+    name: `warmup-test-dev-warmup-plugin-${warmerName}`,
     runtime: 'nodejs12.x',
     package: {
       individually: true,
       exclude: ['**'],
-      include: ['_warmup/**'],
+      include: [`_warmup/${warmerName}/**`],
     },
     timeout: 10,
     ...options,
