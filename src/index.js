@@ -30,7 +30,7 @@ class WarmUp {
 
     this.provider = this.serverless.getProvider('aws');
 
-    this.extendServerlessSchema();
+    WarmUp.extendServerlessSchema(this.serverless);
 
     this.hooks = {
       'after:package:initialize': this.afterPackageInitialize.bind(this),
@@ -42,7 +42,7 @@ class WarmUp {
   /**
    * @description Define the additions to the serverless schema by this plugin.
    * */
-  extendServerlessSchema() {
+  static extendServerlessSchema(serverless) {
     // Most of these are taken from
     // https://github.com/serverless/serverless/blob/master/lib/configSchema.js
     // https://github.com/serverless/serverless/blob/master/lib/plugins/aws/provider/awsProvider.js
@@ -147,7 +147,7 @@ class WarmUp {
       concurrency: { type: 'integer' },
     };
 
-    this.serverless.configSchemaHandler.defineCustomProperties({
+    serverless.configSchemaHandler.defineCustomProperties({
       type: 'object',
       properties: {
         warmup: {
@@ -160,7 +160,7 @@ class WarmUp {
       },
     });
 
-    this.serverless.configSchemaHandler.defineFunctionProperties('aws', {
+    serverless.configSchemaHandler.defineFunctionProperties('aws', {
       type: 'object',
       properties: {
         warmup: {
