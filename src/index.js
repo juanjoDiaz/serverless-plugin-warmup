@@ -184,7 +184,7 @@ class WarmUp {
    * */
   async afterPackageInitialize() {
     this.resolvedOptions = this.getResolvedStageAndRegion();
-    this.warmupConfigByWarmer = WarmUp.configPlugin(
+    this.configByWarmer = WarmUp.getConfigByWarmer(
       this.serverless.service,
       this.resolvedOptions.stage,
     );
@@ -192,7 +192,7 @@ class WarmUp {
     this.functionsByWarmer = WarmUp.getFunctionsByWarmer(
       this.serverless.service,
       this.resolvedOptions.stage,
-      this.warmupConfigByWarmer,
+      this.configByWarmer,
     );
 
     if (Object.keys(this.functionsByWarmer).length === 0) {
@@ -200,7 +200,7 @@ class WarmUp {
       return;
     }
 
-    await Promise.all(Object.entries(this.warmupConfigByWarmer)
+    await Promise.all(Object.entries(this.configByWarmer)
       .map(([warmerName, warmerConfig]) => this.configureWarmer(
         warmerName,
         warmerConfig,
@@ -218,10 +218,10 @@ class WarmUp {
    * */
   async afterCreateDeploymentArtifacts() {
     this.resolvedOptions = this.resolvedOptions || this.getResolvedStageAndRegion();
-    this.warmupConfigByWarmer = this.warmupConfigByWarmer
-      || WarmUp.configPlugin(this.serverless.service, this.resolvedOptions.stage);
+    this.configByWarmer = this.configByWarmer
+      || WarmUp.getConfigByWarmer(this.serverless.service, this.resolvedOptions.stage);
 
-    const foldersToClean = Array.from(new Set(Object.values(this.warmupConfigByWarmer)
+    const foldersToClean = Array.from(new Set(Object.values(this.configByWarmer)
       .filter((config) => config.cleanFolder)
       .map((config) => config.folderName)));
 
@@ -246,13 +246,13 @@ class WarmUp {
    * */
   async afterDeployFunctions() {
     this.resolvedOptions = this.resolvedOptions || this.getResolvedStageAndRegion();
-    this.warmupConfigByWarmer = this.warmupConfigByWarmer
-      || WarmUp.configPlugin(this.serverless.service, this.resolvedOptions.stage);
+    this.configByWarmer = this.configByWarmer
+      || WarmUp.getConfigByWarmer(this.serverless.service, this.resolvedOptions.stage);
 
     this.functionsByWarmer = this.functionsToWarmup || WarmUp.getFunctionsByWarmer(
       this.serverless.service,
       this.resolvedOptions.stage,
-      this.warmupConfigByWarmer,
+      this.configByWarmer,
     );
 
     if (Object.keys(this.functionsByWarmer).length === 0) {
@@ -260,7 +260,7 @@ class WarmUp {
       return;
     }
 
-    await Promise.all(Object.entries(this.warmupConfigByWarmer)
+    await Promise.all(Object.entries(this.configByWarmer)
       .filter(([, warmerConfig]) => warmerConfig.prewarm)
       .map(async ([warmerName, warmerConfig]) => {
         WarmUp.addWarmUpFunctionToService(this.serverless.service, warmerName, warmerConfig);
@@ -370,7 +370,7 @@ class WarmUp {
    *
    * @return {Object} - Configuration options to be used by the plugin
    * */
-  static configPlugin(service, stage) {
+  static getConfigByWarmer(service, stage) {
     const getWarmerDefaultOpts = (warmerName) => ({
       folderName: path.join('_warmup', warmerName),
       cleanFolder: true,
@@ -415,14 +415,14 @@ class WarmUp {
    *
    * @return {Array} - List of functions to be warmed up and their specific configs
    * */
-  static getFunctionsByWarmer(service, stage, warmupConfigByWarmer) {
+  static getFunctionsByWarmer(service, stage, configByWarmer) {
     const functions = service.getAllFunctions()
       .map((name) => service.getFunction(name))
       .map((config) => {
         if (config.warmup === undefined) {
           return {
             name: config.name,
-            config: Object.entries(warmupConfigByWarmer)
+            config: Object.entries(configByWarmer)
               .reduce((warmers, [warmerName, warmerConfig]) => ({
                 ...warmers,
                 [warmerName]: WarmUp.getFunctionConfig({}, warmerConfig),
@@ -431,14 +431,14 @@ class WarmUp {
         }
 
         const unknownWarmers = Object.keys(config.warmup)
-          .filter((warmerName) => warmupConfigByWarmer[warmerName] === undefined);
+          .filter((warmerName) => configByWarmer[warmerName] === undefined);
         if (unknownWarmers.length > 0) {
           throw new Error(`WarmUp: Invalid function-level warmup configuration (${unknownWarmers.join(', ')}) in function ${config.name}. Every warmer should be declared in the custom section.`);
         }
 
         return {
           name: config.name,
-          config: Object.entries(warmupConfigByWarmer)
+          config: Object.entries(configByWarmer)
             .reduce((warmers, [warmerName, warmerConfig]) => ({
               ...warmers,
               [warmerName]: WarmUp.getFunctionConfig(config.warmup[warmerName], warmerConfig),
