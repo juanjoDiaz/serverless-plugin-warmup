@@ -1886,6 +1886,288 @@ describe('Serverless warmup plugin constructor', () => {
     }
   });
 
+  describe('Packaging', () => {
+    it('Should package only the lambda handler by default', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              default: {
+                enabled: true,
+              },
+            },
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+        },
+      });
+      const plugin = new WarmUp(serverless, {});
+
+      await plugin.hooks['after:package:initialize']();
+
+      expect(plugin.serverless.service.functions.warmUpPluginDefault)
+        .toEqual(getExpectedFunctionConfig({
+          package: {
+            individually: true,
+            exclude: ['**'],
+            include: ['_warmup/default/**'],
+          },
+        }));
+    });
+
+    it('Should exclude files included at the service level', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          package: {
+            include: ['../**'],
+          },
+          custom: {
+            warmup: {
+              default: {
+                enabled: true,
+              },
+            },
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+        },
+      });
+      const plugin = new WarmUp(serverless, {});
+
+      await plugin.hooks['after:package:initialize']();
+
+      expect(plugin.serverless.service.functions.warmUpPluginDefault)
+        .toEqual(getExpectedFunctionConfig({
+          package: {
+            individually: true,
+            include: ['!../**', '_warmup/default/**'],
+            exclude: ['**'],
+          },
+        }));
+    });
+
+    it('Should use the package exclusions from options if present', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              default: {
+                enabled: true,
+                package: {
+                  individually: true,
+                  exclude: ['../**'],
+                },
+              },
+            },
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+        },
+      });
+      const plugin = new WarmUp(serverless, {});
+
+      await plugin.hooks['after:package:initialize']();
+
+      expect(plugin.serverless.service.functions.warmUpPluginDefault)
+        .toEqual(getExpectedFunctionConfig({
+          package: {
+            individually: true,
+            include: ['_warmup/default/**'],
+            exclude: ['../**'],
+          },
+        }));
+    });
+
+    it('Should use the package inclusions from options if present', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              default: {
+                enabled: true,
+                package: {
+                  individually: true,
+                  exclude: ['../**'],
+                  include: ['test/**'],
+                },
+              },
+            },
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+        },
+      });
+      const plugin = new WarmUp(serverless, {});
+
+      await plugin.hooks['after:package:initialize']();
+
+      expect(plugin.serverless.service.functions.warmUpPluginDefault)
+        .toEqual(getExpectedFunctionConfig({
+          package: {
+            individually: true,
+            exclude: ['../**'],
+            include: ['test/**', '_warmup/default/**'],
+          },
+        }));
+    });
+
+    it('Should not duplicate the warmup folder inclusion even if manually included', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              default: {
+                enabled: true,
+                package: {
+                  individually: true,
+                  exclude: ['../**'],
+                  include: ['test/**', '_warmup/default/**'],
+                },
+              },
+            },
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+        },
+      });
+      const plugin = new WarmUp(serverless, {});
+
+      await plugin.hooks['after:package:initialize']();
+
+      expect(plugin.serverless.service.functions.warmUpPluginDefault)
+        .toEqual(getExpectedFunctionConfig({
+          package: {
+            individually: true,
+            exclude: ['../**'],
+            include: ['test/**', '_warmup/default/**'],
+          },
+        }));
+    });
+
+    it('Should use the package inclusions with custom folderName', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              default: {
+                enabled: true,
+                folderName: 'test-folder',
+                package: {
+                  individually: true,
+                  exclude: ['../**'],
+                  include: ['test/**'],
+                },
+              },
+            },
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+        },
+      });
+      const plugin = new WarmUp(serverless, {});
+
+      await plugin.hooks['after:package:initialize']();
+
+      expect(plugin.serverless.service.functions.warmUpPluginDefault)
+        .toEqual(getExpectedFunctionConfig({
+          handler: 'test-folder/index.warmUp',
+          package: {
+            individually: true,
+            exclude: ['../**'],
+            include: ['test/**', 'test-folder/**'],
+          },
+        }));
+    });
+
+    it('Should support package individually false', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              default: {
+                enabled: true,
+                package: {
+                  individually: false,
+                  exclude: ['../**'],
+                },
+              },
+            },
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+        },
+      });
+      const plugin = new WarmUp(serverless, {});
+
+      await plugin.hooks['after:package:initialize']();
+
+      expect(plugin.serverless.service.functions.warmUpPluginDefault)
+        .toEqual(getExpectedFunctionConfig({
+          handler: '_warmup/default/index.warmUp',
+          package: {
+            individually: false,
+            exclude: ['../**'],
+            include: ['_warmup/default/**'],
+          },
+        }));
+    });
+
+    it('Should use default exclude if missing', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              default: {
+                enabled: true,
+                package: {
+                  individually: true,
+                },
+              },
+            },
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+        },
+      });
+      const plugin = new WarmUp(serverless, {});
+
+      await plugin.hooks['after:package:initialize']();
+
+      expect(plugin.serverless.service.functions.warmUpPluginDefault)
+        .toEqual(getExpectedFunctionConfig({
+          handler: '_warmup/default/index.warmUp',
+          package: {
+            individually: true,
+            exclude: ['**'],
+            include: ['_warmup/default/**'],
+          },
+        }));
+    });
+
+    it('Should use default individually if missing', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              default: {
+                enabled: true,
+                package: {
+                  exclude: ['**'],
+                },
+              },
+            },
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+        },
+      });
+      const plugin = new WarmUp(serverless, {});
+
+      await plugin.hooks['after:package:initialize']();
+
+      expect(plugin.serverless.service.functions.warmUpPluginDefault)
+        .toEqual(getExpectedFunctionConfig({
+          handler: '_warmup/default/index.warmUp',
+          package: {
+            individually: true,
+            exclude: ['**'],
+            include: ['_warmup/default/**'],
+          },
+        }));
+    });
+  });
+
   describe('Other plugins integrations', () => {
     it('Should use the warmup function alias if SERVERLESS_ALIAS env variable is present', async () => {
       const serverless = getServerlessConfig({
