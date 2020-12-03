@@ -480,7 +480,7 @@ class WarmUp {
 const aws = require('aws-sdk');
 aws.config.region = '${region}';
 const lambda = new aws.Lambda();
-const functions = ${JSON.stringify(functions)};
+const functions = ${JSON.stringify(functions, null, '  ')};
 
 function getConcurrency(func, envVars) {
   const functionConcurrency = envVars[\`WARMUP_CONCURRENCY_\${func.name.toUpperCase().replace(/-/g, '_')}\`];
