@@ -151,7 +151,7 @@ class WarmUp {
           { const: false }, // to skip it
           { type: 'object' }, // any
         ],
-      },      
+      },
       payload: { type: 'object' }, // any
       payloadRaw: { type: 'boolean' },
       concurrency: { type: 'integer' },
@@ -556,6 +556,115 @@ module.exports.warmUp = async (event, context) => {
   }
 
   /**
+   * @description Add warmer function to service
+   * */
+  static addWarmUpFunctionRoleToResources(service, stage, warmerName, warmerConfig, functions) {
+    // eslint-disable-next-line no-param-reassign
+    warmerConfig.role = `WarmUpPlugin${capitalize(warmerName)}Role`;
+    if (typeof service.resources !== 'object') {
+      // eslint-disable-next-line no-param-reassign
+      service.resources = {};
+    }
+    if (typeof service.resources.Resources !== 'object') {
+      // eslint-disable-next-line no-param-reassign
+      service.resources.Resources = {};
+    }
+
+    // eslint-disable-next-line no-param-reassign
+    service.resources.Resources[warmerConfig.role] = {
+      Type: 'AWS::IAM::Role',
+      Properties: {
+        Path: '/',
+        RoleName: {
+          'Fn::Join': [
+            '-',
+            [
+              service.service,
+              stage,
+              { Ref: 'AWS::Region' },
+              warmerName.toLowerCase(),
+              'role',
+            ],
+          ],
+        },
+        AssumeRolePolicyDocument: {
+          Version: '2012-10-17',
+          Statement: [
+            {
+              Effect: 'Allow',
+              Principal: {
+                Service: [
+                  'lambda.amazonaws.com',
+                ],
+              },
+              Action: 'sts:AssumeRole',
+            },
+          ],
+        },
+        Policies: [
+          {
+            PolicyName: {
+              'Fn::Join': [
+                '-',
+                [
+                  service.service,
+                  stage,
+                  'warmer',
+                  warmerName.toLowerCase(),
+                  'policy',
+                ],
+              ],
+            },
+            PolicyDocument: {
+              Version: '2012-10-17',
+              Statement: [
+                {
+                  Effect: 'Allow',
+                  Action: [
+                    'logs:CreateLogGroup',
+                    'logs:CreateLogStream',
+                  ],
+                  Resource: [{
+                    'Fn::Sub': `arn:\${AWS::Partition}:logs:\${AWS::Region}:\${AWS::AccountId}:log-group:/aws/lambda/${warmerConfig.name}:*`,
+                  }],
+                },
+                {
+                  Effect: 'Allow',
+                  Action: [
+                    'logs:PutLogEvents',
+                  ],
+                  Resource: [{
+                    'Fn::Sub': `arn:\${AWS::Partition}:logs:\${AWS::Region}:\${AWS::AccountId}:log-group:/aws/lambda/${warmerConfig.name}:*:*`,
+                  }],
+                },
+                {
+                  Effect: 'Allow',
+                  Action: [
+                    'lambda:InvokeFunction',
+                  ],
+                  Resource: functions.map((fn) => ({
+                    'Fn::Sub': `arn:\${AWS::Partition}:lambda:\${AWS::Region}:\${AWS::AccountId}:function:${fn.name}`,
+                  })),
+                },
+                {
+                  Effect: 'Allow',
+                  Action: [
+                    'ec2:CreateNetworkInterface',
+                    'ec2:DescribeNetworkInterfaces',
+                    'ec2:DetachNetworkInterface',
+                    'ec2:DeleteNetworkInterface',
+                  ],
+                  Resource: '*',
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+  }
+
+  /**
    * @description Create warm up function code and write it to the handler file
    * and add warm up function to the service
    * */
@@ -577,6 +686,16 @@ module.exports.warmUp = async (event, context) => {
       this.provider.getRegion(),
       path.join(handlerFolder, 'index.js'),
     );
+
+    if (warmerConfig.role === undefined) {
+      WarmUp.addWarmUpFunctionRoleToResources(
+        this.serverless.service,
+        this.stage,
+        warmerName,
+        warmerConfig,
+        functions,
+      );
+    }
 
     WarmUp.addWarmUpFunctionToService(this.serverless.service, warmerName, warmerConfig);
   }
