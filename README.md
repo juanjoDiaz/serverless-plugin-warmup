@@ -36,7 +36,7 @@ plugins:
 
 Most options are set under `custom.warmup` in the `serverless.yaml` file.
 
-* **folderName** Folder to temporarily store the generated code (defaults to `_warmup`)
+* **folderName** Folder to temporarily store the generated code (defaults to `.warmup`)
 * **cleanFolder** Whether to automatically delete the generated code folder. You might want to keep it if you are doing some custom packaging (defaults to `true`)
 * **name** Name of the generated warmer lambda (defaults to `${service}-${stage}-warmup-plugin`)
 * **role** Role to apply to the warmer lambda (defaults to the role in the provider)
@@ -44,7 +44,7 @@ Most options are set under `custom.warmup` in the `serverless.yaml` file.
 * **vpc** The VPC and subnets in which to deploy. Can be any [Serverless VPC configuration](https://serverless.com/framework/docs/providers/aws/guide/functions#vpc-configuration) or be set to `false` in order to deploy the warmup function outside of a VPC (defaults to the vpc in the provider)
 * **memorySize** The memory to be assigned to the warmer lambda (defaults to `128`)
 * **events** The event that triggers the warmer lambda. Can be any [Serverless event](https://serverless.com/framework/docs/providers/aws/events/) (defaults to `- schedule: rate(5 minutes)`)
-* **package** The package configuration. Can be any [Serverless package configuration](https://serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration) (defaults to `{ individually: true, exclude: ['**'], include: ['_warmup/**'] }`)
+* **package** The package configuration. Can be any [Serverless package configuration](https://serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration) (defaults to `{ individually: true, exclude: ['**'], include: ['.warmup/**'] }`)
 * **timeout** How many seconds until the warmer lambda times out. (defaults to `10`)
 * **environment** Can be used to set environment variables in the warmer lambda. You can also unset variables configured at the provider by setting them to undefined. However, you should almost never have to change the default. (defaults to unset all package level environment variables. )
 * **prewarm** If set to true, it warms up your lambdas right after deploying (defaults to `false`)
@@ -61,7 +61,7 @@ There are also some options which can be set under `custom.warmup` to be applied
 custom:
   warmup:
     enabled: true # Whether to warm up functions by default or not
-    folderName: '_warmup' # Name of the folder created for the generated warmup 
+    folderName: '.warmup' # Name of the folder created for the generated warmup 
     cleanFolder: false
     memorySize: 256
     name: 'make-them-pop'
@@ -155,7 +155,7 @@ WarmUp requires some permissions to be able to `invoke` your lambdas.
 ```yaml
 custom:
   warmup:
-    folderName: '_warmup' # Name of the folder created for the generated warmup 
+    folderName: '.warmup' # Name of the folder created for the generated warmup 
     cleanFolder: false
     memorySize: 256
     name: 'make-them-pop'
@@ -336,7 +336,7 @@ def lambda_handler(event, context):
 Or you could use a decorator to avoid the redundant logic in all your functions:
 
 ```python
-def skip_execution_if_warmup_call(func):
+def skip_execution_if.warmup_call(func):
     def warmup_wrapper(event, context):
       if event.get("source") in ["aws.events", "serverless-plugin-warmup"]:
         print("Lambda is warm!")
@@ -348,7 +348,7 @@ def skip_execution_if_warmup_call(func):
 
 # ...
 
-@skip_execution_if_warmup_call
+@skip_execution_if.warmup_call
 def lambda_handler(event, context):
     # function logic here
     ...
@@ -362,9 +362,9 @@ WarmUp supports `serverless deploy`.
 
 WarmUp supports `serverless package`.
 
-By default, the WarmUp function is packaged individually and it uses a folder named `_warmup` to store duiring the packaging process, which is deleted at the end of the process.
+By default, the WarmUp function is packaged individually and it uses a folder named `.warmup` to store duiring the packaging process, which is deleted at the end of the process.
 
-If you are doing your own [package artifact](https://serverless.com/framework/docs/providers/aws/guide/packaging#artifact) you can set the `cleanFolder` option to `false` and include the `_warmup` folder in your custom artifact.
+If you are doing your own [package artifact](https://serverless.com/framework/docs/providers/aws/guide/packaging#artifact) you can set the `cleanFolder` option to `false` and include the `.warmup` folder in your custom artifact.
 
 ## Gotchas
 

@@ -350,7 +350,7 @@ class WarmUp {
    * */
   static getConfigByWarmer(service, stage) {
     const getWarmerDefaultOpts = (warmerName) => ({
-      folderName: path.join('_warmup', warmerName),
+      folderName: path.join('.warmup', warmerName),
       cleanFolder: true,
       memorySize: 128,
       name: `${service.service}-${stage}-warmup-plugin-${warmerName}`,
