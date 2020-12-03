@@ -15,7 +15,7 @@ Keep your lambdas warm during winter.
 
 ## How it works
 
-WarmUp solves *cold starts* by creating a scheduled lambda that invokes all the selected service's lambdas in a configured time interval (default: 5 minutes) and forcing your containers to stay warm.
+WarmUp solves *cold starts* by creating a scheduled lambda (the warmer) that invokes all the selected service's lambdas in a configured time interval (default: 5 minutes) and forcing your containers to stay warm.
 
 ## Installation
 
@@ -34,22 +34,43 @@ plugins:
 
 ## Configuration
 
-Most options are set under `custom.warmup` in the `serverless.yaml` file.
+The warmup plugin supports creating one or more warmer functions. Warmers are defined under `custom.warmup` in the `serverless.yaml` file:
+
+```yaml
+custom:
+  warmup:
+    officeHoursWarmer:
+      enabled: true
+      events:
+        - schedule: cron(0/5 8-17 ? * MON-FRI *)
+      concurrency: 10
+    outOfOfficeHoursWarmer:
+      enabled: true
+      events:
+        - schedule: cron(0/5 0-7 ? * MON-FRI *)
+        - schedule: cron(0/5 18-23 ? * MON-FRI *)
+        - schedule: cron(0/5 * ? * SAT-SUN *)
+      concurrency: 1
+    testWarmer:
+      enabled: false
+```
+
+The options are the same for all the warmers:
 
 * **folderName** Folder to temporarily store the generated code (defaults to `.warmup`)
 * **cleanFolder** Whether to automatically delete the generated code folder. You might want to keep it if you are doing some custom packaging (defaults to `true`)
-* **name** Name of the generated warmer lambda (defaults to `${service}-${stage}-warmup-plugin`)
+* **name** Name of the generated warmer lambda (defaults to `${service}-${stage}-warmup-plugin-${warmerName}`)
 * **role** Role to apply to the warmer lambda (defaults to the role in the provider)
 * **tags** Tag to apply to the generated warmer lambda (defaults to the serverless default tags)
 * **vpc** The VPC and subnets in which to deploy. Can be any [Serverless VPC configuration](https://serverless.com/framework/docs/providers/aws/guide/functions#vpc-configuration) or be set to `false` in order to deploy the warmup function outside of a VPC (defaults to the vpc in the provider)
 * **memorySize** The memory to be assigned to the warmer lambda (defaults to `128`)
 * **events** The event that triggers the warmer lambda. Can be any [Serverless event](https://serverless.com/framework/docs/providers/aws/events/) (defaults to `- schedule: rate(5 minutes)`)
-* **package** The package configuration. Can be any [Serverless package configuration](https://serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration) (defaults to `{ individually: true, exclude: ['**'], include: ['.warmup/**'] }`)
+* **package** The package configuration. Can be any [Serverless package configuration](https://serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration) (defaults to `{ individually: true, exclude: ['**'], include: ['.warmup/${warmerName}/**'] }`)
 * **timeout** How many seconds until the warmer lambda times out. (defaults to `10`)
 * **environment** Can be used to set environment variables in the warmer lambda. You can also unset variables configured at the provider by setting them to undefined. However, you should almost never have to change the default. (defaults to unset all package level environment variables. )
 * **prewarm** If set to true, it warms up your lambdas right after deploying (defaults to `false`)
 
-There are also some options which can be set under `custom.warmup` to be applied to all your lambdas or under `yourLambda.warmup` to  overridde the global configuration for that particular lambda.
+There are also some options which can be set under `custom.warmup.<yourWarmer>` to be applied to all your lambdas or under `yourLambda.warmup.<yourWarmer>` to  overridde the global configuration for that particular lambda. Keep in mind that in order to configure a warmer at the function level, it needed to be previously configured at the `custom` section or the pluging will error.
 
 * **enabled** Whether your lambda should be warmed up or not. Can be a boolean, a stage for which the lambda will be warmed up or a list of stages for which your lambda will be warmed up (defaults to `false`)
 * **clientContext** Custom data to send as client context to the data. It should be an object where all the values are strings. (defaults to the payload. Set it to `false` to avoid sending any client context custom data)
@@ -60,35 +81,36 @@ There are also some options which can be set under `custom.warmup` to be applied
 ```yaml
 custom:
   warmup:
-    enabled: true # Whether to warm up functions by default or not
-    folderName: '.warmup' # Name of the folder created for the generated warmup 
-    cleanFolder: false
-    memorySize: 256
-    name: 'make-them-pop'
-    role: myCustRole0
-    tags:
-      Project: foo
-      Owner: bar 
-    vpc: false
-    events:
-      - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUp every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
-    package:
-      individually: true
-      exclude: # exclude additional binaries that are included at the serverless package level
-        - ../**
-        - ../../**
-      include:
-        - ./**
-    timeout: 20
-    prewarm: true # Run WarmUp immediately after a deploymentlambda
-    clientContext:
-      source: my-custom-source
-      other: '20'
-    payload: 
-      source: my-custom-source
-      other: 20
-    payloadRaw: true # Won't JSON.stringify() the payload, may be necessary for Go/AppSync deployments
-    concurrency: 5 # Warm up 5 concurrent instances
+    default:
+      enabled: true # Whether to warm up functions by default or not
+      folderName: '.warmup' # Name of the folder created for the generated warmup 
+      cleanFolder: false
+      memorySize: 256
+      name: warmer-default
+      role: WarmupRole
+      tags:
+        Project: foo
+        Owner: bar 
+      vpc: false
+      events:
+        - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUp every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
+      package:
+        individually: true
+        exclude: # exclude additional binaries that are included at the serverless package level
+          - ../**
+          - ../../**
+        include:
+          - ./**
+      timeout: 20
+      prewarm: true # Run WarmUp immediately after a deploymentlambda
+      clientContext:
+        source: my-custom-source
+        other: '20'
+      payload: 
+        source: my-custom-source
+        other: 20
+      payloadRaw: true # Won't JSON.stringify() the payload, may be necessary for Go/AppSync deployments
+      concurrency: 5 # Warm up 5 concurrent instances
     
 functions:
   myColdfunction:
@@ -98,7 +120,8 @@ functions:
           path: my-cold-function
           method: post
     warmup:
-      enabled: false
+      default:
+        enabled: false
 
   myLowConcurrencyFunction:
     handler: 'myLowConcurrencyFunction.handler'
@@ -107,11 +130,12 @@ functions:
           path: my-low-concurrency-function
           method: post
     warmup:
-      clientContext:
-        source: different-source-only-for-this-lambda
-      payload:
-        source: different-source-only-for-this-lambda
-      concurrency: 1
+      default:
+        clientContext:
+          source: different-source-only-for-this-lambda
+        payload:
+          source: different-source-only-for-this-lambda
+        concurrency: 1
    
   myProductionOnlyFunction:
     handler: 'myProductionOnlyFunction.handler'
@@ -120,7 +144,8 @@ functions:
           path: my-production-only-function
           method: post
     warmup:
-      enabled: prod
+      default:
+        enabled: prod
       
    myDevAndStagingOnlyFunction:
     handler: 'myDevAndStagingOnlyFunction.handler'
@@ -129,9 +154,10 @@ functions:
           path: my-dev-and-staging-only-function
           method: post
     warmup:
-      enabled:
-        - dev
-        - staging
+      default:
+        enabled:
+          - dev
+          - staging
 ```
 
 ##### Options should be tweaked depending on:
@@ -141,6 +167,7 @@ functions:
 * Desire to avoid cold lambdas after a deployment
 
 #### Runtime Configuration
+
 Concurrency can be modified post-deployment at runtime by setting the warmer lambda environment variables.  
 Two configuration options exist:
 * Globally set the concurrency for all lambdas on the stack (overriding the deployment-time configuration):  
@@ -150,33 +177,22 @@ Two configuration options exist:
 
 ### Permissions
 
-WarmUp requires some permissions to be able to `invoke` your lambdas.
+WarmUp requires permission to be able to `invoke` your lambdas.
+
+If no role is provided at the `custom.warmup` level, each warmer function gets a default role with minimal permissions allowing the warmer function to:
+* Create its log stream and write logs to it
+* Invoke the functions that it should warm (and only those)
+* Create and attach elastic network interfaces (ENIs) which is necessary if deploying to a VPC
+
+The default role looks like:
 
 ```yaml
-custom:
-  warmup:
-    folderName: '.warmup' # Name of the folder created for the generated warmup 
-    cleanFolder: false
-    memorySize: 256
-    name: 'make-them-pop'
-    role:  myCustRole0
-    events:
-      - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUp every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
-    timeout: 20
-    prewarm: true # Run WarmUp immediately after a deployment
-    tags:
-      Project: foo
-      Owner: bar
-
-.....
-
 resources:
   Resources:
-    myCustRole0:
+    WarmupRole:
       Type: AWS::IAM::Role
       Properties:
-        Path: /my/cust/path/
-        RoleName: MyCustRole0
+        RoleName: WarmupRole
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -186,43 +202,39 @@ resources:
                   - lambda.amazonaws.com
               Action: sts:AssumeRole
         Policies:
-          - PolicyName: myPolicyName
+          - PolicyName: WarmUpLambdaPolicy
             PolicyDocument:
               Version: '2012-10-17'
               Statement:
-                - Effect: Allow # Warmer lambda to send logs to CloudWatch
+               # Warmer lambda to send logs to CloudWatch
+                - Effect: Allow
                   Action:
                     - logs:CreateLogGroup
                     - logs:CreateLogStream
+                  Resource: 
+                    - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/${self:service}-${opt:stage, self:provider.stage}/*:*
+                - Effect: Allow
+                  Action:
                     - logs:PutLogEvents
                   Resource: 
-                    - 'Fn::Join':
-                      - ':'
-                      -
-                        - 'arn:aws:logs'
-                        - Ref: 'AWS::Region'
-                        - Ref: 'AWS::AccountId'
-                        - 'log-group:/aws/lambda/*:*:*'
-                - Effect: Allow # Warmer lambda to manage ENIS (only needed if deploying to VPC, https://docs.aws.amazon.com/lambda/latest/dg/vpc.html)
+                    - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/${self:service}-${opt:stage, self:provider.stage}/*:*:*
+                # Warmer lambda to invoke the functions to be warmed
+                - Effect: 'Allow'
+                  Action:
+                    - lambda:InvokeFunction
+                  Resource:
+                    - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${opt:stage, self:provider.stage}-*
+                # Warmer lambda to manage ENIS (only needed if deploying to VPC, https://docs.aws.amazon.com/lambda/latest/dg/vpc.html)
+                - Effect: Allow
                   Action:
                     - ec2:CreateNetworkInterface
                     - ec2:DescribeNetworkInterfaces
                     - ec2:DetachNetworkInterface
                     - ec2:DeleteNetworkInterface
                   Resource: "*"
-                - Effect: 'Allow' # Warmer lambda to invoke the functions to be warmed
-                  Action:
-                    - 'lambda:InvokeFunction'
-                  Resource:
-                  - Fn::Join:
-                    - ':'
-                    - - arn:aws:lambda
-                      - Ref: AWS::Region
-                      - Ref: AWS::AccountId
-                      - function:${self:service}-${opt:stage, self:provider.stage}-*
 ```
 
-The permissions can also be added to all lambdas using `iamRoleStatements` under `provider` (see https://serverless.com/framework/docs/providers/aws/guide/functions/#permissions):
+The permissions can also be added to all lambdas using setting the role to `IamRoleLambdaExecution` and setting the permissions in `iamRoleStatements` under `provider` (see https://serverless.com/framework/docs/providers/aws/guide/functions/#permissions):
 
 ```yaml
 provider:
@@ -233,15 +245,15 @@ provider:
       Action:
         - 'lambda:InvokeFunction'
       Resource:
-      - Fn::Join:
-        - ':'
-        - - arn:aws:lambda
-          - Ref: AWS::Region
-          - Ref: AWS::AccountId
-          - function:${self:service}-${opt:stage, self:provider.stage}-*
+      - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${opt:stage, self:provider.stage}-*
+custom:
+  warmup:
+    default:
+      enabled: true
+      role: IamRoleLambdaExecution
 ```
-If using pre-warm, the deployment user also needs a similar policy so it can run the warmer lambda.
 
+If setting `prewarm` to `true`, the deployment user used by the AWS CLI and the Serverless framework also needs permissions to invoke the warmer.
 
 ## On the function side
 
@@ -376,6 +388,71 @@ If you use the VPC option to deploy your WarmUp function to a VPC subnet it will
 
 ### v4.X to v5.X
 
+#### Support multiple warmer
+
+Previous versions of the plugin only support a single warmer which limited use cases like having different concurrentcies in different time periods. From v5, multiple warmers are supported. The `warmup` field in the `custom` section or the function section, takes an object where each key represent the name of the warmer and the value the configuration which is exactly as it used to be except for the changes listed below.
+
+```yaml
+custom:
+  warmup:
+    enabled: true
+    events:
+      - schedule: rate(5 minutes)
+```
+
+have to be named, for example, to `default`:
+
+```yaml
+custom:
+  warmup:
+    default:
+      enabled: true
+      events:
+        - schedule: rate(5 minutes)
+```
+
+#### Change the default temporary folder to `.warmup`
+
+Previous versions of the plugin named the temporary folder to create the warmer handler `_warmup`. It has been renamed to `.warmup` to better align with the serverless framework and other plugins' behaviours.
+
+Remembe to add `.warmup` to your git ignore.
+
+#### Default to Unqualified alias
+
+Previous versions of the plugin used the `$LATEST` alias as default alias to warm up if no alias was provided. From v5, the unqualified alias is the default. You can still use the `$LATEST` alias by setting it using the `SERVERLESS_ALIAS` environment variable.
+
+```yaml
+custom:
+  warmup:
+    default:
+      environment:
+        SERVERLESS_ALIAS: $LATEST
+```
+
+#### Automatically exclude package level includes
+
+Previous versions of the plugin exclude everything in the service folder and include the `.warmup` folder. This caused that any files that you include to the service level were also included in the plugin specially if you include ancestor folders (like `../**`)
+From v5, all service level include are automatically excluded from the plugin. You still override this behaviour using the `package` option.
+
+#### Removed shorthand
+
+Previous versions of the plugin support replacing the configuration by a boolean, a string representing a stage or an array of strings representing a lsit of stages. From v5, this is not supported anymore. The `enabled` option is equivalent.
+
+```yaml
+custom:
+  warmup: 'prod'
+```
+
+is the same as
+```yaml
+custom:
+  warmup:
+    default: # Name of the warmer, see above
+      enabed: 'prod'
+```
+
+#### Removed legacy options
+
 The following legacy options have been completely removed:
 
 * **default** Has been renamed to `enabled`
@@ -383,13 +460,17 @@ The following legacy options have been completely removed:
 * **source** Has been renamed to `payload`
 * **sourceRaw** Has been renamed to `payloadRaw`
 
+#### Automatically creates a role for the lambda
+
+If no role is provided in the `custom.warmup` config, a default role with minimal permissions is created for each warmer.
+
 ## Cost
 
 You can check the Lambda [pricing](https://aws.amazon.com/lambda/pricing/) and CloudWatch [pricing](https://aws.amazon.com/cloudwatch/pricing/) or can use the [AWS Lambda Pricing Calculator](https://s3.amazonaws.com/lambda-tools/pricing-calculator.html) to estimate the monthly cost
 
 #### Example
 
-If you want to warm 10 functions, each with `memorySize = 1024` and `duration = 10`, using the default settings (and we ignore the free tier):
+If you have a single warmer and want to warm 10 functions, each with `memorySize = 1024` and `duration = 10`, using the default settings (and we ignore the free tier):
 
 * WarmUp: runs 8640 times per month = $0.18
 * 10 warm lambdas: each invoked 8640 times per month = $14.4
@@ -399,7 +480,7 @@ CloudWatch costs are not in this example because they are very low.
 
 ## Contribute
 
-Help us making this plugin better and future proof.
+Help us making this plugin better and future-proof.
 
 * Clone the code
 * Install the dependencies with `npm install`
