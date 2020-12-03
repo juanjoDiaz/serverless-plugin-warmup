@@ -482,23 +482,31 @@ aws.config.region = '${region}';
 const lambda = new aws.Lambda();
 const functions = ${JSON.stringify(functions)};
 
+function getConcurrency(func, envVars) {
+  const functionConcurrency = envVars[\`WARMUP_CONCURRENCY_\${func.name.toUpperCase().replace(/-/g, '_')}\`];
+
+  if (functionConcurrency) {
+    const concurrency = parseInt(functionConcurrency);
+    console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from function-specific environment variable)\`);
+    return concurrency;
+  }
+
+  if (envVars.WARMUP_CONCURRENCY) {
+    const concurrency = parseInt(envVars.WARMUP_CONCURRENCY);
+    console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from global environment variable)\`);
+    return concurrency;
+  }
+  
+  const concurrency = parseInt(func.config.concurrency);
+  console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency}\`);
+  return concurrency;
+}
+
 module.exports.warmUp = async (event, context) => {
   console.log('Warm Up Start');
 
   const invokes = await Promise.all(functions.map(async (func) => {
-    let concurrency;
-    const functionConcurrency = process.env[\`WARMUP_CONCURRENCY_\${func.name.toUpperCase().replace(/-/g, '_')}\`];
-
-    if (functionConcurrency) {
-      concurrency = parseInt(functionConcurrency);
-      console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from function-specific environment variable)\`);
-    } else if (process.env.WARMUP_CONCURRENCY) {
-      concurrency = parseInt(process.env.WARMUP_CONCURRENCY);
-      console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from global environment variable)\`);
-    } else {
-      concurrency = parseInt(func.config.concurrency);
-      console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency}\`);
-    }
+    const concurrency = getConcurrency(func, process.env);
 
     const clientContext = func.config.clientContext !== undefined
       ? func.config.clientContext
