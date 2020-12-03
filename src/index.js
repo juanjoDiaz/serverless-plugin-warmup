@@ -196,7 +196,7 @@ class WarmUp {
     );
 
     if (Object.keys(this.functionsByWarmer).length === 0) {
-      this.serverless.cli.log('WarmUp: no functions to warm up for any warmer');
+      this.serverless.cli.log('WarmUp: Skipping all warmers creation. No functions to warm up.');
       return;
     }
 
@@ -230,7 +230,7 @@ class WarmUp {
         await WarmUp.cleanFolder(path.join(this.serverless.config.servicePath, folderToClean));
       } catch (err) {
         if (err.code !== 'ENOENT') {
-          this.serverless.cli.log(`WarmUp: couldn't clean up temporary folder ${folderToClean}`);
+          this.serverless.cli.log(`WarmUp: Couldn't clean up temporary folder ${folderToClean}.`);
         }
       }
     }));
@@ -256,7 +256,7 @@ class WarmUp {
     );
 
     if (Object.keys(this.functionsByWarmer).length === 0) {
-      this.serverless.cli.log('WarmUp: no functions to prewarm');
+      this.serverless.cli.log('WarmUp: Skipping all warmers prewarming. No functions to warm up.');
       return;
     }
 
@@ -578,12 +578,12 @@ module.exports.warmUp = async (event, context) => {
    * */
   async configureWarmer(warmerName, warmerConfig, functions) {
     if (functions === undefined || functions.length === 0) {
-      this.serverless.cli.log(`WarmUp: no functions to warm up for warmer ${warmerName}`);
+      this.serverless.cli.log(`WarmUp: Skipping warmer "${warmerName}" creation. No functions to warm up.`);
       return;
     }
 
-    this.serverless.cli.log(`WarmUp: setting warmer "${warmerName}" to warm up ${functions.length} lambdas`);
-    functions.forEach((func) => this.serverless.cli.log(`WarmUp: ${func.name}`));
+    this.serverless.cli.log(`WarmUp: Creating warmer "${warmerName}" to warm up ${functions.length} function${functions.length === 1 ? '' : 's'}:`);
+    functions.forEach((func) => this.serverless.cli.log(`          * ${func.name}`));
 
     const handlerFolder = path.join(this.serverless.config.servicePath, warmerConfig.folderName);
 
@@ -600,11 +600,11 @@ module.exports.warmUp = async (event, context) => {
 
   async invokeWarmer(warmerName, warmerConfig, functions) {
     if (functions === undefined || functions.length === 0) {
-      this.serverless.cli.log(`WarmUp: no functions to warm up for warmer ${warmerName}`);
+      this.serverless.cli.log(`WarmUp: Skipping prewarming using warmer "${warmerName}". No functions to warm up.`);
       return;
     }
 
-    this.serverless.cli.log(`WarmUp: Pre-warming up you functions using warmer "${warmerName}"`);
+    this.serverless.cli.log(`WarmUp: Prewarming up you functions using warmer "${warmerName}".`);
 
     try {
       const { SERVERLESS_ALIAS } = this.serverless.service.getFunction(`warmUpPlugin${capitalize(warmerName)}`).environment || {};
@@ -617,9 +617,9 @@ module.exports.warmUp = async (event, context) => {
       };
 
       await this.provider.request('Lambda', 'invoke', params);
-      this.serverless.cli.log(`WarmUp: Warmer "${warmerName}" successfully pre-warmed your functions`);
+      this.serverless.cli.log(`WarmUp: Warmer "${warmerName}" successfully prewarmed your functions.`);
     } catch (err) {
-      this.serverless.cli.log(`WarmUp: Error while pre-warming your functions using warmer "${warmerName}"`, err);
+      this.serverless.cli.log(`WarmUp: Error while prewarming your functions using warmer "${warmerName}".`, err);
     }
   }
 }
