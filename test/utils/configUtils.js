@@ -1,6 +1,10 @@
 function getServerlessConfig(serverless = {}) {
   return {
-    getProvider: serverless.getProvider || (() => {}),
+    getProvider: serverless.getProvider || (() => ({
+      request: (serverless.provider && serverless.provider.request) || (() => Promise.resolve()),
+      getStage: (serverless.provider && serverless.provider.getStage) || (() => 'dev'),
+      getRegion: (serverless.provider && serverless.provider.getRegion) || (() => 'us-east-1'),
+    })),
     configSchemaHandler: {
       defineCustomProperties() {},
       defineFunctionProperties() {},

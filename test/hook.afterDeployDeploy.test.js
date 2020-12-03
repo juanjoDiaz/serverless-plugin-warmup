@@ -5,9 +5,9 @@ const { getServerlessConfig } = require('./utils/configUtils');
 
 describe('Serverless warmup plugin after:deploy:deploy hook', () => {
   it('Should prewarm the functions if prewarm is set to true and there are functions', async () => {
-    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
+    const mockedRequest = jest.fn(() => Promise.resolve());
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
+      provider: { request: mockedRequest },
       service: {
         custom: {
           warmup: {
@@ -24,7 +24,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:deploy:deploy']();
 
-    expect(mockProvider.request).toHaveBeenCalledTimes(1);
+    expect(mockedRequest).toHaveBeenCalledTimes(1);
     const params = {
       FunctionName: 'warmup-test-dev-warmup-plugin-default',
       InvocationType: 'RequestResponse',
@@ -32,13 +32,13 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       Qualifier: undefined,
       Payload: '{"source":"serverless-plugin-warmup"}',
     };
-    expect(mockProvider.request).toHaveBeenCalledWith('Lambda', 'invoke', params);
+    expect(mockedRequest).toHaveBeenCalledWith('Lambda', 'invoke', params);
   });
 
   it('Should not prewarm the functions if prewarm is set to true and there are no functions', async () => {
-    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
+    const mockedRequest = jest.fn(() => Promise.resolve());
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
+      provider: { request: mockedRequest },
       service: {
         custom: {
           warmup: {
@@ -54,13 +54,13 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:deploy:deploy']();
 
-    expect(mockProvider.request).not.toHaveBeenCalled();
+    expect(mockedRequest).not.toHaveBeenCalled();
   });
 
   it('Should not prewarm the functions if prewarm is set to true and there are no functions for specific warmer', async () => {
-    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
+    const mockedRequest = jest.fn(() => Promise.resolve());
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
+      provider: { request: mockedRequest },
       service: {
         custom: {
           warmup: {
@@ -82,13 +82,13 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:deploy:deploy']();
 
-    expect(mockProvider.request).not.toHaveBeenCalled();
+    expect(mockedRequest).not.toHaveBeenCalled();
   });
 
   it('Should not prewarm the functions if prewarm is set to false', async () => {
-    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
+    const mockedRequest = jest.fn(() => Promise.resolve());
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
+      provider: { request: mockedRequest },
       service: {
         custom: {
           warmup: {
@@ -103,13 +103,13 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:deploy:deploy']();
 
-    expect(mockProvider.request).not.toHaveBeenCalled();
+    expect(mockedRequest).not.toHaveBeenCalled();
   });
 
   it('Should not error if prewarming fails', async () => {
-    const mockProvider = { request: jest.fn(() => Promise.reject(new Error())) };
+    const mockedRequest = jest.fn(() => Promise.reject(new Error()));
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
+      provider: { request: mockedRequest },
       service: {
         custom: {
           warmup: {
@@ -126,7 +126,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
     await plugin.hooks['after:deploy:deploy']();
 
-    expect(mockProvider.request).toHaveBeenCalledTimes(1);
+    expect(mockedRequest).toHaveBeenCalledTimes(1);
     const params = {
       FunctionName: 'warmup-test-dev-warmup-plugin-default',
       InvocationType: 'RequestResponse',
@@ -134,14 +134,14 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       Qualifier: undefined,
       Payload: '{"source":"serverless-plugin-warmup"}',
     };
-    expect(mockProvider.request).toHaveBeenCalledWith('Lambda', 'invoke', params);
+    expect(mockedRequest).toHaveBeenCalledWith('Lambda', 'invoke', params);
   });
 
   describe('Other plugins integrations', () => {
     it('Should use the warmup function alias if SERVERLESS_ALIAS env variable is present', async () => {
-      const mockProvider = { request: jest.fn(() => Promise.resolve()) };
+      const mockedRequest = jest.fn(() => Promise.resolve());
       const serverless = getServerlessConfig({
-        getProvider() { return mockProvider; },
+        provider: { request: mockedRequest },
         service: {
           custom: {
             warmup: {
@@ -161,7 +161,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
 
       await plugin.hooks['after:deploy:deploy']();
 
-      expect(mockProvider.request).toHaveBeenCalledTimes(1);
+      expect(mockedRequest).toHaveBeenCalledTimes(1);
       const params = {
         FunctionName: 'warmup-test-dev-warmup-plugin-default',
         InvocationType: 'RequestResponse',
@@ -169,7 +169,7 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
         Qualifier: 'TEST_ALIAS',
         Payload: '{"source":"serverless-plugin-warmup"}',
       };
-      expect(mockProvider.request).toHaveBeenCalledWith('Lambda', 'invoke', params);
+      expect(mockedRequest).toHaveBeenCalledWith('Lambda', 'invoke', params);
     });
   });
 });

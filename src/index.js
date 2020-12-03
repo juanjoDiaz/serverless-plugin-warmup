@@ -183,15 +183,12 @@ class WarmUp {
    * @return {Promise}
    * */
   async afterPackageInitialize() {
-    this.resolvedOptions = this.getResolvedStageAndRegion();
-    this.configByWarmer = WarmUp.getConfigByWarmer(
-      this.serverless.service,
-      this.resolvedOptions.stage,
-    );
+    this.stage = this.provider.getStage();
 
+    this.configByWarmer = WarmUp.getConfigByWarmer(this.serverless.service, this.stage);
     this.functionsByWarmer = WarmUp.getFunctionsByWarmer(
       this.serverless.service,
-      this.resolvedOptions.stage,
+      this.stage,
       this.configByWarmer,
     );
 
@@ -217,9 +214,9 @@ class WarmUp {
    * @return {Promise}
    * */
   async afterCreateDeploymentArtifacts() {
-    this.resolvedOptions = this.resolvedOptions || this.getResolvedStageAndRegion();
+    this.stage = this.stage || this.provider.getStage();
     this.configByWarmer = this.configByWarmer
-      || WarmUp.getConfigByWarmer(this.serverless.service, this.resolvedOptions.stage);
+      || WarmUp.getConfigByWarmer(this.serverless.service, this.stage);
 
     const foldersToClean = Array.from(new Set(Object.values(this.configByWarmer)
       .filter((config) => config.cleanFolder)
@@ -245,13 +242,13 @@ class WarmUp {
    * @return {Promise}
    * */
   async afterDeployFunctions() {
-    this.resolvedOptions = this.resolvedOptions || this.getResolvedStageAndRegion();
+    this.stage = this.stage || this.provider.getStage();
     this.configByWarmer = this.configByWarmer
-      || WarmUp.getConfigByWarmer(this.serverless.service, this.resolvedOptions.stage);
+      || WarmUp.getConfigByWarmer(this.serverless.service, this.stage);
 
     this.functionsByWarmer = this.functionsToWarmup || WarmUp.getFunctionsByWarmer(
       this.serverless.service,
-      this.resolvedOptions.stage,
+      this.stage,
       this.configByWarmer,
     );
 
@@ -266,25 +263,6 @@ class WarmUp {
         WarmUp.addWarmUpFunctionToService(this.serverless.service, warmerName, warmerConfig);
         await this.invokeWarmer(warmerName, warmerConfig, this.functionsByWarmer[warmerName]);
       }));
-  }
-
-  /**
-   * @description Get the stage and region properly resolved
-   * See https://github.com/serverless/serverless/issues/2631
-   *
-   * @return {Object} - Stage and region options
-   * */
-  getResolvedStageAndRegion() {
-    return {
-      stage: this.options.stage
-        || this.serverless.service.provider.stage
-        || (this.serverless.service.defaults && this.serverless.service.defaults.stage)
-        || 'dev',
-      region: this.options.region
-        || this.serverless.service.provider.region
-        || (this.serverless.service.defaults && this.serverless.service.defaults.region)
-        || 'us-east-1',
-    };
   }
 
   /**
@@ -591,7 +569,7 @@ module.exports.warmUp = async (event, context) => {
 
     await WarmUp.createWarmUpFunctionArtifact(
       functions,
-      this.resolvedOptions.region,
+      this.provider.getRegion(),
       path.join(handlerFolder, 'index.js'),
     );
 

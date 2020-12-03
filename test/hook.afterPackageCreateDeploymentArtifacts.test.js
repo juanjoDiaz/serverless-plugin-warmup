@@ -25,9 +25,7 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
 
   it('Should clean the temporary folder if cleanFolder is set to true', async () => {
     fs.readdir.mockResolvedValueOnce(files);
-    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
       service: {
         custom: {
           warmup: {
@@ -52,9 +50,7 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
 
   it('Should clean the custom temporary folder if cleanFolder is set to true', async () => {
     fs.readdir.mockResolvedValueOnce(files);
-    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
       service: {
         custom: {
           warmup: {
@@ -82,9 +78,7 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
     const err = new Error('Folder doesn\'t exist');
     err.code = 'ENOENT';
     fs.readdir.mockRejectedValueOnce(err);
-    const mockProvider = { request: jest.fn(() => Promise.reject()) };
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
       service: {
         custom: {
           warmup: {
@@ -109,9 +103,7 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
   it('Should not error if couldn\'t clean up the custom temporary folder', async () => {
     fs.readdir.mockResolvedValueOnce(files);
     fs.rmdir.mockRejectedValueOnce(new Error('Folder couldn\'t be cleaned'));
-    const mockProvider = { request: jest.fn(() => Promise.reject()) };
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
       service: {
         custom: {
           warmup: {
@@ -132,9 +124,7 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
   });
 
   it('Should not clean the temporary folder if cleanFolder is set to false', async () => {
-    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
       service: {
         custom: {
           warmup: {
@@ -155,9 +145,7 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
   });
 
   it('Should package only the lambda handler by default', async () => {
-    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
       service: {
         custom: {
           warmup: {
@@ -184,9 +172,7 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
   });
 
   it('Should exclude files included at the service level', async () => {
-    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
       service: {
         package: {
           include: ['../**'],
@@ -216,9 +202,7 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
   });
 
   it('Should use the package exclusions from options if present', async () => {
-    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
       service: {
         custom: {
           warmup: {
@@ -249,9 +233,7 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
   });
 
   it('Should use the package inclusions from options if present', async () => {
-    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
       service: {
         custom: {
           warmup: {
@@ -283,9 +265,7 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
   });
 
   it('Should not duplicate the warmup folder inclusion even if manually included', async () => {
-    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
       service: {
         custom: {
           warmup: {
@@ -317,9 +297,7 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
   });
 
   it('Should use the package inclusions with custom folderName', async () => {
-    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
       service: {
         custom: {
           warmup: {
@@ -353,9 +331,7 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
   });
 
   it('Should support package individually false', async () => {
-    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
       service: {
         custom: {
           warmup: {
@@ -387,9 +363,7 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
   });
 
   it('Should use default exclude if missing', async () => {
-    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
       service: {
         custom: {
           warmup: {
@@ -420,9 +394,7 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
   });
 
   it('Should use default individually if missing', async () => {
-    const mockProvider = { request: jest.fn(() => Promise.resolve()) };
     const serverless = getServerlessConfig({
-      getProvider() { return mockProvider; },
       service: {
         custom: {
           warmup: {
