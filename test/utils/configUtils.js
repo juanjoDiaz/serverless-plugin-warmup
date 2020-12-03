@@ -38,7 +38,7 @@ function getExpectedFunctionConfig(options = {}) {
   const warmerName = options.warmerName || 'default';
 
   return {
-    description: 'Serverless WarmUp Plugin',
+    description: `Serverless WarmUp Plugin (warmer "${warmerName}")`,
     events: [{ schedule: 'rate(5 minutes)' }],
     handler: `.warmup/${warmerName}/index.warmUp`,
     memorySize: 128,

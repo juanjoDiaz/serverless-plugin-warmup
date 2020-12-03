@@ -538,7 +538,7 @@ module.exports.warmUp = async (event, context) => {
   static addWarmUpFunctionToService(service, warmerName, warmerConfig) {
     // eslint-disable-next-line no-param-reassign
     service.functions[`warmUpPlugin${capitalize(warmerName)}`] = {
-      description: 'Serverless WarmUp Plugin',
+      description: `Serverless WarmUp Plugin (warmer "${warmerName}")`,
       events: warmerConfig.events,
       handler: warmerConfig.pathHandler,
       memorySize: warmerConfig.memorySize,
