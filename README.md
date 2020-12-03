@@ -281,7 +281,7 @@ module.exports.lambdaToWarm = async function(event, context) {
     return 'Lambda is warm!';
   }
 
-  ... add lambda logic after
+  // ... function logic
 }
 ```
 
@@ -295,7 +295,7 @@ module.exports.lambdaToWarm = function(event, context, callback) {
     return callback(null, 'Lambda is warm!')
   }
 
-  ... add lambda logic after
+  // ... function logic
 }
 ```
 
@@ -309,13 +309,13 @@ module.exports.lambdaToWarm = async function(event, context) {
     return 'Lambda is warm!';
   }
 
-  ... add lambda logic after
+  // ... function logic
 }
 ```
 
 If you're using the `concurrency` option you might want to add a slight delay before returning on warmup calls to ensure that your function doesn't return before all concurrent requests have been started:
 
-```jss
+```js
 module.exports.lambdaToWarm = async (event, context) => {
   if (event.source === 'serverless-plugin-warmup') {
     console.log('WarmUp - Lambda is warm!');
@@ -323,10 +323,9 @@ module.exports.lambdaToWarm = async (event, context) => {
     	to ensure concurrent invocation */
     await new Promise(r => setTimeout(r, 25));
     return 'Lambda is warm!';
-    
   }
 
-  ... add lambda logic after
+  // ... add lambda logic after
 }
 ```
 
@@ -338,11 +337,10 @@ You can handle it in your function:
 def lambda_handler(event, context):
     # early return call when the function is called by warmup plugin
     if event.get("source") in ["aws.events", "serverless-plugin-warmup"]:
-        print('Lambda is warm!')
+        print("WarmUp - Lambda is warm!")
         return {}
 
-    # function logic here
-    ...
+    # ... function logic
 ```
 
 Or you could use a decorator to avoid the redundant logic in all your functions:
@@ -351,7 +349,7 @@ Or you could use a decorator to avoid the redundant logic in all your functions:
 def skip_execution_if.warmup_call(func):
     def warmup_wrapper(event, context):
       if event.get("source") in ["aws.events", "serverless-plugin-warmup"]:
-        print("Lambda is warm!")
+        print("WarmUp - Lambda is warm!")
         return {}
 
       return func(event, context)
@@ -362,8 +360,39 @@ def skip_execution_if.warmup_call(func):
 
 @skip_execution_if.warmup_call
 def lambda_handler(event, context):
-    # function logic here
-    ...
+    # ... function logic
+```
+
+### Java
+
+You can handle it in your function:
+
+```java
+public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
+  if ("serverless-plugin-warmup".equals(input.get("source"))) {
+    System.out.println("WarmUp - Lambda is warm!");
+    return ApiGatewayResponse.builder()
+        .setStatusCode(200)
+        .build();
+  }
+  
+  // ... function logic
+}
+```
+
+### Ruby
+
+You can handle it in your function:
+
+```ruby
+def handle_request(app:, event:, context:, config: {})
+  if event['source'] == 'serverless-plugin-warmup'
+    puts 'WarmUp - Lambda is warm!'
+    return {} 
+  end
+
+  # ... function logic
+end
 ```
 
 ## Deployment
