@@ -271,8 +271,7 @@ class WarmUp {
    *
    * @return {Object} - Global configuration options
    * */
-  static getWarmerConfig(possibleConfig, defaultOpts) {
-    const config = (typeof possibleConfig === 'object') ? possibleConfig : {};
+  static getWarmerConfig(config = {}, defaultOpts = {}) {
     const folderName = path.join((typeof config.folderName === 'string') ? config.folderName : defaultOpts.folderName);
 
     /* eslint-disable no-nested-ternary */
@@ -320,11 +319,7 @@ class WarmUp {
    *
    * @return {Object} - Function-specific configuration options
    * */
-  static getFunctionConfig(possibleConfig, defaultOpts) {
-    const config = (['boolean', 'string'].includes(typeof possibleConfig) || Array.isArray(possibleConfig))
-      ? { enabled: possibleConfig }
-      : (possibleConfig || {});
-
+  static getFunctionConfig(config = {}, defaultOpts = {}) {
     /* eslint-disable no-nested-ternary */
     return {
       enabled: (config.enabled !== undefined)
