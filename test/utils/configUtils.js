@@ -40,14 +40,14 @@ function getExpectedFunctionConfig(options = {}) {
   return {
     description: 'Serverless WarmUp Plugin',
     events: [{ schedule: 'rate(5 minutes)' }],
-    handler: `_warmup/${warmerName}/index.warmUp`,
+    handler: `.warmup/${warmerName}/index.warmUp`,
     memorySize: 128,
     name: `warmup-test-dev-warmup-plugin-${warmerName}`,
     runtime: 'nodejs12.x',
     package: {
       individually: true,
       exclude: ['**'],
-      include: [`_warmup/${warmerName}/**`],
+      include: [`.warmup/${warmerName}/**`],
     },
     timeout: 10,
     ...options,

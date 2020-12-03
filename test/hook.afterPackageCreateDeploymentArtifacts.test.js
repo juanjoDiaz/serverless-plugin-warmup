@@ -43,9 +43,9 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
     await plugin.hooks['after:package:createDeploymentArtifacts']();
 
     expect(fs.unlink).toHaveBeenCalledTimes(files.length);
-    files.forEach((file, i) => expect(fs.unlink).toHaveBeenNthCalledWith(i + 1, path.join('testPath', '_warmup', 'default', file)));
+    files.forEach((file, i) => expect(fs.unlink).toHaveBeenNthCalledWith(i + 1, path.join('testPath', '.warmup', 'default', file)));
     expect(fs.rmdir).toHaveBeenCalledTimes(1);
-    expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', '_warmup', 'default'));
+    expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', '.warmup', 'default'));
   });
 
   it('Should clean the custom temporary folder if cleanFolder is set to true', async () => {
@@ -120,7 +120,7 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
     await plugin.hooks['after:package:createDeploymentArtifacts']();
 
     expect(fs.rmdir).toHaveBeenCalledTimes(1);
-    expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', '_warmup', 'default'));
+    expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', '.warmup', 'default'));
   });
 
   it('Should not clean the temporary folder if cleanFolder is set to false', async () => {
