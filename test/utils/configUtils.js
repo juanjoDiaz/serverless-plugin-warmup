@@ -49,6 +49,7 @@ function getExpectedFunctionConfig(options = {}) {
       exclude: ['**'],
       include: [`.warmup/${warmerName}/**`],
     },
+    role: 'WarmUpPluginDefaultRole',
     timeout: 10,
     ...options,
   };
