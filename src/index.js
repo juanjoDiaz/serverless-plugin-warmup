@@ -58,7 +58,12 @@ class WarmUp {
       name: { type: 'string' },
       role: { $ref: '#/definitions/awsLambdaRole' },
       tags: { $ref: '#/definitions/awsResourceTags' },
-      vpc: { $ref: '#/definitions/awsLambdaVpcConfig' },
+      vpc: {
+        anyOf: [
+          { const: false }, // to deploy outside of the VPC
+          { $ref: '#/definitions/awsLambdaVpcConfig' },
+        ],
+      },
       events: {
         type: 'array',
         items: {
@@ -141,7 +146,12 @@ class WarmUp {
           { type: 'array', items: { type: 'string' } },
         ],
       },
-      clientContext: { type: 'object' }, // any
+      clientContext: {
+        anyOf: [
+          { const: false }, // to skip it
+          { type: 'object' }, // any
+        ],
+      },      
       payload: { type: 'object' }, // any
       payloadRaw: { type: 'boolean' },
       concurrency: { type: 'integer' },
