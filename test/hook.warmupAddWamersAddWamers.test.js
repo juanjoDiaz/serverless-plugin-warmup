@@ -28,6 +28,30 @@ describe('Serverless warmup plugin constructor', () => {
     fs.writeFile.mockResolvedValue(undefined);
   });
 
+  it('Should be called after package:createDeploymentArtifacts', async () => {
+    const mockedRequest = jest.fn(() => Promise.resolve());
+    const serverless = getServerlessConfig({
+      provider: { request: mockedRequest },
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+              prewarm: true,
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:initialize']();
+
+    expect(serverless.pluginManager.spawn).toHaveBeenCalledTimes(1);
+    expect(serverless.pluginManager.spawn).toHaveBeenCalledWith('warmup:addWamers');
+  });
+
   it('Should support multiple warmers', async () => {
     const serverless = getServerlessConfig({
       service: {
@@ -53,7 +77,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -113,7 +138,8 @@ describe('Serverless warmup plugin constructor', () => {
     const plugin = new WarmUp(serverless, {});
 
     try {
-      await plugin.hooks['after:package:initialize']();
+      await plugin.hooks['before:warmup:addWamers:addWamers']();
+      await plugin.hooks['warmup:addWamers:addWamers']();
     } catch (err) {
       expect(err.message).toEqual('WarmUp: Invalid function-level warmup configuration (unknown) in function someFunc1. Every warmer should be declared in the custom section.');
       expect(fs.mkdir).not.toHaveBeenCalled();
@@ -142,7 +168,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginSecondary).toBeUndefined();
     expect(fs.mkdir).toHaveBeenCalledTimes(1);
@@ -159,7 +186,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault).toBeUndefined();
     expect(fs.mkdir).not.toHaveBeenCalled();
@@ -179,7 +207,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault).toBeUndefined();
     expect(fs.mkdir).not.toHaveBeenCalled();
@@ -201,7 +230,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault).toBeUndefined();
     expect(fs.mkdir).not.toHaveBeenCalled();
@@ -223,7 +253,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -258,7 +289,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -293,7 +325,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault).toBeUndefined();
     expect(fs.mkdir).not.toHaveBeenCalled();
@@ -315,7 +348,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -350,7 +384,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault).toBeUndefined();
     expect(fs.mkdir).not.toHaveBeenCalled();
@@ -375,7 +410,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -411,7 +447,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -447,7 +484,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -483,7 +521,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -519,7 +558,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -555,7 +595,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -591,7 +632,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -627,7 +669,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -663,7 +706,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -699,7 +743,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -735,7 +780,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -771,7 +817,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -807,7 +854,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -843,7 +891,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -879,7 +928,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -915,7 +965,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -951,7 +1002,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -987,7 +1039,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -1021,7 +1074,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
@@ -1050,7 +1104,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, { stage: 'test', region: 'us-west-2' });
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
@@ -1074,7 +1129,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
@@ -1101,7 +1157,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
@@ -1128,7 +1185,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
@@ -1152,7 +1210,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
@@ -1176,7 +1235,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
@@ -1200,7 +1260,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
@@ -1224,7 +1285,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
@@ -1253,7 +1315,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
@@ -1289,7 +1352,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
@@ -1319,7 +1383,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
@@ -1346,7 +1411,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -1385,7 +1451,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -1421,7 +1488,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -1457,7 +1525,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -1495,7 +1564,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -1536,7 +1606,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -1575,7 +1646,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -1617,7 +1689,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -1655,7 +1728,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -1694,7 +1768,8 @@ describe('Serverless warmup plugin constructor', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:initialize']();
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig());
@@ -1730,7 +1805,8 @@ describe('Serverless warmup plugin constructor', () => {
       });
       const plugin = new WarmUp(serverless, {});
 
-      await plugin.hooks['after:package:initialize']();
+      await plugin.hooks['before:warmup:addWamers:addWamers']();
+      await plugin.hooks['warmup:addWamers:addWamers']();
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
@@ -1760,7 +1836,8 @@ describe('Serverless warmup plugin constructor', () => {
       });
       const plugin = new WarmUp(serverless, {});
 
-      await plugin.hooks['after:package:initialize']();
+      await plugin.hooks['before:warmup:addWamers:addWamers']();
+      await plugin.hooks['warmup:addWamers:addWamers']();
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
@@ -1791,7 +1868,8 @@ describe('Serverless warmup plugin constructor', () => {
       });
       const plugin = new WarmUp(serverless, {});
 
-      await plugin.hooks['after:package:initialize']();
+      await plugin.hooks['before:warmup:addWamers:addWamers']();
+      await plugin.hooks['warmup:addWamers:addWamers']();
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
@@ -1823,7 +1901,8 @@ describe('Serverless warmup plugin constructor', () => {
       });
       const plugin = new WarmUp(serverless, {});
 
-      await plugin.hooks['after:package:initialize']();
+      await plugin.hooks['before:warmup:addWamers:addWamers']();
+      await plugin.hooks['warmup:addWamers:addWamers']();
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
@@ -1855,7 +1934,8 @@ describe('Serverless warmup plugin constructor', () => {
       });
       const plugin = new WarmUp(serverless, {});
 
-      await plugin.hooks['after:package:initialize']();
+      await plugin.hooks['before:warmup:addWamers:addWamers']();
+      await plugin.hooks['warmup:addWamers:addWamers']();
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
@@ -1888,7 +1968,8 @@ describe('Serverless warmup plugin constructor', () => {
       });
       const plugin = new WarmUp(serverless, {});
 
-      await plugin.hooks['after:package:initialize']();
+      await plugin.hooks['before:warmup:addWamers:addWamers']();
+      await plugin.hooks['warmup:addWamers:addWamers']();
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
@@ -1920,7 +2001,8 @@ describe('Serverless warmup plugin constructor', () => {
       });
       const plugin = new WarmUp(serverless, {});
 
-      await plugin.hooks['after:package:initialize']();
+      await plugin.hooks['before:warmup:addWamers:addWamers']();
+      await plugin.hooks['warmup:addWamers:addWamers']();
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
@@ -1951,7 +2033,8 @@ describe('Serverless warmup plugin constructor', () => {
       });
       const plugin = new WarmUp(serverless, {});
 
-      await plugin.hooks['after:package:initialize']();
+      await plugin.hooks['before:warmup:addWamers:addWamers']();
+      await plugin.hooks['warmup:addWamers:addWamers']();
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
@@ -1982,7 +2065,8 @@ describe('Serverless warmup plugin constructor', () => {
       });
       const plugin = new WarmUp(serverless, {});
 
-      await plugin.hooks['after:package:initialize']();
+      await plugin.hooks['before:warmup:addWamers:addWamers']();
+      await plugin.hooks['warmup:addWamers:addWamers']();
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
@@ -2012,7 +2096,8 @@ describe('Serverless warmup plugin constructor', () => {
       });
       const plugin = new WarmUp(serverless, {});
 
-      await plugin.hooks['after:package:initialize']();
+      await plugin.hooks['before:warmup:addWamers:addWamers']();
+      await plugin.hooks['warmup:addWamers:addWamers']();
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig());

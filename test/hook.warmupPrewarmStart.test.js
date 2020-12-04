@@ -3,8 +3,8 @@
 const WarmUp = require('../src/index');
 const { getServerlessConfig } = require('./utils/configUtils');
 
-describe('Serverless warmup plugin after:deploy:deploy hook', () => {
-  it('Should prewarm the functions if prewarm is set to true and there are functions', async () => {
+describe('Serverless warmup plugin warmup:prewarm:start hook', () => {
+  it('Should be called after deploy:deploy', async () => {
     const mockedRequest = jest.fn(() => Promise.resolve());
     const serverless = getServerlessConfig({
       provider: { request: mockedRequest },
@@ -23,6 +23,31 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
     const plugin = new WarmUp(serverless, {});
 
     await plugin.hooks['after:deploy:deploy']();
+
+    expect(serverless.pluginManager.spawn).toHaveBeenCalledTimes(1);
+    expect(serverless.pluginManager.spawn).toHaveBeenCalledWith('warmup:prewarm');
+  });
+
+  it('Should prewarm the functions if prewarm is set to true and there are functions', async () => {
+    const mockedRequest = jest.fn(() => Promise.resolve());
+    const serverless = getServerlessConfig({
+      provider: { request: mockedRequest },
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+              prewarm: true,
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['before:warmup:prewarm:start']();
+    await plugin.hooks['warmup:prewarm:start']();
 
     expect(mockedRequest).toHaveBeenCalledTimes(1);
     const params = {
@@ -52,7 +77,8 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:deploy:deploy']();
+    await plugin.hooks['before:warmup:prewarm:start']();
+    await plugin.hooks['warmup:prewarm:start']();
 
     expect(mockedRequest).not.toHaveBeenCalled();
   });
@@ -80,7 +106,8 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:deploy:deploy']();
+    await plugin.hooks['before:warmup:prewarm:start']();
+    await plugin.hooks['warmup:prewarm:start']();
 
     expect(mockedRequest).not.toHaveBeenCalled();
   });
@@ -101,7 +128,8 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:deploy:deploy']();
+    await plugin.hooks['before:warmup:prewarm:start']();
+    await plugin.hooks['warmup:prewarm:start']();
 
     expect(mockedRequest).not.toHaveBeenCalled();
   });
@@ -124,7 +152,8 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:deploy:deploy']();
+    await plugin.hooks['before:warmup:prewarm:start']();
+    await plugin.hooks['warmup:prewarm:start']();
 
     expect(mockedRequest).toHaveBeenCalledTimes(1);
     const params = {
@@ -159,7 +188,8 @@ describe('Serverless warmup plugin after:deploy:deploy hook', () => {
       });
       const plugin = new WarmUp(serverless, {});
 
-      await plugin.hooks['after:deploy:deploy']();
+      await plugin.hooks['before:warmup:prewarm:start']();
+      await plugin.hooks['warmup:prewarm:start']();
 
       expect(mockedRequest).toHaveBeenCalledTimes(1);
       const params = {

@@ -160,12 +160,6 @@ functions:
           - staging
 ```
 
-##### Options should be tweaked depending on:
-
-* Number of lambdas to warm up
-* Day cold periods
-* Desire to avoid cold lambdas after a deployment
-
 #### Runtime Configuration
 
 Concurrency can be modified post-deployment at runtime by setting the warmer lambda environment variables.  
@@ -254,6 +248,15 @@ custom:
 ```
 
 If setting `prewarm` to `true`, the deployment user used by the AWS CLI and the Serverless framework also needs permissions to invoke the warmer.
+
+### Lifecycle hooks
+
+WarmUp plugin uses 3 lifecycles hooks:
+
+* `warmup:addWamers:addWamers`: This is where the warmers are added to the service. It runs `after:package:initialize`.
+* `warmup:cleanupTempDir:cleanup`: This is where the warmers' temp folders are removed. It runs `after:package:createDeploymentArtifacts`.
+* `warmup:prewarm:start`: This is where the warmers are invoked. It runs `after:deploy:deploy` or when running the command `serverless warmup prewarm`.
+* `warmup:prewarm:end`: This is after the warmers are invoked. 
 
 ## On the function side
 
@@ -395,17 +398,40 @@ def handle_request(app:, event:, context:, config: {})
 end
 ```
 
-## Deployment
+## Usage
 
-WarmUp supports `serverless deploy`.
+### Packaging
 
-## Packaging
+WarmUp supports
 
-WarmUp supports `serverless package`.
+```sh
+serverless package
+```
 
-By default, the WarmUp function is packaged individually and it uses a folder named `.warmup` to store duiring the packaging process, which is deleted at the end of the process.
+By default, each warmer function is packaged individually and it uses a folder named `.warmup/<function_name>` to serve as temporary folder during the packaging process. This folder is deleted at the end of the packaging process unless the `cleanFolder` option is set to `false`.
 
 If you are doing your own [package artifact](https://serverless.com/framework/docs/providers/aws/guide/packaging#artifact) you can set the `cleanFolder` option to `false` and include the `.warmup` folder in your custom artifact.
+
+### Deployment
+
+WarmUp adds package the warmers and add them to your services automatically when you run
+
+```sh
+serverless deploy
+```
+
+After the deployment, any warmer with `prewarm: true` is automatically invoked to warm up your functions without delay.
+
+
+## Prewarming
+
+Apart from prewarming automatically after each deployment. You can invokes a warmer after a sucessful deployment to warm up functions using:
+
+```sh
+serverless warmup prewarm -warmers <warmer_name>
+```
+
+The `warmers` flag takes a comma-separated list of warmer names. If it's nor provided, all warmers with `prewarm` set to `true` are invoked.
 
 ## Gotchas
 
