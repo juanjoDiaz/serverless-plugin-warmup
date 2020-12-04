@@ -68,6 +68,7 @@ The options are the same for all the warmers:
 * **package** The package configuration. Can be any [Serverless package configuration](https://serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration) (defaults to `{ individually: true, exclude: ['**'], include: ['.warmup/${warmerName}/**'] }`)
 * **timeout** How many seconds until the warmer lambda times out. (defaults to `10`)
 * **environment** Can be used to set environment variables in the warmer lambda. You can also unset variables configured at the provider by setting them to undefined. However, you should almost never have to change the default. (defaults to unset all package level environment variables. )
+* **tracing** Specify whether to enable/disable tracing at the function level. When tracing is enabled, warmer functions will use NPM to install the X-Ray client and use it to trace requests (It takes any of the values supported by serverless as `boolean`, `Active`or `PassThrough` and defaults to the provider-level setting)
 * **prewarm** If set to true, it warms up your lambdas right after deploying (defaults to `false`)
 
 There are also some options which can be set under `custom.warmup.<yourWarmer>` to be applied to all your lambdas or under `yourLambda.warmup.<yourWarmer>` to  overridde the global configuration for that particular lambda. Keep in mind that in order to configure a warmer at the function level, it needed to be previously configured at the `custom` section or the pluging will error.
@@ -102,6 +103,7 @@ custom:
         include:
           - ./**
       timeout: 20
+      tracing: true
       prewarm: true # Run WarmUp immediately after a deploymentlambda
       clientContext:
         source: my-custom-source
@@ -518,6 +520,10 @@ The following legacy options have been completely removed:
 #### Automatically creates a role for the lambda
 
 If no role is provided in the `custom.warmup` config, a default role with minimal permissions is created for each warmer.
+
+#### Support Tracing
+
+If tracing is enabled at the provider level or at the warmer config level, the X-Ray client is automatically installed and X-Ray tracing is enabled.
 
 ## Cost
 
