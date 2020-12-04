@@ -134,6 +134,42 @@ describe('Serverless warmup plugin warmup:prewarm:start hook', () => {
     expect(mockedRequest).not.toHaveBeenCalled();
   });
 
+  it('Should error if prewarming non-existing function', async () => {
+    const mockedRequest = jest.fn(() => Promise.reject(new Error()));
+    const serverless = getServerlessConfig({
+      provider: { request: mockedRequest },
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+              prewarm: true,
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, { warmers: 'default,non-existing' });
+
+    await plugin.hooks['before:warmup:prewarm:start']();
+
+    try {
+      await plugin.hooks['warmup:prewarm:start']();
+    } catch (err) {
+      expect(err.message).toEqual('Warmer names non-existing doesn\'t exist.');
+      expect(mockedRequest).toHaveBeenCalledTimes(1);
+      const params = {
+        FunctionName: 'warmup-test-dev-warmup-plugin-default',
+        InvocationType: 'RequestResponse',
+        LogType: 'None',
+        Qualifier: undefined,
+        Payload: '{"source":"serverless-plugin-warmup"}',
+      };
+      expect(mockedRequest).toHaveBeenCalledWith('Lambda', 'invoke', params);
+    }
+  });
+
   it('Should not error if prewarming fails', async () => {
     const mockedRequest = jest.fn(() => Promise.reject(new Error()));
     const serverless = getServerlessConfig({
