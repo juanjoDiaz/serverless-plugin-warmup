@@ -32,10 +32,35 @@ class WarmUp {
 
     WarmUp.extendServerlessSchema(this.serverless);
 
+    this.commands = {
+      warmup: {
+        commands: {
+          addWamers: { lifecycleEvents: ['addWamers'] },
+          cleanupTempDir: { lifecycleEvents: ['cleanup'] },
+          prewarm: {
+            lifecycleEvents: ['start', 'end'],
+            options: {
+              warmers: {
+                shortcut: 'w',
+                usage: 'Comma-separated list of warmer names to prewarm.',
+              },
+            },
+            usage: 'Invoke a warmer to warm the functions on demand.',
+          },
+        },
+      },
+    };
+
     this.hooks = {
-      'after:package:initialize': this.afterPackageInitialize.bind(this),
-      'after:package:createDeploymentArtifacts': this.afterCreateDeploymentArtifacts.bind(this),
-      'after:deploy:deploy': this.afterDeployFunctions.bind(this),
+      'after:package:initialize': () => this.serverless.pluginManager.spawn('warmup:addWamers'),
+      'after:package:createDeploymentArtifacts': () => this.serverless.pluginManager.spawn('warmup:cleanupTempDir'),
+      'after:deploy:deploy': () => this.serverless.pluginManager.spawn('warmup:prewarm'),
+      'before:warmup:addWamers:addWamers': this.configPlugin.bind(this),
+      'warmup:addWamers:addWamers': this.initializeWarmers.bind(this),
+      'before:warmup:cleanupTempDir:cleanup': this.configPlugin.bind(this),
+      'warmup:cleanupTempDir:cleanup': this.cleanUp.bind(this),
+      'before:warmup:prewarm:start': this.configPlugin.bind(this),
+      'warmup:prewarm:start': this.prewarmFunctions.bind(this),
     };
   }
 
@@ -185,23 +210,29 @@ class WarmUp {
   }
 
   /**
-   * @description After package initialize hook. Create warmer function and add it to the service.
+   * @description Configures the plugin if needed or do nothing if already configured.
+   * */
+  configPlugin() {
+    this.stage = this.stage || this.provider.getStage();
+    this.configByWarmer = this.configByWarmer
+      || WarmUp.getConfigByWarmer(this.serverless.service, this.stage);
+
+    this.functionsByWarmer = this.functionsByWarmer || WarmUp.getFunctionsByWarmer(
+      this.serverless.service,
+      this.stage,
+      this.configByWarmer,
+    );
+  }
+
+  /**
+   * @description Warm up initialize hook. Create warmer function and add it to the service.
    *
    * @fulfil {} — Warm up set
    * @reject {Error} Warm up error
    *
    * @return {Promise}
    * */
-  async afterPackageInitialize() {
-    this.stage = this.provider.getStage();
-
-    this.configByWarmer = WarmUp.getConfigByWarmer(this.serverless.service, this.stage);
-    this.functionsByWarmer = WarmUp.getFunctionsByWarmer(
-      this.serverless.service,
-      this.stage,
-      this.configByWarmer,
-    );
-
+  async initializeWarmers() {
     if (Object.keys(this.functionsByWarmer).length === 0) {
       this.serverless.cli.log('WarmUp: Skipping all warmers creation. No functions to warm up.');
       return;
@@ -216,18 +247,14 @@ class WarmUp {
   }
 
   /**
-   * @description After create deployment artifacts. Clean prefix folder.
+   * @description Warmup cleanup hook.
    *
-   * @fulfil {} — Optimization finished
-   * @reject {Error} Optimization error
+   * @fulfil {} — Temp folders cleaned up
+   * @reject {Error} Couldn't cleaned up temp folders
    *
    * @return {Promise}
    * */
-  async afterCreateDeploymentArtifacts() {
-    this.stage = this.stage || this.provider.getStage();
-    this.configByWarmer = this.configByWarmer
-      || WarmUp.getConfigByWarmer(this.serverless.service, this.stage);
-
+  async cleanUp() {
     const foldersToClean = Array.from(new Set(Object.values(this.configByWarmer)
       .filter((config) => config.cleanFolder)
       .map((config) => config.folderName)));
@@ -244,35 +271,33 @@ class WarmUp {
   }
 
   /**
-   * @description After deploy functions hooks
+   * @description Warmer prewarm functions hook
    *
    * @fulfil {} — Functions warmed up sucessfuly
    * @reject {Error} Functions couldn't be warmed up
    *
    * @return {Promise}
    * */
-  async afterDeployFunctions() {
-    this.stage = this.stage || this.provider.getStage();
-    this.configByWarmer = this.configByWarmer
-      || WarmUp.getConfigByWarmer(this.serverless.service, this.stage);
-
-    this.functionsByWarmer = this.functionsToWarmup || WarmUp.getFunctionsByWarmer(
-      this.serverless.service,
-      this.stage,
-      this.configByWarmer,
-    );
-
+  async prewarmFunctions() {
     if (Object.keys(this.functionsByWarmer).length === 0) {
       this.serverless.cli.log('WarmUp: Skipping all warmers prewarming. No functions to warm up.');
       return;
     }
 
-    await Promise.all(Object.entries(this.configByWarmer)
-      .filter(([, warmerConfig]) => warmerConfig.prewarm)
-      .map(async ([warmerName, warmerConfig]) => {
-        WarmUp.addWarmUpFunctionToService(this.serverless.service, warmerName, warmerConfig);
-        await this.invokeWarmer(warmerName, warmerConfig, this.functionsByWarmer[warmerName]);
-      }));
+    const warmerNames = (this.options.warmers)
+      ? this.options.warmers.split(',')
+      : Object.entries(this.configByWarmer)
+        .filter(([, warmerConfig]) => warmerConfig.prewarm)
+        .map(([warmerName]) => warmerName);
+
+    await Promise.all(warmerNames.map(async (warmerName) => {
+      const warmerConfig = this.configByWarmer[warmerName];
+      if (!warmerConfig) {
+        throw new Error(`Warmer names ${warmerName} doesn't exist.`);
+      }
+      WarmUp.addWarmUpFunctionToService(this.serverless.service, warmerName, warmerConfig);
+      await this.invokeWarmer(warmerName, warmerConfig, this.functionsByWarmer[warmerName]);
+    }));
   }
 
   /**
@@ -564,7 +589,7 @@ module.exports.warmUp = async (event, context) => {
   }
 
   /**
-   * @description Add warmer function to service
+   * @description Add warmer role to service
    * */
   static addWarmUpFunctionRoleToResources(service, stage, warmerName, warmerConfig, functions) {
     // eslint-disable-next-line no-param-reassign

@@ -16,11 +16,35 @@ const { getServerlessConfig } = require('./utils/configUtils');
 
 const files = ['index.js'];
 
-describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook', () => {
+describe('Serverless warmup plugin warmup:cleanupTempDir:cleanup hook', () => {
   beforeEach(() => {
     fs.readdir.mockClear();
     fs.unlink.mockClear();
     fs.rmdir.mockClear();
+  });
+
+  it('Should be called after package:createDeploymentArtifacts', async () => {
+    const mockedRequest = jest.fn(() => Promise.resolve());
+    const serverless = getServerlessConfig({
+      provider: { request: mockedRequest },
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+              prewarm: true,
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:package:createDeploymentArtifacts']();
+
+    expect(serverless.pluginManager.spawn).toHaveBeenCalledTimes(1);
+    expect(serverless.pluginManager.spawn).toHaveBeenCalledWith('warmup:cleanupTempDir');
   });
 
   it('Should clean the temporary folder if cleanFolder is set to true', async () => {
@@ -40,7 +64,8 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:createDeploymentArtifacts']();
+    await plugin.hooks['before:warmup:cleanupTempDir:cleanup']();
+    await plugin.hooks['warmup:cleanupTempDir:cleanup']();
 
     expect(fs.unlink).toHaveBeenCalledTimes(files.length);
     files.forEach((file, i) => expect(fs.unlink).toHaveBeenNthCalledWith(i + 1, path.join('testPath', '.warmup', 'default', file)));
@@ -66,7 +91,8 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:createDeploymentArtifacts']();
+    await plugin.hooks['before:warmup:cleanupTempDir:cleanup']();
+    await plugin.hooks['warmup:cleanupTempDir:cleanup']();
 
     expect(fs.unlink).toHaveBeenCalledTimes(files.length);
     files.forEach((file, i) => expect(fs.unlink).toHaveBeenNthCalledWith(i + 1, path.join('testPath', 'test-folder', file)));
@@ -94,7 +120,8 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:createDeploymentArtifacts']();
+    await plugin.hooks['before:warmup:cleanupTempDir:cleanup']();
+    await plugin.hooks['warmup:cleanupTempDir:cleanup']();
 
     expect(fs.rmdir).not.toHaveBeenCalled();
   });
@@ -117,7 +144,8 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:createDeploymentArtifacts']();
+    await plugin.hooks['before:warmup:cleanupTempDir:cleanup']();
+    await plugin.hooks['warmup:cleanupTempDir:cleanup']();
 
     expect(fs.rmdir).toHaveBeenCalledTimes(1);
     expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', '.warmup', 'default'));
@@ -139,7 +167,8 @@ describe('Serverless warmup plugin after:package:createDeploymentArtifacts hook'
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['after:package:createDeploymentArtifacts']();
+    await plugin.hooks['before:warmup:cleanupTempDir:cleanup']();
+    await plugin.hooks['warmup:cleanupTempDir:cleanup']();
 
     expect(fs.rmdir).not.toHaveBeenCalled();
   });

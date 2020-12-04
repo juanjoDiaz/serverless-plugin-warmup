@@ -1,3 +1,5 @@
+/* global jest */
+
 function getServerlessConfig(serverless = {}) {
   return {
     getProvider: serverless.getProvider || (() => ({
@@ -5,6 +7,9 @@ function getServerlessConfig(serverless = {}) {
       getStage: (serverless.provider && serverless.provider.getStage) || (() => 'dev'),
       getRegion: (serverless.provider && serverless.provider.getRegion) || (() => 'us-east-1'),
     })),
+    pluginManager: {
+      spawn: jest.fn(),
+    },
     configSchemaHandler: {
       defineCustomProperties() {},
       defineFunctionProperties() {},
