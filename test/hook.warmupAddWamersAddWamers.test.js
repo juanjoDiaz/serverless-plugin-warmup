@@ -9,7 +9,11 @@ jest.mock('fs', () => ({
     rmdir: jest.fn(),
   },
 }));
+jest.mock('child_process', () => ({
+  exec: jest.fn((path, opts, cb) => cb()),
+}));
 const fs = require('fs').promises;
+const { exec } = require('child_process');
 const path = require('path');
 const WarmUp = require('../src/index');
 const {
@@ -26,6 +30,7 @@ describe('Serverless warmup plugin constructor', () => {
     fs.mkdir.mockResolvedValue(undefined);
     fs.writeFile.mockClear();
     fs.writeFile.mockResolvedValue(undefined);
+    exec.mockClear();
   });
 
   it('Should be called after package:createDeploymentArtifacts', async () => {
@@ -1393,6 +1398,88 @@ describe('Serverless warmup plugin constructor', () => {
           other_var: 'other_value',
         },
       }));
+  });
+
+  it('Should enable X-Ray tracing if set up at the provider', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        provider: {
+          tracing: {
+            lambda: true,
+          },
+        },
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
+
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
+      .toEqual(getExpectedFunctionConfig());
+  });
+
+  it('Should enable X-Ray tracing if set up at the warmer config', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+              tracing: true,
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
+
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
+      .toEqual(getExpectedFunctionConfig({ tracing: true }));
+    expect(exec).toHaveBeenCalledTimes(2);
+    expect(exec).toHaveBeenNthCalledWith(1, 'npm init -y', { cwd: 'testPath/.warmup/default' }, expect.anything());
+    expect(exec).toHaveBeenNthCalledWith(2, 'npm install --save aws-xray-sdk-core', { cwd: 'testPath/.warmup/default' }, expect.anything());
+  });
+
+  it('Should overide provider tracing setting if set up at the warmer config', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        provider: {
+          tracing: {
+            lambda: true,
+          },
+        },
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+              tracing: false,
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
+
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
+      .toEqual(getExpectedFunctionConfig({ tracing: false }));
+    expect(exec).not.toHaveBeenCalled();
   });
 
   it('Should use the client context from options if present', async () => {

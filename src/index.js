@@ -5,6 +5,7 @@
  *
  * @requires 'fs'
  * @requires 'path'
+ * @requires 'child_process'
  * */
 const path = require('path');
 const { extendServerlessSchema } = require('./schema');
@@ -168,6 +169,7 @@ class WarmUp {
 
     await createWarmUpFunctionArtifact(
       warmerConfig.functions,
+      warmerConfig.tracing,
       this.provider.getRegion(),
       handlerFolder,
     );

@@ -43,6 +43,7 @@ function getWarmerConfig(config = {}, defaultOpts = {}) {
     environment: (config.environment !== undefined)
       ? config.environment
       : defaultOpts.environment,
+    tracing: (config.tracing !== undefined) ? config.tracing : defaultOpts.tracing,
     prewarm: (config.prewarm !== undefined) ? config.prewarm : defaultOpts.prewarm,
   };
   /* eslint-enable no-nested-ternary */
