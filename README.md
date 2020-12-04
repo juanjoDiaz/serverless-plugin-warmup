@@ -162,7 +162,7 @@ functions:
           - staging
 ```
 
-#### Runtime Configuration
+### Runtime Configuration
 
 Concurrency can be modified post-deployment at runtime by setting the warmer lambda environment variables.  
 Two configuration options exist:
@@ -170,6 +170,17 @@ Two configuration options exist:
   Set the environment variable `WARMUP_CONCURRENCY`
 * Individually set the concurrency per lambda  
   Set the environment variable `WARMUP_CONCURRENCY_YOUR_FUNCTION_NAME`. Must be all uppercase and hyphens (-) must be replaced with underscores (_). If present for one of your lambdas, it overrides the global concurrency setting.
+
+### Netowrking
+
+The WarmUp function use normal calls to the AWS SDK in order to keep your lambdas warm.
+If you set up at the provider level or the warmer confir level that the wamer function should be deployed into into a VPC subnet you need to keep in mind a couple of things:
+
+* If the subnet is public, access to the AWS API should be allowed by [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
+* If the subnet is private, a [Network Address Translation (NAT) gateway](http://docs.aws.amazon.com/lambda/latest/dg/vpc.html) is needed so the warmers can connect to the AWS API.
+* In either case, the security group and the network ACLs need to allow access from the warmer to the AWS API.
+
+Since the AWS SDK doesn't provide any timeout by default, this plugin uses a default connection timeout of 1 second. This is to avoid the issue of a lambda constantly timing out and consuming all its allowed duration simply because it can't connect to the AWS API.
 
 ### Permissions
 
@@ -250,26 +261,6 @@ custom:
 ```
 
 If setting `prewarm` to `true`, the deployment user used by the AWS CLI and the Serverless framework also needs permissions to invoke the warmer.
-
-### Netowrking
-
-The WarmUp function use normal calls to the AWS SDK in order to keep your lambdas warm.
-If you set up at the provider level or the warmer confir level that the wamer function should be deployed into into a VPC subnet you need to keep in mind a couple of things:
-
-* If the subnet is public, access to the AWS API should be allowed by [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
-* If the subnet is private, a [Network Address Translation (NAT) gateway](http://docs.aws.amazon.com/lambda/latest/dg/vpc.html) is needed so the warmers can connect to the AWS API.
-* In either case, the security group and the network ACLs need to allow access from the warmer to the AWS API.
-
-Since the AWS SDK doesn't provide any timeout by default, this plugin uses a default connection timeout of 1 second. This is to avoid the issue of a lambda constantly timing out and consuming all its allowed duration simply because it can't connect to the AWS API.
-
-### Lifecycle hooks
-
-WarmUp plugin uses 3 lifecycles hooks:
-
-* `warmup:addWamers:addWamers`: This is where the warmers are added to the service. It runs `after:package:initialize`.
-* `warmup:cleanupTempDir:cleanup`: This is where the warmers' temp folders are removed. It runs `after:package:createDeploymentArtifacts`.
-* `warmup:prewarm:start`: This is where the warmers are invoked. It runs `after:deploy:deploy` or when running the command `serverless warmup prewarm`.
-* `warmup:prewarm:end`: This is after the warmers are invoked. 
 
 ## On the function side
 
@@ -410,6 +401,15 @@ def handle_request(app:, event:, context:, config: {})
   # ... function logic
 end
 ```
+
+## Lifecycle hooks
+
+WarmUp plugin uses 3 lifecycles hooks:
+
+* `warmup:addWamers:addWamers`: This is where the warmers are added to the service. It runs `after:package:initialize`.
+* `warmup:cleanupTempDir:cleanup`: This is where the warmers' temp folders are removed. It runs `after:package:createDeploymentArtifacts`.
+* `warmup:prewarm:start`: This is where the warmers are invoked. It runs `after:deploy:deploy` or when running the command `serverless warmup prewarm`.
+* `warmup:prewarm:end`: This is after the warmers are invoked. 
 
 ## Usage
 
