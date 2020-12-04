@@ -114,6 +114,16 @@ class WarmUp {
         }
       }
     }));
+
+    if (foldersToClean.some((folder) => folder.startsWith('.warmup'))) {
+      try {
+        await cleanFolder(path.join(this.serverless.config.servicePath, '.warmup'));
+      } catch (err) {
+        if (err.code !== 'ENOENT') {
+          this.serverless.cli.log('WarmUp: Couldn\'t clean up temporary folder .warmup.');
+        }
+      }
+    }
   }
 
   /**
