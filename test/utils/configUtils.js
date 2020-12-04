@@ -39,6 +39,17 @@ function getServerlessConfig(serverless = {}) {
   };
 }
 
+function getExpectedLambdaClientConfig(options = {}) {
+  return {
+    apiVersion: '2015-03-31',
+    region: 'us-east-1',
+    httpOptions: {
+      connectTimeout: 1000,
+    },
+    ...options,
+  };
+}
+
 function getExpectedFunctionConfig(options = {}) {
   const warmerName = options.warmerName || 'default';
 
@@ -73,6 +84,7 @@ function getExpectedLambdaCallOptions(funcName, options = {}) {
 
 module.exports = {
   getServerlessConfig,
+  getExpectedLambdaClientConfig,
   getExpectedFunctionConfig,
   getExpectedLambdaCallOptions,
 };

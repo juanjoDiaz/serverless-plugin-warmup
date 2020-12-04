@@ -6,7 +6,8 @@ class GeneratedFunctionTester {
     this.lambdaInstances = [];
     this.aws = {
       config: {},
-      Lambda: jest.fn().mockImplementation(() => {
+      Lambda: jest.fn().mockImplementation((config) => {
+        this.aws.config = config;
         const invoke = jest.fn().mockReturnValue(Promise.resolve());
         this.lambdaInstances.push(invoke);
         return { invoke };

@@ -251,6 +251,17 @@ custom:
 
 If setting `prewarm` to `true`, the deployment user used by the AWS CLI and the Serverless framework also needs permissions to invoke the warmer.
 
+### Netowrking
+
+The WarmUp function use normal calls to the AWS SDK in order to keep your lambdas warm.
+If you set up at the provider level or the warmer confir level that the wamer function should be deployed into into a VPC subnet you need to keep in mind a couple of things:
+
+* If the subnet is public, access to the AWS API should be allowed by [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
+* If the subnet is private, a [Network Address Translation (NAT) gateway](http://docs.aws.amazon.com/lambda/latest/dg/vpc.html) is needed so the warmers can connect to the AWS API.
+* In either case, the security group and the network ACLs need to allow access from the warmer to the AWS API.
+
+Since the AWS SDK doesn't provide any timeout by default, this plugin uses a default connection timeout of 1 second. This is to avoid the issue of a lambda constantly timing out and consuming all its allowed duration simply because it can't connect to the AWS API.
+
 ### Lifecycle hooks
 
 WarmUp plugin uses 3 lifecycles hooks:
@@ -435,12 +446,6 @@ serverless warmup prewarm -warmers <warmer_name>
 
 The `warmers` flag takes a comma-separated list of warmer names. If it's nor provided, all warmers with `prewarm` set to `true` are invoked.
 
-## Gotchas
-
-The WarmUp function use normal calls to the AWS SDK in order to keep your lambdas warm.
-By deafult, the WarmUp function is deployed outside of any VPC so it can reach AWS API.
-If you use the VPC option to deploy your WarmUp function to a VPC subnet it will need internet access. You can do it by using an [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) or a [Network Address Translation (NAT) gateway](http://docs.aws.amazon.com/lambda/latest/dg/vpc.html). 
-
 ## Migrations
 
 ### v4.X to v5.X
@@ -519,11 +524,15 @@ The following legacy options have been completely removed:
 
 #### Automatically creates a role for the lambda
 
-If no role is provided in the `custom.warmup` config, a default role with minimal permissions is created for each warmer.
+If no role is provided in the `custom.warmup` config, a default role with minimal permissions is created for each warmer. See "Permissions" section
 
 #### Support Tracing
 
 If tracing is enabled at the provider level or at the warmer config level, the X-Ray client is automatically installed and X-Ray tracing is enabled.
+
+#### Add a 1 second connect timeout to the AWS SDK
+
+See the "Networking" section for more details.
 
 ## Cost
 
