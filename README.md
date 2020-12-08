@@ -4,7 +4,6 @@
 [![npm monthly downloads][npm-downloads-badge]][npm-version-badge-url]
 [![Build Status][travis-badge]][travis-badge-url]
 [![Coverage Status][coveralls-badge]][coveralls-badge-url]
-[![Dependency Status][dev-badge]][dev-badge-url]
 [![license](https://img.shields.io/npm/l/serverless-plugin-warmup.svg)](https://raw.githubusercontent.com/juanjoDiaz/serverless-plugin-warmup/master/LICENSE)
 
 Keep your lambdas warm during winter.
@@ -571,8 +570,6 @@ This software is released under the MIT license. See [the license file](LICENSE)
 [travis-badge-url]: https://travis-ci.org/juanjoDiaz/serverless-plugin-warmup
 [coveralls-badge]: https://coveralls.io/repos/juanjoDiaz/serverless-plugin-warmup/badge.svg?branch=master
 [coveralls-badge-url]: https://coveralls.io/r/juanjoDiaz/serverless-plugin-warmup?branch=master
-[dev-badge]: https://david-dm.org/juanjoDiaz/serverless-plugin-warmup.svg
-[dev-badge-url]: https://david-dm.org/juanjoDiaz/serverless-plugin-warmup
 
 ## Acknowledgements
 
