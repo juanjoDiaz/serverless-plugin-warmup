@@ -10,11 +10,11 @@
     "test-with-coverage": "jest --coverage --collectCoverageFrom=src/**/*.js test",
     "coveralls": "cat coverage/lcov.info | coveralls"
   },
-  "author": "Gonçalo Neves",
+  "author": "Juanjo Diaz <juanjo.diazmo@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/FidelLimited/serverless-plugin-warmup.git"
+    "url": "git+https://github.com/juanjoDiaz/serverless-plugin-warmup.git"
   },
   "keywords": [
     "serverless plugin warm up lambdas",
@@ -26,9 +26,9 @@
     "lambda cold"
   ],
   "bugs": {
-    "url": "https://github.com/FidelLimited/serverless-plugin-warmup/issues"
+    "url": "https://github.com/juanjoDiaz/serverless-plugin-warmup/issues"
   },
-  "homepage": "https://github.com/FidelLimited/serverless-plugin-warmup",
+  "homepage": "https://github.com/juanjoDiaz/serverless-plugin-warmup",
   "dependencies": {},
   "devDependencies": {
     "coveralls": "^3.0.11",
