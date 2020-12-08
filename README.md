@@ -170,7 +170,7 @@ Two configuration options exist:
 * Individually set the concurrency per lambda  
   Set the environment variable `WARMUP_CONCURRENCY_YOUR_FUNCTION_NAME`. Must be all uppercase and hyphens (-) must be replaced with underscores (_). If present for one of your lambdas, it overrides the global concurrency setting.
 
-### Netowrking
+### Networking
 
 The WarmUp function use normal calls to the AWS SDK in order to keep your lambdas warm.
 If you set up at the provider level or the warmer confir level that the wamer function should be deployed into into a VPC subnet you need to keep in mind a couple of things:
