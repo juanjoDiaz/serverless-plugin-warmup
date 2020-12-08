@@ -19,4 +19,4 @@ deploy:
   on:
     branch: master
     tags: true
-    repo: FidelLimited/serverless-plugin-warmup
+    repo: juanjoDiaz/serverless-plugin-warmup
