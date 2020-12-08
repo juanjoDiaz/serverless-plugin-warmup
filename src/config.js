@@ -6,7 +6,7 @@ const path = require('path');
  *
  * @return {Object} - Global configuration options
  * */
-function getWarmerConfig(config = {}, defaultOpts = {}) {
+function getWarmerConfig(config, defaultOpts) {
   const folderName = path.join((typeof config.folderName === 'string') ? config.folderName : defaultOpts.folderName);
 
   /* eslint-disable no-nested-ternary */
@@ -55,7 +55,7 @@ function getWarmerConfig(config = {}, defaultOpts = {}) {
  *
  * @return {Object} - Function-specific configuration options
  * */
-function getFunctionConfig(config = {}, defaultOpts = {}) {
+function getFunctionConfig(config, defaultOpts) {
   /* eslint-disable no-nested-ternary */
   return {
     enabled: (config.enabled !== undefined)
@@ -105,7 +105,7 @@ function getFunctionsByWarmer(service, stage, configsByWarmer) {
         config: Object.entries(configsByWarmer)
           .reduce((warmers, [warmerName, warmerConfig]) => ({
             ...warmers,
-            [warmerName]: getFunctionConfig(config.warmup[warmerName], warmerConfig),
+            [warmerName]: getFunctionConfig(config.warmup[warmerName] || {}, warmerConfig),
           }), {}),
       };
     });
