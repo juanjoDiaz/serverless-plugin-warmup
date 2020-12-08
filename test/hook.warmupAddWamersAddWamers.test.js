@@ -24,7 +24,6 @@ const {
 } = require('./utils/configUtils');
 const { GeneratedFunctionTester } = require('./utils/generatedFunctionTester');
 
-
 describe('Serverless warmup plugin constructor', () => {
   beforeEach(() => {
     fs.mkdir.mockClear();
