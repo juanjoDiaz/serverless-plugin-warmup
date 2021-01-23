@@ -34,6 +34,7 @@ function extendServerlessSchema(serverless) {
             properties: {
               rate: { type: 'string', pattern: scheduleSyntax },
               enabled: { type: 'boolean' },
+              alias: { type: 'string' },
               name: {
                 type: 'string', minLength: 1, maxLength: 64, pattern: '[\\.\\-_A-Za-z0-9]+',
               },

@@ -180,7 +180,7 @@ module.exports.warmUp = async (event, context) => {
       FunctionName: func.name,
       InvocationType: 'RequestResponse',
       LogType: 'None',
-      Qualifier: process.env.SERVERLESS_ALIAS,
+      Qualifier: func.config.alias || process.env.SERVERLESS_ALIAS,
       Payload: func.config.payload
     };
 

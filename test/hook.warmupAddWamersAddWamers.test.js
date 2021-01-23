@@ -1482,6 +1482,83 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
     expect(exec).not.toHaveBeenCalled();
   });
 
+  it('Should use the function alias from options if present', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+              alias: 'alias1',
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
+
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
+      .toEqual(getExpectedFunctionConfig());
+
+    const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
+    functionTester.executeWarmupFunction();
+
+    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
+        Qualifier: 'alias1',
+      }));
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2', {
+        Qualifier: 'alias1',
+      }));
+  });
+
+  it('Should override function alias from options if present at the function', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+              alias: 'alias1',
+            },
+          },
+        },
+        functions: {
+          someFunc1: { name: 'someFunc1', warmup: { default: { alias: 'alias2' } } },
+          someFunc2: { name: 'someFunc2' },
+        },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['before:warmup:addWamers:addWamers']();
+    await plugin.hooks['warmup:addWamers:addWamers']();
+
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
+      .toEqual(getExpectedFunctionConfig());
+
+    const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
+    functionTester.executeWarmupFunction();
+
+    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
+        Qualifier: 'alias2',
+      }));
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(2, getExpectedLambdaCallOptions('someFunc2', {
+        Qualifier: 'alias1',
+      }));
+  });
+
   it('Should use the client context from options if present', async () => {
     const serverless = getServerlessConfig({
       service: {
