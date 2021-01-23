@@ -73,6 +73,7 @@ The options are the same for all the warmers:
 There are also some options which can be set under `custom.warmup.<yourWarmer>` to be applied to all your lambdas or under `yourLambda.warmup.<yourWarmer>` to  overridde the global configuration for that particular lambda. Keep in mind that in order to configure a warmer at the function level, it needed to be previously configured at the `custom` section or the pluging will error.
 
 * **enabled** Whether your lambda should be warmed up or not. Can be a boolean, a stage for which the lambda will be warmed up or a list of stages for which your lambda will be warmed up (defaults to `false`)
+* **alias** Alias qualifier to use when invoking the functions. Necessary, for example, when this plugin is combined with the [serverless-plugin-canary-deployments](https://github.com/davidgf/serverless-plugin-canary-deployments) serverless canary plugin (warmup should always be declared after).
 * **clientContext** Custom data to send as client context to the data. It should be an object where all the values are strings. (defaults to the payload. Set it to `false` to avoid sending any client context custom data)
 * **payload** The payload to send to your lambda. This helps your lambda identify when the call comes from this plugin (defaults to `{ "source": "serverless-plugin-warmup" }`)
 * **payloadRaw** Whether to leave the payload as-is. If false, the payload will be stringified into JSON. (defaults to `false`)
@@ -480,14 +481,13 @@ Remembe to add `.warmup` to your git ignore.
 
 #### Default to Unqualified alias
 
-Previous versions of the plugin used the `$LATEST` alias as default alias to warm up if no alias was provided. From v5, the unqualified alias is the default. You can still use the `$LATEST` alias by setting it using the `SERVERLESS_ALIAS` environment variable.
+Previous versions of the plugin used the `$LATEST` alias as default alias to warm up if no alias was provided. From v5, the unqualified alias is the default. You can still use the `$LATEST` alias by setting it using the `alias` option.
 
 ```yaml
 custom:
   warmup:
     default:
-      environment:
-        SERVERLESS_ALIAS: $LATEST
+      alias: $LATEST
 ```
 
 #### Automatically exclude package level includes

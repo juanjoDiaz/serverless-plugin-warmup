@@ -61,6 +61,9 @@ function getFunctionConfig(config, defaultOpts) {
     enabled: (config.enabled !== undefined)
       ? config.enabled
       : defaultOpts.enabled,
+    alias: (config.alias !== undefined)
+      ? config.alias
+      : defaultOpts.alias,
     clientContext: (config.clientContext !== undefined)
       ? config.clientContext && JSON.stringify(config.clientContext)
       : defaultOpts.clientContext,
