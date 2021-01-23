@@ -117,31 +117,37 @@ function extendServerlessSchema(serverless) {
     concurrency: { type: 'integer' },
   };
 
-  serverless.configSchemaHandler.defineCustomProperties({
-    type: 'object',
-    properties: {
-      warmup: {
-        '.*': {
-          type: 'object',
-          properties: { ...globalConfigSchemaProperties, ...functionConfigSchemaProperties },
-          additionalProperties: false,
-        },
-      },
-    },
-  });
+  if (!serverless.configSchemaHandler) return;
 
-  serverless.configSchemaHandler.defineFunctionProperties('aws', {
-    type: 'object',
-    properties: {
-      warmup: {
-        '.*': {
-          type: 'object',
-          properties: { functionConfigSchemaProperties },
-          additionalProperties: false,
+  if (typeof serverless.configSchemaHandler.defineCustomProperties === 'function') {
+    serverless.configSchemaHandler.defineCustomProperties({
+      type: 'object',
+      properties: {
+        warmup: {
+          '.*': {
+            type: 'object',
+            properties: { ...globalConfigSchemaProperties, ...functionConfigSchemaProperties },
+            additionalProperties: false,
+          },
         },
       },
-    },
-  });
+    });
+  }
+
+  if (typeof serverless.configSchemaHandler.defineFunctionProperties === 'function') {
+    serverless.configSchemaHandler.defineFunctionProperties('aws', {
+      type: 'object',
+      properties: {
+        warmup: {
+          '.*': {
+            type: 'object',
+            properties: { functionConfigSchemaProperties },
+            additionalProperties: false,
+          },
+        },
+      },
+    });
+  }
 }
 
 module.exports = {

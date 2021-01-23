@@ -1,38 +1,44 @@
 /* global jest */
 
-function getServerlessConfig(serverless = {}) {
+function getServerlessConfig(serverlessOverrides = {}) {
+  // eslint-disable-next-line no-param-reassign
+  const serverless = {
+    provider: {},
+    config: {},
+    service: {},
+    ...serverlessOverrides,
+  };
+
   return {
     getProvider: serverless.getProvider || (() => ({
-      request: (serverless.provider && serverless.provider.request) || (() => Promise.resolve()),
-      getStage: (serverless.provider && serverless.provider.getStage) || (() => 'dev'),
-      getRegion: (serverless.provider && serverless.provider.getRegion) || (() => 'us-east-1'),
+      request: serverless.provider.request || (() => Promise.resolve()),
+      getStage: serverless.provider.getStage || (() => 'dev'),
+      getRegion: serverless.provider.getRegion || (() => 'us-east-1'),
     })),
     pluginManager: {
       spawn: jest.fn(),
     },
-    configSchemaHandler: {
-      defineCustomProperties() {},
-      defineFunctionProperties() {},
-    },
+    configSchemaHandler: serverless.configSchemaHandler !== undefined
+      ? serverless.configSchemaHandler
+      : {
+        defineCustomProperties() {},
+        defineFunctionProperties() {},
+      },
     config: {
-      servicePath: (serverless.config && serverless.config.servicePath) ? serverless.config.servicePath : 'testPath',
+      servicePath: (serverless.config.servicePath) ? serverless.config.servicePath : 'testPath',
     },
     cli: {
       log() {},
     },
     service: {
-      provider: (serverless.service && serverless.service.provider)
-        ? serverless.service.provider
-        : { stage: '', region: '' },
-      defaults: (serverless.service && serverless.service.defaults)
-        ? serverless.service.defaults
-        : { stage: '', region: '' },
+      provider: serverless.service.provider || { stage: '', region: '' },
+      defaults: serverless.service.defaults || { stage: '', region: '' },
       service: 'warmup-test',
       package: serverless.service.package,
       custom: serverless.service ? serverless.service.custom : undefined,
       getAllFunctions() { return Object.keys(this.functions); },
       getFunction(name) { return this.functions[name]; },
-      functions: (serverless.service && serverless.service.functions)
+      functions: serverless.service.functions
         ? serverless.service.functions
         : {},
     },
