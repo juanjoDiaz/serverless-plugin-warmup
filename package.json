@@ -4,11 +4,10 @@
   "description": "Keep your lambdas warm during winter.",
   "main": "src/index.js",
   "scripts": {
-    "lint": "eslint '**/*.js'",
-    "lint:fix": "eslint --fix '**/*.js'",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
     "test": "jest test",
-    "test-with-coverage": "jest --coverage --collectCoverageFrom=src/**/*.js test",
-    "coveralls": "cat coverage/lcov.info | coveralls"
+    "test-with-coverage": "jest --coverage --collectCoverageFrom=src/**/*.js test"
   },
   "author": "Juanjo Diaz <juanjo.diazmo@gmail.com>",
   "license": "MIT",
@@ -31,11 +30,10 @@
   "homepage": "https://github.com/juanjoDiaz/serverless-plugin-warmup",
   "dependencies": {},
   "devDependencies": {
-    "coveralls": "^3.1.0",
-    "eslint": "^7.15",
+    "eslint": "^7.18.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
-    "husky": "^4.3.5",
+    "husky": "^4.3.8",
     "jest": "^26.6.3"
   },
   "husky": {
