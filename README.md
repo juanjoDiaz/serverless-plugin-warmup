@@ -343,7 +343,7 @@ You can handle it in your function:
 ```python
 def lambda_handler(event, context):
     # early return call when the function is called by warmup plugin
-    if event.get("source") in ["aws.events", "serverless-plugin-warmup"]:
+    if event.get("source") == "serverless-plugin-warmup":
         print("WarmUp - Lambda is warm!")
         return {}
 
@@ -355,7 +355,7 @@ Or you could use a decorator to avoid the redundant logic in all your functions:
 ```python
 def skip_execution_if.warmup_call(func):
     def warmup_wrapper(event, context):
-      if event.get("source") in ["aws.events", "serverless-plugin-warmup"]:
+      if event.get("source") == "serverless-plugin-warmup":
         print("WarmUp - Lambda is warm!")
         return {}
 
