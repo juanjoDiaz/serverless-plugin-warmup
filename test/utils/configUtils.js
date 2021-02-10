@@ -1,7 +1,6 @@
 /* global jest */
 
 function getServerlessConfig(serverlessOverrides = {}) {
-  // eslint-disable-next-line no-param-reassign
   const serverless = {
     provider: {},
     config: {},
