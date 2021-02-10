@@ -4,7 +4,7 @@
 function extendServerlessSchema(serverless) {
   // Most of these are taken from
   // https://github.com/serverless/serverless/blob/master/lib/configSchema.js
-  // https://github.com/serverless/serverless/blob/master/lib/plugins/aws/provider/awsProvider.js
+  // https://github.com/serverless/serverless/blob/master/lib/plugins/aws/provider.js
   // https://github.com/serverless/serverless/blob/master/lib/plugins/aws/package/compile/events/schedule/index.js
 
   const rateSyntax = '^rate\\((?:1 (?:minute|hour|day)|(?:1\\d+|[2-9]\\d*) (?:minute|hour|day)s)\\)$';
@@ -122,7 +122,6 @@ function extendServerlessSchema(serverless) {
 
   if (typeof serverless.configSchemaHandler.defineCustomProperties === 'function') {
     serverless.configSchemaHandler.defineCustomProperties({
-      type: 'object',
       properties: {
         warmup: {
           '.*': {
