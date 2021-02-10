@@ -7,6 +7,7 @@
  * @requires 'path'
  * @requires 'child_process'
  * */
+const fs = require('fs').promises;
 const path = require('path');
 const { extendServerlessSchema } = require('./schema');
 const { getConfigsByWarmer } = require('./config');
@@ -14,7 +15,6 @@ const {
   addWarmUpFunctionRoleToResources,
   createWarmUpFunctionArtifact,
   addWarmUpFunctionToService,
-  cleanFolder,
 } = require('./warmer');
 const { capitalize } = require('./utils');
 
@@ -108,7 +108,10 @@ class WarmUp {
 
     await Promise.all(foldersToClean.map(async (folderToClean) => {
       try {
-        await cleanFolder(path.join(this.serverless.config.servicePath, folderToClean));
+        await fs.rmdir(
+          path.join(this.serverless.config.servicePath, folderToClean),
+          { recursive: true },
+        );
       } catch (err) {
         if (err.code !== 'ENOENT') {
           this.serverless.cli.log(`WarmUp: Couldn't clean up temporary folder ${folderToClean}.`);
@@ -116,13 +119,17 @@ class WarmUp {
       }
     }));
 
-    if (foldersToClean.some((folder) => folder.startsWith('.warmup'))) {
-      try {
-        await cleanFolder(path.join(this.serverless.config.servicePath, '.warmup'));
-      } catch (err) {
-        if (err.code !== 'ENOENT') {
-          this.serverless.cli.log('WarmUp: Couldn\'t clean up temporary folder .warmup.');
-        }
+    try {
+      const defaultDir = path.join(this.serverless.config.servicePath, '.warmup');
+      if (
+        foldersToClean.some((folder) => folder.startsWith('.warmup'))
+        && (await fs.readdir(defaultDir)).length === 0
+      ) {
+        await fs.rmdir(defaultDir, { recursive: true });
+      }
+    } catch (err) {
+      if (err.code !== 'ENOENT') {
+        this.serverless.cli.log('WarmUp: Couldn\'t clean up temporary folder .warmup.');
       }
     }
   }

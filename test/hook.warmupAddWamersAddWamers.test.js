@@ -3,7 +3,6 @@
 jest.mock('fs', () => ({
   promises: {
     mkdir: jest.fn(),
-    readdir: jest.fn(),
     unlink: jest.fn(),
     writeFile: jest.fn(),
     rmdir: jest.fn(),

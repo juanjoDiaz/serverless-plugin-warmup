@@ -27,7 +27,7 @@ function getServerlessConfig(serverlessOverrides = {}) {
       servicePath: (serverless.config.servicePath) ? serverless.config.servicePath : 'testPath',
     },
     cli: {
-      log() {},
+      log: (serverless.config.cli && serverless.config.cli.log) || (() => {}),
     },
     service: {
       provider: serverless.service.provider || { stage: '', region: '' },

@@ -231,29 +231,8 @@ function addWarmUpFunctionToService(service, warmerName, warmerConfig) {
   };
 }
 
-/**
- * @description Clean prefix folder
- *
- * @fulfil {} — Folder cleaned
- * @reject {Error} File system error
- *
- * @return {Promise}
- * */
-async function cleanFolder(folderToClean) {
-  const files = await fs.readdir(folderToClean);
-  await Promise.all(files.map(async (filename) => {
-    if ((await fs.stat(path.join(folderToClean, filename))).isDirectory()) {
-      await cleanFolder(path.join(folderToClean, filename));
-    } else {
-      await fs.unlink(path.join(folderToClean, filename));
-    }
-  }));
-  await fs.rmdir(folderToClean);
-}
-
 module.exports = {
   addWarmUpFunctionRoleToResources,
   createWarmUpFunctionArtifact,
   addWarmUpFunctionToService,
-  cleanFolder,
 };
