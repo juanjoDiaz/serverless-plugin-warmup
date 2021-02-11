@@ -4,7 +4,7 @@
   "description": "Keep your lambdas warm during winter.",
   "main": "src/index.js",
   "scripts": {
-    "postinstall": "husky install",
+    "postinstall": "node install_husky.js",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "test": "jest test",
