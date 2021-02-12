@@ -7,12 +7,12 @@ const path = require('path');
  * @return {Object} - Global configuration options
  * */
 function getWarmerConfig(config, defaultOpts) {
-  const folderName = path.join((typeof config.folderName === 'string') ? config.folderName : defaultOpts.folderName);
+  const folderName = (typeof config.folderName === 'string') ? config.folderName : defaultOpts.folderName;
 
   /* eslint-disable no-nested-ternary */
   return {
     folderName,
-    pathHandler: `${folderName}/index.warmUp`,
+    pathHandler: path.join(folderName, 'index.warmUp'),
     cleanFolder: (typeof config.cleanFolder === 'boolean') ? config.cleanFolder : defaultOpts.cleanFolder,
     name: (config.name !== undefined) ? config.name : defaultOpts.name,
     role: (config.role !== undefined) ? config.role : defaultOpts.role,
@@ -29,14 +29,14 @@ function getWarmerConfig(config, defaultOpts) {
           ? config.package.exclude
           : defaultOpts.package.exclude,
         include: Array.isArray(config.package.include)
-          ? (config.package.include.includes(`${folderName}/**`)
+          ? (config.package.include.includes(path.join(folderName, '**'))
             ? config.package.include
-            : [...config.package.include, `${folderName}/**`])
-          : [...defaultOpts.package.include, `${folderName}/**`],
+            : [...config.package.include, path.join(folderName, '**')])
+          : [...defaultOpts.package.include, path.join(folderName, '**')],
       }
       : {
         ...defaultOpts.package,
-        include: [...defaultOpts.package.include, `${folderName}/**`],
+        include: [...defaultOpts.package.include, path.join(folderName, '**')],
       },
     memorySize: (config.memorySize !== undefined) ? config.memorySize : defaultOpts.memorySize,
     timeout: (config.timeout !== undefined) ? config.timeout : defaultOpts.timeout,

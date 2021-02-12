@@ -1083,11 +1083,11 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
-        handler: 'test-folder/index.warmUp',
+        handler: path.join('test-folder', 'index.warmUp'),
         package: {
           individually: true,
           exclude: ['**'],
-          include: ['test-folder/**'],
+          include: [path.join('test-folder', '**')],
         },
       }));
   });
@@ -1448,8 +1448,8 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({ tracing: true }));
     expect(exec).toHaveBeenCalledTimes(2);
-    expect(exec).toHaveBeenNthCalledWith(1, 'npm init -y', { cwd: 'testPath/.warmup/default' }, expect.anything());
-    expect(exec).toHaveBeenNthCalledWith(2, 'npm install --save aws-xray-sdk-core', { cwd: 'testPath/.warmup/default' }, expect.anything());
+    expect(exec).toHaveBeenNthCalledWith(1, 'npm init -y', { cwd: path.join('testPath', '.warmup', 'default') }, expect.anything());
+    expect(exec).toHaveBeenNthCalledWith(2, 'npm install --save aws-xray-sdk-core', { cwd: path.join('testPath', '.warmup', 'default') }, expect.anything());
   });
 
   it('Should overide provider tracing setting if set up at the warmer config', async () => {
@@ -1976,7 +1976,7 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
           package: {
             individually: true,
             exclude: ['**'],
-            include: ['.warmup/default/**'],
+            include: [path.join('.warmup', 'default', '**')],
           },
         }));
     });
@@ -1985,7 +1985,7 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
       const serverless = getServerlessConfig({
         service: {
           package: {
-            include: ['../**'],
+            include: [path.join('..', '**')],
           },
           custom: {
             warmup: {
@@ -2006,7 +2006,7 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
         .toEqual(getExpectedFunctionConfig({
           package: {
             individually: true,
-            include: ['!../**', '.warmup/default/**'],
+            include: [path.join('!..', '**'), path.join('.warmup', 'default', '**')],
             exclude: ['**'],
           },
         }));
@@ -2021,7 +2021,7 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
                 enabled: true,
                 package: {
                   individually: true,
-                  exclude: ['../**'],
+                  exclude: [path.join('..', '**')],
                 },
               },
             },
@@ -2038,8 +2038,8 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
         .toEqual(getExpectedFunctionConfig({
           package: {
             individually: true,
-            include: ['.warmup/default/**'],
-            exclude: ['../**'],
+            include: [path.join('.warmup', 'default', '**')],
+            exclude: [path.join('..', '**')],
           },
         }));
     });
@@ -2053,8 +2053,8 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
                 enabled: true,
                 package: {
                   individually: true,
-                  exclude: ['../**'],
-                  include: ['test/**'],
+                  exclude: [path.join('..', '**')],
+                  include: [path.join('test', '**')],
                 },
               },
             },
@@ -2071,8 +2071,8 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
         .toEqual(getExpectedFunctionConfig({
           package: {
             individually: true,
-            exclude: ['../**'],
-            include: ['test/**', '.warmup/default/**'],
+            exclude: [path.join('..', '**')],
+            include: [path.join('test', '**'), path.join('.warmup', 'default', '**')],
           },
         }));
     });
@@ -2086,8 +2086,8 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
                 enabled: true,
                 package: {
                   individually: true,
-                  exclude: ['../**'],
-                  include: ['test/**', '.warmup/default/**'],
+                  exclude: [path.join('..', '**')],
+                  include: [path.join('test', '**'), path.join('.warmup', 'default', '**')],
                 },
               },
             },
@@ -2104,8 +2104,8 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
         .toEqual(getExpectedFunctionConfig({
           package: {
             individually: true,
-            exclude: ['../**'],
-            include: ['test/**', '.warmup/default/**'],
+            exclude: [path.join('..', '**')],
+            include: [path.join('test', '**'), path.join('.warmup', 'default', '**')],
           },
         }));
     });
@@ -2120,8 +2120,8 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
                 folderName: 'test-folder',
                 package: {
                   individually: true,
-                  exclude: ['../**'],
-                  include: ['test/**'],
+                  exclude: [path.join('..', '**')],
+                  include: [path.join('test', '**')],
                 },
               },
             },
@@ -2136,11 +2136,11 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
-          handler: 'test-folder/index.warmUp',
+          handler: path.join('test-folder', 'index.warmUp'),
           package: {
             individually: true,
-            exclude: ['../**'],
-            include: ['test/**', 'test-folder/**'],
+            exclude: [path.join('..', '**')],
+            include: [path.join('test', '**'), path.join('test-folder', '**')],
           },
         }));
     });
@@ -2154,7 +2154,7 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
                 enabled: true,
                 package: {
                   individually: false,
-                  exclude: ['../**'],
+                  exclude: [path.join('..', '**')],
                 },
               },
             },
@@ -2169,11 +2169,11 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
-          handler: '.warmup/default/index.warmUp',
+          handler: path.join('.warmup', 'default', 'index.warmUp'),
           package: {
             individually: false,
-            exclude: ['../**'],
-            include: ['.warmup/default/**'],
+            exclude: [path.join('..', '**')],
+            include: [path.join('.warmup', 'default', '**')],
           },
         }));
     });
@@ -2201,11 +2201,11 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
-          handler: '.warmup/default/index.warmUp',
+          handler: path.join('.warmup', 'default', 'index.warmUp'),
           package: {
             individually: true,
             exclude: ['**'],
-            include: ['.warmup/default/**'],
+            include: [path.join('.warmup', 'default', '**')],
           },
         }));
     });
@@ -2233,11 +2233,11 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
-          handler: '.warmup/default/index.warmUp',
+          handler: path.join('.warmup', 'default', 'index.warmUp'),
           package: {
             individually: true,
             exclude: ['**'],
-            include: ['.warmup/default/**'],
+            include: [path.join('.warmup', 'default', '**')],
           },
         }));
     });

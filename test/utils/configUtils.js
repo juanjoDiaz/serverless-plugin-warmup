@@ -1,5 +1,7 @@
 /* global jest */
 
+const path = require('path');
+
 function getServerlessConfig(serverlessOverrides = {}) {
   const serverless = {
     provider: {},
@@ -61,14 +63,14 @@ function getExpectedFunctionConfig(options = {}) {
   return {
     description: `Serverless WarmUp Plugin (warmer "${warmerName}")`,
     events: [{ schedule: 'rate(5 minutes)' }],
-    handler: `.warmup/${warmerName}/index.warmUp`,
+    handler: path.join('.warmup', warmerName, 'index.warmUp'),
     memorySize: 128,
     name: `warmup-test-dev-warmup-plugin-${warmerName}`,
     runtime: 'nodejs12.x',
     package: {
       individually: true,
       exclude: ['**'],
-      include: [`.warmup/${warmerName}/**`],
+      include: [path.join('.warmup', warmerName, '**')],
     },
     role: 'WarmUpPluginDefaultRole',
     timeout: 10,

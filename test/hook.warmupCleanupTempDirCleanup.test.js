@@ -162,7 +162,7 @@ describe('Serverless warmup plugin warmup:cleanupTempDir:cleanup hook', () => {
   });
 
   it('Should not error if couldn\'t clean up the .warmup temporary folder', async () => {
-    fs.readdir.mockImplementation((dir) => (dir === 'testPath/.warmup' ? Promise.reject(new Error('Folder couldn\'t be cleaned')) : Promise.resolve([])));
+    fs.readdir.mockImplementation((dir) => (dir === path.join('testPath', '.warmup') ? Promise.reject(new Error('Folder couldn\'t be cleaned')) : Promise.resolve([])));
     const serverless = getServerlessConfig({
       config: {
         cli: {
