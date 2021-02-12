@@ -129,10 +129,10 @@ describe('Serverless warmup plugin warmup:cleanupTempDir:cleanup hook', () => {
     expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', '.warmup'), { recursive: true });
   });
 
-  it('Should ignore cleaning the .warmup temporary folder if there was nothing to clean', async () => {
+  it('Should ignore cleaning the warmer temporary folders if there was nothing to clean', async () => {
     const err = new Error('Folder doesn\'t exist');
     err.code = 'ENOENT';
-    fs.rmdir.mockRejectedValueOnce(err);
+    fs.rmdir.mockRejectedValue(err);
     const serverless = getServerlessConfig({
       config: {
         cli: {
