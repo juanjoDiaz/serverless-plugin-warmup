@@ -246,7 +246,7 @@ The permissions can also be added to all lambdas using setting the role to `IamR
 ```yaml
 provider:
   name: aws
-  runtime: nodejs10.x
+  runtime: nodejs14.x
   iamRoleStatements:
     - Effect: 'Allow'
       Action:
