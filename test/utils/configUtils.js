@@ -66,7 +66,7 @@ function getExpectedFunctionConfig(options = {}) {
     handler: path.join('.warmup', warmerName, 'index.warmUp'),
     memorySize: 128,
     name: `warmup-test-dev-warmup-plugin-${warmerName}`,
-    runtime: 'nodejs12.x',
+    runtime: 'nodejs14.x',
     package: {
       individually: true,
       exclude: ['**'],
