@@ -59,7 +59,7 @@ class WarmUp {
     };
 
     this.hooks = {
-      'after:package:initialize': () => this.serverless.pluginManager.spawn('warmup:addWamers'),
+      'before:package:createDeploymentArtifacts': () => this.serverless.pluginManager.spawn('warmup:addWamers'),
       'after:package:createDeploymentArtifacts': () => this.serverless.pluginManager.spawn('warmup:cleanupTempDir'),
       'after:deploy:deploy': () => this.serverless.pluginManager.spawn('warmup:prewarm'),
       'before:warmup:addWamers:addWamers': this.configPlugin.bind(this),

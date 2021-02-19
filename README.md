@@ -406,7 +406,7 @@ end
 
 WarmUp plugin uses 3 lifecycles hooks:
 
-* `warmup:addWamers:addWamers`: This is where the warmers are added to the service. It runs `after:package:initialize`.
+* `warmup:addWamers:addWamers`: This is where the warmers are added to the service. It runs `before:package:createDeploymentArtifacts`.
 * `warmup:cleanupTempDir:cleanup`: This is where the warmers' temp folders are removed. It runs `after:package:createDeploymentArtifacts`.
 * `warmup:prewarm:start`: This is where the warmers are invoked. It runs `after:deploy:deploy` or when running the command `serverless warmup prewarm`.
 * `warmup:prewarm:end`: This is after the warmers are invoked. 
