@@ -42,7 +42,7 @@ class WarmUp {
     this.commands = {
       warmup: {
         commands: {
-          addWamers: { lifecycleEvents: ['addWamers'] },
+          addWarmers: { lifecycleEvents: ['addWarmers'] },
           cleanupTempDir: { lifecycleEvents: ['cleanup'] },
           prewarm: {
             lifecycleEvents: ['start', 'end'],
@@ -59,11 +59,11 @@ class WarmUp {
     };
 
     this.hooks = {
-      'before:package:createDeploymentArtifacts': () => this.serverless.pluginManager.spawn('warmup:addWamers'),
+      'before:package:createDeploymentArtifacts': () => this.serverless.pluginManager.spawn('warmup:addWarmers'),
       'after:package:createDeploymentArtifacts': () => this.serverless.pluginManager.spawn('warmup:cleanupTempDir'),
       'after:deploy:deploy': () => this.serverless.pluginManager.spawn('warmup:prewarm'),
-      'before:warmup:addWamers:addWamers': this.configPlugin.bind(this),
-      'warmup:addWamers:addWamers': this.initializeWarmers.bind(this),
+      'before:warmup:addWarmers:addWarmers': this.configPlugin.bind(this),
+      'warmup:addWarmers:addWarmers': this.initializeWarmers.bind(this),
       'before:warmup:cleanupTempDir:cleanup': this.configPlugin.bind(this),
       'warmup:cleanupTempDir:cleanup': this.cleanUp.bind(this),
       'before:warmup:prewarm:start': this.configPlugin.bind(this),
