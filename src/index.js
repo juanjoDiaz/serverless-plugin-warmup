@@ -68,6 +68,8 @@ class WarmUp {
       'warmup:cleanupTempDir:cleanup': this.cleanUp.bind(this),
       'before:warmup:prewarm:start': this.configPlugin.bind(this),
       'warmup:prewarm:start': this.prewarmFunctions.bind(this),
+      // Workaround webpack/bundle plugins, reset the plugin and ignore changes
+      'before:package:createDeploymentArtifacts': this.initializeWarmers.bind(this),
     };
   }
 
