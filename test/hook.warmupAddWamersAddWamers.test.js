@@ -50,7 +50,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     });
     const plugin = new WarmUp(serverless, {});
 
-    await plugin.hooks['before:package:createDeploymentArtifacts']();
+    await plugin.hooks['after:package:initialize']();
 
     expect(serverless.pluginManager.spawn).toHaveBeenCalledTimes(1);
     expect(serverless.pluginManager.spawn).toHaveBeenCalledWith('warmup:addWarmers');

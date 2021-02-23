@@ -59,7 +59,7 @@ class WarmUp {
     };
 
     this.hooks = {
-      'before:package:createDeploymentArtifacts': () => this.serverless.pluginManager.spawn('warmup:addWarmers'),
+      'after:package:initialize': () => this.serverless.pluginManager.spawn('warmup:addWarmers'),
       'after:package:createDeploymentArtifacts': () => this.serverless.pluginManager.spawn('warmup:cleanupTempDir'),
       'after:deploy:deploy': () => this.serverless.pluginManager.spawn('warmup:prewarm'),
       'before:warmup:addWarmers:addWarmers': this.configPlugin.bind(this),
@@ -68,6 +68,8 @@ class WarmUp {
       'warmup:cleanupTempDir:cleanup': this.cleanUp.bind(this),
       'before:warmup:prewarm:start': this.configPlugin.bind(this),
       'warmup:prewarm:start': this.prewarmFunctions.bind(this),
+      // Workaround webpack/bundle plugins, reset the plugin and ignore changes
+      'before:package:createDeploymentArtifacts': this.initializeWarmers.bind(this),
     };
   }
 
