@@ -497,7 +497,7 @@ From v5, all service level include are automatically excluded from the plugin. Y
 
 #### Removed shorthand
 
-Previous versions of the plugin support replacing the configuration by a boolean, a string representing a stage or an array of strings representing a lsit of stages. From v5, this is not supported anymore. The `enabled` option is equivalent.
+Previous versions of the plugin supported replacing the configuration by a boolean, a string representing a stage or an array of strings representing a list of stages. From v5, this is not supported anymore. The `enabled` option is equivalent.
 
 ```yaml
 custom:
@@ -509,7 +509,7 @@ is the same as
 custom:
   warmup:
     default: # Name of the warmer, see above
-      enabed: 'prod'
+      enabled: 'prod'
 ```
 
 #### Removed legacy options
