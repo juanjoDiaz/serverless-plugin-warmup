@@ -1083,7 +1083,7 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
-        handler: path.join('test-folder', 'index.warmUp'),
+        handler: 'test-folder/index.warmUp',
         package: {
           individually: true,
           exclude: ['**'],
@@ -2136,7 +2136,7 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
-          handler: path.join('test-folder', 'index.warmUp'),
+          handler: 'test-folder/index.warmUp',
           package: {
             individually: true,
             exclude: [path.join('..', '**')],
@@ -2169,7 +2169,6 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
-          handler: path.join('.warmup', 'default', 'index.warmUp'),
           package: {
             individually: false,
             exclude: [path.join('..', '**')],
@@ -2201,7 +2200,6 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
-          handler: path.join('.warmup', 'default', 'index.warmUp'),
           package: {
             individually: true,
             exclude: ['**'],
@@ -2233,7 +2231,6 @@ describe('Serverless warmup plugin warmup:warmers:addWamers:addWamers hook', () 
 
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig({
-          handler: path.join('.warmup', 'default', 'index.warmUp'),
           package: {
             individually: true,
             exclude: ['**'],

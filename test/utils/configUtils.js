@@ -63,7 +63,7 @@ function getExpectedFunctionConfig(options = {}) {
   return {
     description: `Serverless WarmUp Plugin (warmer "${warmerName}")`,
     events: [{ schedule: 'rate(5 minutes)' }],
-    handler: path.join('.warmup', warmerName, 'index.warmUp'),
+    handler: `.warmup/${warmerName}/index.warmUp`,
     memorySize: 128,
     name: `warmup-test-dev-warmup-plugin-${warmerName}`,
     runtime: 'nodejs14.x',

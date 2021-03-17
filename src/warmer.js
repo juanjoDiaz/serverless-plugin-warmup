@@ -215,7 +215,7 @@ function addWarmUpFunctionToService(service, warmerName, warmerConfig) {
   service.functions[`warmUpPlugin${capitalize(warmerName)}`] = {
     description: `Serverless WarmUp Plugin (warmer "${warmerName}")`,
     events: warmerConfig.events,
-    handler: warmerConfig.pathHandler,
+    handler: warmerConfig.pathHandler.split(path.sep).join(path.posix.sep),
     memorySize: warmerConfig.memorySize,
     name: warmerConfig.name,
     runtime: 'nodejs14.x',
