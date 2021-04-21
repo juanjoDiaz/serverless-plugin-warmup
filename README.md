@@ -33,7 +33,7 @@ plugins:
 
 ## Configuration
 
-The warmup plugin supports creating one or more warmer functions. Warmers are defined under `custom.warmup` in the `serverless.yaml` file:
+The warmup plugin supports creating one or more warmer functions. Warmers must be defined under `custom.warmup` in the `serverless.yaml` file before they can be used in the functions' configs:
 
 ```yaml
 custom:
