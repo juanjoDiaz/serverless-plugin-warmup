@@ -25,8 +25,9 @@ function getServerlessConfig(serverlessOverrides = {}) {
         defineCustomProperties() {},
         defineFunctionProperties() {},
       },
+    serviceDir: (serverless.serviceDir !== undefined) ? serverless.serviceDir : 'testPath',
     config: {
-      servicePath: (serverless.config.servicePath) ? serverless.config.servicePath : 'testPath',
+      servicePath: serverless.config.servicePath,
     },
     cli: {
       log: (serverless.config.cli && serverless.config.cli.log) || (() => {}),
