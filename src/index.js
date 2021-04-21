@@ -50,6 +50,7 @@ class WarmUp {
               warmers: {
                 shortcut: 'w',
                 usage: 'Comma-separated list of warmer names to prewarm.',
+                type: 'string',
               },
             },
             usage: 'Invoke a warmer to warm the functions on demand.',
