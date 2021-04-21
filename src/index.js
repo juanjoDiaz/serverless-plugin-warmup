@@ -71,6 +71,10 @@ class WarmUp {
       // Workaround webpack/bundle plugins, reset the plugin and ignore changes
       'before:package:createDeploymentArtifacts': this.initializeWarmers.bind(this),
     };
+
+    // Fixed for issues in Serverles
+    // https://github.com/serverless/serverless/pull/9307
+    this.serviceDir = this.serverless.serviceDir || this.serverless.config.servicePath || '';
   }
 
   /**
@@ -111,7 +115,7 @@ class WarmUp {
     await Promise.all(foldersToClean.map(async (folderToClean) => {
       try {
         await fs.rmdir(
-          path.join(this.serverless.config.servicePath, folderToClean),
+          path.join(this.serviceDir, folderToClean),
           { recursive: true },
         );
       } catch (err) {
@@ -122,7 +126,7 @@ class WarmUp {
     }));
 
     try {
-      const defaultDir = path.join(this.serverless.config.servicePath, '.warmup');
+      const defaultDir = path.join(this.serviceDir, '.warmup');
       if (
         foldersToClean.some((folder) => folder.startsWith('.warmup'))
         && (await fs.readdir(defaultDir)).length === 0
@@ -174,7 +178,7 @@ class WarmUp {
     this.serverless.cli.log(`WarmUp: Creating warmer "${warmerName}" to warm up ${warmerConfig.functions.length} function${warmerConfig.functions.length === 1 ? '' : 's'}:`);
     warmerConfig.functions.forEach((func) => this.serverless.cli.log(`          * ${func.name}`));
 
-    const handlerFolder = path.join(this.serverless.config.servicePath, warmerConfig.folderName);
+    const handlerFolder = path.join(this.serviceDir, warmerConfig.folderName);
 
     await createWarmUpFunctionArtifact(
       warmerConfig.functions,
