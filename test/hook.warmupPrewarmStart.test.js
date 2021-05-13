@@ -28,6 +28,30 @@ describe('Serverless warmup plugin warmup:prewarm:start hook', () => {
     expect(serverless.pluginManager.spawn).toHaveBeenCalledWith('warmup:prewarm');
   });
 
+  it('Should be called after deploy:function:deploy', async () => {
+    const mockedRequest = jest.fn(() => Promise.resolve());
+    const serverless = getServerlessConfig({
+      provider: { request: mockedRequest },
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+              prewarm: true,
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['after:deploy:function:deploy']();
+
+    expect(serverless.pluginManager.spawn).toHaveBeenCalledTimes(1);
+    expect(serverless.pluginManager.spawn).toHaveBeenCalledWith('warmup:prewarm');
+  });
+
   it('Should prewarm the functions if prewarm is set to true and there are functions', async () => {
     const mockedRequest = jest.fn(() => Promise.resolve());
     const serverless = getServerlessConfig({

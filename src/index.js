@@ -63,6 +63,7 @@ class WarmUp {
       'after:package:initialize': () => this.serverless.pluginManager.spawn('warmup:addWarmers'),
       'after:package:createDeploymentArtifacts': () => this.serverless.pluginManager.spawn('warmup:cleanupTempDir'),
       'after:deploy:deploy': () => this.serverless.pluginManager.spawn('warmup:prewarm'),
+      'after:deploy:function:deploy': () => this.serverless.pluginManager.spawn('warmup:prewarm'),
       'before:warmup:addWarmers:addWarmers': this.configPlugin.bind(this),
       'warmup:addWarmers:addWarmers': this.initializeWarmers.bind(this),
       'before:warmup:cleanupTempDir:cleanup': this.configPlugin.bind(this),
