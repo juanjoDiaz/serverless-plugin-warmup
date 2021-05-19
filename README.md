@@ -219,12 +219,12 @@ resources:
                     - logs:CreateLogGroup
                     - logs:CreateLogStream
                   Resource: 
-                    - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/${self:service}-${opt:stage, self:provider.stage}/*:*
+                    - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*:*
                 - Effect: Allow
                   Action:
                     - logs:PutLogEvents
                   Resource: 
-                    - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/${self:service}-${opt:stage, self:provider.stage}/*:*:*
+                    - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*:*:*
                 # Warmer lambda to invoke the functions to be warmed
                 - Effect: 'Allow'
                   Action:
