@@ -191,7 +191,7 @@ If no role is provided at the `custom.warmup` level, each warmer function gets a
 * Invoke the functions that it should warm (and only those)
 * Create and attach elastic network interfaces (ENIs) which is necessary if deploying to a VPC
 
-The default role looks like:
+The default role for each warmer looks like:
 
 ```yaml
 resources:
@@ -219,18 +219,20 @@ resources:
                     - logs:CreateLogGroup
                     - logs:CreateLogStream
                   Resource: 
-                    - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*:*
+                    - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${warmer.name}:*
                 - Effect: Allow
                   Action:
                     - logs:PutLogEvents
                   Resource: 
-                    - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*:*:*
+                    - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${warmer.name}:*:*
                 # Warmer lambda to invoke the functions to be warmed
                 - Effect: 'Allow'
                   Action:
                     - lambda:InvokeFunction
                   Resource:
-                    - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${opt:stage, self:provider.stage}-*
+                    - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${fn1.name}
+                    - !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${fn2.name}
+                    # and one more row for each function that must be warmed up by the warmer
                 # Warmer lambda to manage ENIS (only needed if deploying to VPC, https://docs.aws.amazon.com/lambda/latest/dg/vpc.html)
                 - Effect: Allow
                   Action:
