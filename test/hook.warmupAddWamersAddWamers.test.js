@@ -1086,8 +1086,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         handler: 'test-folder/index.warmUp',
         package: {
           individually: true,
-          exclude: ['**'],
-          include: [path.join('test-folder', '**')],
+          patterns: ['!**', path.join('test-folder', '**')],
         },
       }));
   });
@@ -1975,44 +1974,12 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         .toEqual(getExpectedFunctionConfig({
           package: {
             individually: true,
-            exclude: ['**'],
-            include: [path.join('.warmup', 'default', '**')],
+            patterns: ['!**', path.join('.warmup', 'default', '**')],
           },
         }));
     });
 
-    it('Should exclude files included at the service level', async () => {
-      const serverless = getServerlessConfig({
-        service: {
-          package: {
-            include: [path.join('..', '**')],
-          },
-          custom: {
-            warmup: {
-              default: {
-                enabled: true,
-              },
-            },
-          },
-          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
-        },
-      });
-      const plugin = new WarmUp(serverless, {});
-
-      await plugin.hooks['before:warmup:addWarmers:addWarmers']();
-      await plugin.hooks['warmup:addWarmers:addWarmers']();
-
-      expect(plugin.serverless.service.functions.warmUpPluginDefault)
-        .toEqual(getExpectedFunctionConfig({
-          package: {
-            individually: true,
-            include: [path.join('!..', '**'), path.join('.warmup', 'default', '**')],
-            exclude: ['**'],
-          },
-        }));
-    });
-
-    it('Should use the package exclusions from options if present', async () => {
+    it('Should use the package patterns from options if present', async () => {
       const serverless = getServerlessConfig({
         service: {
           custom: {
@@ -2021,7 +1988,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
                 enabled: true,
                 package: {
                   individually: true,
-                  exclude: [path.join('..', '**')],
+                  patterns: [`!${path.join('..', '**')}`, path.join('test', '**')],
                 },
               },
             },
@@ -2038,41 +2005,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         .toEqual(getExpectedFunctionConfig({
           package: {
             individually: true,
-            include: [path.join('.warmup', 'default', '**')],
-            exclude: [path.join('..', '**')],
-          },
-        }));
-    });
-
-    it('Should use the package inclusions from options if present', async () => {
-      const serverless = getServerlessConfig({
-        service: {
-          custom: {
-            warmup: {
-              default: {
-                enabled: true,
-                package: {
-                  individually: true,
-                  exclude: [path.join('..', '**')],
-                  include: [path.join('test', '**')],
-                },
-              },
-            },
-          },
-          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
-        },
-      });
-      const plugin = new WarmUp(serverless, {});
-
-      await plugin.hooks['before:warmup:addWarmers:addWarmers']();
-      await plugin.hooks['warmup:addWarmers:addWarmers']();
-
-      expect(plugin.serverless.service.functions.warmUpPluginDefault)
-        .toEqual(getExpectedFunctionConfig({
-          package: {
-            individually: true,
-            exclude: [path.join('..', '**')],
-            include: [path.join('test', '**'), path.join('.warmup', 'default', '**')],
+            patterns: ['!**', `!${path.join('..', '**')}`, path.join('test', '**'), path.join('.warmup', 'default', '**')],
           },
         }));
     });
@@ -2086,8 +2019,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
                 enabled: true,
                 package: {
                   individually: true,
-                  exclude: [path.join('..', '**')],
-                  include: [path.join('test', '**'), path.join('.warmup', 'default', '**')],
+                  patterns: [`!${path.join('..', '**')}`, path.join('test', '**'), path.join('.warmup', 'default', '**')],
                 },
               },
             },
@@ -2104,8 +2036,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         .toEqual(getExpectedFunctionConfig({
           package: {
             individually: true,
-            exclude: [path.join('..', '**')],
-            include: [path.join('test', '**'), path.join('.warmup', 'default', '**')],
+            patterns: ['!**', `!${path.join('..', '**')}`, path.join('test', '**'), path.join('.warmup', 'default', '**')],
           },
         }));
     });
@@ -2120,8 +2051,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
                 folderName: 'test-folder',
                 package: {
                   individually: true,
-                  exclude: [path.join('..', '**')],
-                  include: [path.join('test', '**')],
+                  patterns: [`!${path.join('..', '**')}`, path.join('test', '**')],
                 },
               },
             },
@@ -2139,8 +2069,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
           handler: 'test-folder/index.warmUp',
           package: {
             individually: true,
-            exclude: [path.join('..', '**')],
-            include: [path.join('test', '**'), path.join('test-folder', '**')],
+            patterns: ['!**', `!${path.join('..', '**')}`, path.join('test', '**'), path.join('test-folder', '**')],
           },
         }));
     });
@@ -2154,7 +2083,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
                 enabled: true,
                 package: {
                   individually: false,
-                  exclude: [path.join('..', '**')],
+                  patterns: [`!${path.join('..', '**')}`],
                 },
               },
             },
@@ -2171,13 +2100,12 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         .toEqual(getExpectedFunctionConfig({
           package: {
             individually: false,
-            exclude: [path.join('..', '**')],
-            include: [path.join('.warmup', 'default', '**')],
+            patterns: ['!**', `!${path.join('..', '**')}`, path.join('.warmup', 'default', '**')],
           },
         }));
     });
 
-    it('Should use default exclude if missing', async () => {
+    it('Should use default pattern exclusion if missing', async () => {
       const serverless = getServerlessConfig({
         service: {
           custom: {
@@ -2202,8 +2130,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         .toEqual(getExpectedFunctionConfig({
           package: {
             individually: true,
-            exclude: ['**'],
-            include: [path.join('.warmup', 'default', '**')],
+            patterns: ['!**', path.join('.warmup', 'default', '**')],
           },
         }));
     });
@@ -2215,9 +2142,6 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
             warmup: {
               default: {
                 enabled: true,
-                package: {
-                  exclude: ['**'],
-                },
               },
             },
           },
@@ -2233,8 +2157,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         .toEqual(getExpectedFunctionConfig({
           package: {
             individually: true,
-            exclude: ['**'],
-            include: [path.join('.warmup', 'default', '**')],
+            patterns: ['!**', path.join('.warmup', 'default', '**')],
           },
         }));
     });

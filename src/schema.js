@@ -86,8 +86,7 @@ function extendServerlessSchema(serverless) {
       type: 'object',
       properties: {
         artifact: { type: 'string' },
-        exclude: { type: 'array', items: { type: 'string' } },
-        include: { type: 'array', items: { type: 'string' } },
+        patterns: { type: 'array', items: { type: 'string' } },
         individually: { type: 'boolean' },
       },
       additionalProperties: false,

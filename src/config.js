@@ -25,18 +25,15 @@ function getWarmerConfig(config, defaultOpts) {
         individually: (config.package.individually !== undefined)
           ? config.package.individually
           : defaultOpts.package.individually,
-        exclude: Array.isArray(config.package.exclude)
-          ? config.package.exclude
-          : defaultOpts.package.exclude,
-        include: Array.isArray(config.package.include)
-          ? (config.package.include.includes(path.join(folderName, '**'))
-            ? config.package.include
-            : [...config.package.include, path.join(folderName, '**')])
-          : [...defaultOpts.package.include, path.join(folderName, '**')],
+        patterns: ['!**', ...Array.isArray(config.package.patterns)
+          ? (config.package.patterns.includes(path.join(folderName, '**'))
+            ? config.package.patterns
+            : [...config.package.patterns, path.join(folderName, '**')])
+          : [...defaultOpts.package.patterns, path.join(folderName, '**')]],
       }
       : {
         ...defaultOpts.package,
-        include: [...defaultOpts.package.include, path.join(folderName, '**')],
+        patterns: ['!**', ...defaultOpts.package.patterns, path.join(folderName, '**')],
       },
     memorySize: (config.memorySize !== undefined) ? config.memorySize : defaultOpts.memorySize,
     timeout: (config.timeout !== undefined) ? config.timeout : defaultOpts.timeout,
@@ -146,13 +143,7 @@ function getConfigsByWarmer(service, stage) {
     events: [{ schedule: 'rate(5 minutes)' }],
     package: {
       individually: true,
-      // Negating the includes to work around https://github.com/serverless/serverless/issues/8093
-      include: service.package && service.package.include
-        ? service.package.include
-          .filter((pattern) => !pattern.startsWith('!'))
-          .map((pattern) => `!${pattern}`)
-        : [],
-      exclude: ['**'],
+      patterns: [],
     },
     timeout: 10,
     environment: Object.keys(service.provider.environment || [])

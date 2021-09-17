@@ -64,7 +64,7 @@ The options are the same for all the warmers:
 * **vpc** The VPC and subnets in which to deploy. Can be any [Serverless VPC configuration](https://serverless.com/framework/docs/providers/aws/guide/functions#vpc-configuration) or be set to `false` in order to deploy the warmup function outside of a VPC (defaults to the vpc in the provider)
 * **memorySize** The memory to be assigned to the warmer lambda (defaults to `128`)
 * **events** The event that triggers the warmer lambda. Can be any [Serverless event](https://serverless.com/framework/docs/providers/aws/events/) (defaults to `- schedule: rate(5 minutes)`)
-* **package** The package configuration. Can be any [Serverless package configuration](https://serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration) (defaults to `{ individually: true, exclude: ['**'], include: ['.warmup/${warmerName}/**'] }`)
+* **package** The package configuration. Can be any [Serverless package configuration](https://serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration) (defaults to `{ individually: true, patterns: ['!**', '.warmup/${warmerName}/**'] }`)
 * **timeout** How many seconds until the warmer lambda times out. (defaults to `10`)
 * **environment** Can be used to set environment variables in the warmer lambda. You can also unset variables configured at the provider by setting them to undefined. However, you should almost never have to change the default. (defaults to unset all package level environment variables. )
 * **tracing** Specify whether to enable/disable tracing at the function level. When tracing is enabled, warmer functions will use NPM to install the X-Ray client and use it to trace requests (It takes any of the values supported by serverless as `boolean`, `Active`or `PassThrough` and defaults to the provider-level setting)
@@ -97,10 +97,9 @@ custom:
         - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUp every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
       package:
         individually: true
-        exclude: # exclude additional binaries that are included at the serverless package level
-          - ../**
-          - ../../**
-        include:
+        patterns:
+          - '!../**'
+          - '!../../**'
           - ./**
       timeout: 20
       tracing: true
@@ -449,6 +448,39 @@ serverless warmup prewarm -warmers <warmer_name>
 The `warmers` flag takes a comma-separated list of warmer names. If it's nor provided, all warmers with `prewarm` set to `true` are invoked.
 
 ## Migrations
+
+### v5.X to v6.X
+
+#### Removed include/exclude in favour of patterns
+
+From Serverless 2.32.0 the `patterns` option is the recommended approach to include/exclude files from packaging. In version 3.X, the `include` and `exclude` are removed.
+
+This plugin applies the same philosophy.
+
+What used to be:
+```yaml
+custom:
+  warmup:
+    default:
+      enabled: 'prod'
+      package:
+        individually: true
+        exclude: '../**',
+        include: 'myFolder'
+```
+
+is the same as
+```yaml
+custom:
+  warmup:
+    default:
+      enabled: 'prod'
+      package:
+        individually: true
+        patterns:
+          - '!../**',
+          - 'myFolder'
+```
 
 ### v4.X to v5.X
 

@@ -70,8 +70,7 @@ function getExpectedFunctionConfig(options = {}) {
     runtime: 'nodejs14.x',
     package: {
       individually: true,
-      exclude: ['**'],
-      include: [path.join('.warmup', warmerName, '**')],
+      patterns: ['!**', path.join('.warmup', warmerName, '**')],
     },
     role: 'WarmUpPluginDefaultRole',
     timeout: 10,
