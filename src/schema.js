@@ -5,7 +5,7 @@ function extendServerlessSchema(serverless) {
   // Most of these are taken from
   // https://github.com/serverless/serverless/blob/master/lib/configSchema.js
   // https://github.com/serverless/serverless/blob/master/lib/plugins/aws/provider.js
-  // https://github.com/serverless/serverless/blob/master/lib/plugins/aws/package/compile/events/schedule/index.js
+  // https://github.com/serverless/serverless/blob/master/lib/plugins/aws/package/compile/events/schedule.js
 
   const rateSyntax = '^rate\\((?:1 (?:minute|hour|day)|(?:1\\d+|[2-9]\\d*) (?:minute|hour|day)s)\\)$';
   const cronSyntax = '^cron\\(\\S+ \\S+ \\S+ \\S+ \\S+ \\S+\\)$';
@@ -27,59 +27,71 @@ function extendServerlessSchema(serverless) {
       type: 'array',
       items: {
         type: 'object',
-        anyOf: [
-          { type: 'string', pattern: scheduleSyntax },
-          {
-            type: 'object',
-            properties: {
-              rate: { type: 'string', pattern: scheduleSyntax },
-              enabled: { type: 'boolean' },
-              alias: { type: 'string' },
-              name: {
-                type: 'string', minLength: 1, maxLength: 64, pattern: '[\\.\\-_A-Za-z0-9]+',
+        properties: {
+          schedule: {
+            anyOf: [
+              { type: 'string', pattern: scheduleSyntax },
+              {
+                type: 'object',
+                properties: {
+                  rate: {
+                    type: 'array',
+                    minItems: 1,
+                    items: {
+                      type: 'string',
+                      pattern: scheduleSyntax,
+                    },
+                  },
+                  enabled: { type: 'boolean' },
+                  name: {
+                    type: 'string', minLength: 1, maxLength: 64, pattern: '[\\.\\-_A-Za-z0-9]+',
+                  },
+                  description: { type: 'string', maxLength: 512 },
+                  input: {
+                    anyOf: [
+                      { type: 'string', maxLength: 8192 },
+                      {
+                        type: 'object',
+                        oneOf: [
+                          {
+                            properties: {
+                              body: { type: 'string', maxLength: 8192 },
+                            },
+                            required: ['body'],
+                            additionalProperties: false,
+                          },
+                          {
+                            not: {
+                              required: ['body'],
+                            },
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  inputPath: { type: 'string', maxLength: 256 },
+                  inputTransformer: {
+                    type: 'object',
+                    properties: {
+                      inputTemplate: {
+                        type: 'string',
+                        minLength: 1,
+                        maxLength: 8192,
+                      },
+                      inputPathsMap: { type: 'object' },
+                    },
+                    required: ['inputTemplate'],
+                    additionalProperties: false,
+                  },
+                },
+                required: ['rate'],
+                additionalProperties: false,
               },
-              description: { type: 'string', maxLength: 512 },
-              // input: {
-              //   anyOf: [
-              //     { type: 'string', maxLength: 8192 },
-              //     {
-              //       type: 'object',
-              //       oneOf: [
-              //         {
-              //           properties: {
-              //             body: { type: 'string', maxLength: 8192 },
-              //           },
-              //           required: ['body'],
-              //           additionalProperties: false,
-              //         },
-              //         {
-              //           not: {
-              //             required: ['body'],
-              //           },
-              //         },
-              //       ],
-              //     },
-              //   ],
-              // },
-              // inputPath: { type: 'string', maxLength: 256 },
-              // inputTransformer: {
-              //   type: 'object',
-              //   properties: {
-              //     inputTemplate: {
-              //       type: 'string',
-              //       minLength: 1,
-              //       maxLength: 8192,
-              //     },
-              //     inputPathsMap: { type: 'object' },
-              //   },
-              //   required: ['inputTemplate'],
-              //   additionalProperties: false,
-              // },
-            },
-            required: ['rate'],
-            additionalProperties: false,
+            ],
           },
-        ],
+        },
+        required: ['schedule'],
+        additionalProperties: false,
       },
     },
     package: {
@@ -123,10 +135,12 @@ function extendServerlessSchema(serverless) {
     serverless.configSchemaHandler.defineCustomProperties({
       properties: {
         warmup: {
-          '.*': {
-            type: 'object',
-            properties: { ...globalConfigSchemaProperties, ...functionConfigSchemaProperties },
-            additionalProperties: false,
+          patternProperties: {
+            '.*': {
+              type: 'object',
+              properties: { ...globalConfigSchemaProperties, ...functionConfigSchemaProperties },
+              additionalProperties: false,
+            },
           },
         },
       },
@@ -138,10 +152,12 @@ function extendServerlessSchema(serverless) {
       type: 'object',
       properties: {
         warmup: {
-          '.*': {
-            type: 'object',
-            properties: { functionConfigSchemaProperties },
-            additionalProperties: false,
+          patternProperties: {
+            '.*': {
+              type: 'object',
+              properties: { functionConfigSchemaProperties },
+              additionalProperties: false,
+            },
           },
         },
       },
