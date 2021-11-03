@@ -207,7 +207,7 @@ class WarmUp {
       return;
     }
 
-    this.serverless.cli.log(`WarmUp: Prewarming up you functions using warmer "${warmerName}".`);
+    this.serverless.cli.log(`WarmUp: Prewarming up your functions using warmer "${warmerName}".`);
 
     try {
       const { SERVERLESS_ALIAS } = this.serverless.service.getFunction(`warmUpPlugin${capitalize(warmerName)}`).environment || {};
