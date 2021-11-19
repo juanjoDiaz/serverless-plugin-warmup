@@ -82,7 +82,7 @@ function getFunctionConfig(config, defaultOpts) {
  *
  * @return {Array} - List of functions to be warmed up and their specific configs
  * */
-function getFunctionsByWarmer(service, stage, configsByWarmer) {
+function getFunctionsByWarmer(service, stage, configsByWarmer, serverlessClasses) {
   const functions = service.getAllFunctions()
     .map((name) => service.getFunction(name))
     .map((config) => {
@@ -100,7 +100,7 @@ function getFunctionsByWarmer(service, stage, configsByWarmer) {
       const unknownWarmers = Object.keys(config.warmup)
         .filter((warmerName) => configsByWarmer[warmerName] === undefined);
       if (unknownWarmers.length > 0) {
-        throw new Error(`WarmUp: Invalid function-level warmup configuration (${unknownWarmers.join(', ')}) in function ${config.name}. Every warmer should be declared in the custom section.`);
+        throw new serverlessClasses.Error(`WarmUp: Invalid function-level warmup configuration (${unknownWarmers.join(', ')}) in function ${config.name}. Every warmer should be declared in the custom section.`);
       }
 
       return {
@@ -137,7 +137,7 @@ function getFunctionsByWarmer(service, stage, configsByWarmer) {
  *
  * @return {Object} - Configuration options to be used by the plugin
  * */
-function getConfigsByWarmer(service, stage) {
+function getConfigsByWarmer({ service, classes }, stage) {
   const getWarmerDefaultOpts = (warmerName) => ({
     folderName: path.join('.warmup', warmerName),
     cleanFolder: true,
@@ -170,7 +170,7 @@ function getConfigsByWarmer(service, stage) {
       },
     }), {});
 
-  const functionsByWarmer = getFunctionsByWarmer(service, stage, configsByWarmer);
+  const functionsByWarmer = getFunctionsByWarmer(service, stage, configsByWarmer, classes);
 
   return Object.entries(configsByWarmer).reduce((warmers, [warmerName, warmerConfig]) => ({
     ...warmers,

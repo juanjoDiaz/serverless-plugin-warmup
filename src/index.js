@@ -86,7 +86,7 @@ class WarmUp {
   configPlugin() {
     this.stage = this.stage || this.provider.getStage();
     this.configsByWarmer = this.configsByWarmer
-      || getConfigsByWarmer(this.serverless.service, this.stage);
+      || getConfigsByWarmer(this.serverless, this.stage);
   }
 
   /**
@@ -161,7 +161,7 @@ class WarmUp {
     await Promise.all(warmerNames.map(async (warmerName) => {
       const warmerConfig = this.configsByWarmer[warmerName];
       if (!warmerConfig) {
-        throw new Error(`Warmer names ${warmerName} doesn't exist.`);
+        throw new this.serverless.classes.Error(`Warmer names ${warmerName} doesn't exist.`);
       }
       addWarmUpFunctionToService(this.serverless.service, warmerName, warmerConfig);
       await this.invokeWarmer(warmerName, warmerConfig);

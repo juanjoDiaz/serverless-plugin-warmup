@@ -2,6 +2,8 @@
 
 const path = require('path');
 
+class FakeServerlessError extends Error {}
+
 function getServerlessConfig(serverlessOverrides = {}) {
   const serverless = {
     provider: {},
@@ -40,6 +42,9 @@ function getServerlessConfig(serverlessOverrides = {}) {
       functions: serverless.service.functions
         ? serverless.service.functions
         : {},
+    },
+    classes: {
+      Error: FakeServerlessError,
     },
   };
 }
