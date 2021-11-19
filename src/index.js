@@ -28,12 +28,12 @@ class WarmUp {
    * @constructor
    *
    * @param {!Object} serverless - Serverless object
-   * @param {!Object} options - Serverless options
+   * @param {!Object} cliOptions - Serverless cliOptions
    * */
-  constructor(serverless, options, { log }) {
+  constructor(serverless, cliOptions, { log }) {
     /** Serverless variables */
     this.serverless = serverless;
-    this.options = options;
+    this.cliOptions = cliOptions;
     this.log = log;
 
     this.provider = this.serverless.getProvider('aws');
@@ -47,7 +47,7 @@ class WarmUp {
           cleanupTempDir: { lifecycleEvents: ['cleanup'] },
           prewarm: {
             lifecycleEvents: ['start', 'end'],
-            options: {
+            cliOptions: {
               warmers: {
                 shortcut: 'w',
                 usage: 'Comma-separated list of warmer names to prewarm.',
@@ -152,8 +152,8 @@ class WarmUp {
    * @return {Promise}
    * */
   async prewarmFunctions() {
-    const warmerNames = (this.options.warmers)
-      ? this.options.warmers.split(',')
+    const warmerNames = (this.cliOptions.warmers)
+      ? this.cliOptions.warmers.split(',')
       : Object.entries(this.configsByWarmer)
         .filter(([, warmerConfig]) => warmerConfig.prewarm)
         .map(([warmerName]) => warmerName);
