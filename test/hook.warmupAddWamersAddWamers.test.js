@@ -17,6 +17,7 @@ const path = require('path');
 const WarmUp = require('../src/index');
 const {
   getServerlessConfig,
+  getPluginUtils,
   getExpectedLambdaClientConfig,
   getExpectedFunctionConfig,
   getExpectedLambdaCallOptions,
@@ -48,7 +49,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['after:package:initialize']();
 
@@ -79,7 +81,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -139,7 +142,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1', warmup: { unknown: { enabled: true } } }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     try {
       await plugin.hooks['before:warmup:addWarmers:addWarmers']();
@@ -170,7 +174,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -188,7 +193,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -209,7 +215,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -232,7 +239,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -255,7 +263,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -291,7 +300,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -327,7 +337,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -350,7 +361,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -386,7 +398,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -412,7 +425,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -449,7 +463,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -486,7 +501,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -523,7 +539,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -560,7 +577,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -597,7 +615,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -634,7 +653,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -671,7 +691,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -708,7 +729,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -745,7 +767,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -782,7 +805,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -819,7 +843,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -856,7 +881,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -893,7 +919,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -930,7 +957,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -967,7 +995,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1004,7 +1033,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1041,7 +1071,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1076,7 +1107,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1105,7 +1137,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, { stage: 'test', region: 'us-west-2' });
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, { stage: 'test', region: 'us-west-2' }, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1130,7 +1163,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1158,7 +1192,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1186,7 +1221,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1211,7 +1247,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1236,7 +1273,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1261,7 +1299,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1286,7 +1325,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1316,7 +1356,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1353,7 +1394,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1384,7 +1426,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1416,7 +1459,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1439,7 +1483,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1470,7 +1515,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1494,7 +1540,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1519,7 +1566,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1559,7 +1607,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1596,7 +1645,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1636,7 +1686,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1673,7 +1724,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1710,7 +1762,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1749,7 +1802,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1791,7 +1845,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1831,7 +1886,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1874,7 +1930,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1913,7 +1970,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1953,7 +2011,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:addWarmers:addWarmers']();
     await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -1990,7 +2049,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
         },
       });
-      const plugin = new WarmUp(serverless, {});
+      const pluginUtils = getPluginUtils();
+      const plugin = new WarmUp(serverless, {}, pluginUtils);
 
       await plugin.hooks['before:warmup:addWarmers:addWarmers']();
       await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -2021,7 +2081,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
         },
       });
-      const plugin = new WarmUp(serverless, {});
+      const pluginUtils = getPluginUtils();
+      const plugin = new WarmUp(serverless, {}, pluginUtils);
 
       await plugin.hooks['before:warmup:addWarmers:addWarmers']();
       await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -2052,7 +2113,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
         },
       });
-      const plugin = new WarmUp(serverless, {});
+      const pluginUtils = getPluginUtils();
+      const plugin = new WarmUp(serverless, {}, pluginUtils);
 
       await plugin.hooks['before:warmup:addWarmers:addWarmers']();
       await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -2084,7 +2146,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
         },
       });
-      const plugin = new WarmUp(serverless, {});
+      const pluginUtils = getPluginUtils();
+      const plugin = new WarmUp(serverless, {}, pluginUtils);
 
       await plugin.hooks['before:warmup:addWarmers:addWarmers']();
       await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -2116,7 +2179,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
         },
       });
-      const plugin = new WarmUp(serverless, {});
+      const pluginUtils = getPluginUtils();
+      const plugin = new WarmUp(serverless, {}, pluginUtils);
 
       await plugin.hooks['before:warmup:addWarmers:addWarmers']();
       await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -2146,7 +2210,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
         },
       });
-      const plugin = new WarmUp(serverless, {});
+      const pluginUtils = getPluginUtils();
+      const plugin = new WarmUp(serverless, {}, pluginUtils);
 
       await plugin.hooks['before:warmup:addWarmers:addWarmers']();
       await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -2173,7 +2238,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
         },
       });
-      const plugin = new WarmUp(serverless, {});
+      const pluginUtils = getPluginUtils();
+      const plugin = new WarmUp(serverless, {}, pluginUtils);
 
       await plugin.hooks['before:warmup:addWarmers:addWarmers']();
       await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -2202,7 +2268,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
         },
       });
-      const plugin = new WarmUp(serverless, {});
+      const pluginUtils = getPluginUtils();
+      const plugin = new WarmUp(serverless, {}, pluginUtils);
 
       await plugin.hooks['before:warmup:addWarmers:addWarmers']();
       await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -2243,7 +2310,12 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
           functions: { someFunc1: { name: 'someFunc1' } },
         },
       });
-      const plugin = new WarmUp(serverless, {});
+      const pluginUtils = getPluginUtils({
+        log: {
+          notice: jest.fn(),
+        },
+      });
+      const plugin = new WarmUp(serverless, {}, pluginUtils);
 
       await plugin.hooks['before:warmup:addWarmers:addWarmers']();
       await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -2252,8 +2324,8 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
       expect(plugin.serverless.service.functions.warmUpPluginDefault)
         .toEqual(getExpectedFunctionConfig());
 
-      expect(serverless.cli.log).toHaveBeenCalledTimes(2);
-      expect(serverless.cli.log).toHaveBeenCalledWith(expect.stringMatching(/^WarmUp: Creating warmer "default" to warm up 1 function:.*/));
+      expect(pluginUtils.log.notice).toHaveBeenCalledTimes(1);
+      expect(pluginUtils.log.notice).toHaveBeenCalledWith(expect.stringMatching(/^WarmUp: Creating warmer "default" to warm up 1 function.*/));
     });
   });
 });

@@ -29,9 +29,6 @@ function getServerlessConfig(serverlessOverrides = {}) {
     config: {
       servicePath: serverless.config.servicePath,
     },
-    cli: {
-      log: (serverless.config.cli && serverless.config.cli.log) || (() => {}),
-    },
     service: {
       provider: serverless.service.provider || { stage: '', region: '' },
       defaults: serverless.service.defaults || { stage: '', region: '' },
@@ -43,6 +40,18 @@ function getServerlessConfig(serverlessOverrides = {}) {
       functions: serverless.service.functions
         ? serverless.service.functions
         : {},
+    },
+  };
+}
+
+function getPluginUtils(options = {}) {
+  return {
+    log: {
+      error: () => {},
+      warning: () => {},
+      notice: () => {},
+      info: () => {},
+      ...options.log,
     },
   };
 }
@@ -92,6 +101,7 @@ function getExpectedLambdaCallOptions(funcName, options = {}) {
 
 module.exports = {
   getServerlessConfig,
+  getPluginUtils,
   getExpectedLambdaClientConfig,
   getExpectedFunctionConfig,
   getExpectedLambdaCallOptions,

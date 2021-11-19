@@ -1,7 +1,7 @@
 /* global jest describe it expect */
 
 const WarmUp = require('../src/index');
-const { getServerlessConfig } = require('./utils/configUtils');
+const { getServerlessConfig, getPluginUtils } = require('./utils/configUtils');
 
 describe('Serverless warmup plugin warmup:prewarm:start hook', () => {
   it('Should be called after deploy:deploy', async () => {
@@ -20,7 +20,8 @@ describe('Serverless warmup plugin warmup:prewarm:start hook', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['after:deploy:deploy']();
 
@@ -44,7 +45,8 @@ describe('Serverless warmup plugin warmup:prewarm:start hook', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['after:deploy:function:deploy']();
 
@@ -68,7 +70,8 @@ describe('Serverless warmup plugin warmup:prewarm:start hook', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:prewarm:start']();
     await plugin.hooks['warmup:prewarm:start']();
@@ -99,7 +102,8 @@ describe('Serverless warmup plugin warmup:prewarm:start hook', () => {
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:prewarm:start']();
     await plugin.hooks['warmup:prewarm:start']();
@@ -128,7 +132,8 @@ describe('Serverless warmup plugin warmup:prewarm:start hook', () => {
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:prewarm:start']();
     await plugin.hooks['warmup:prewarm:start']();
@@ -150,7 +155,8 @@ describe('Serverless warmup plugin warmup:prewarm:start hook', () => {
         },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:prewarm:start']();
     await plugin.hooks['warmup:prewarm:start']();
@@ -174,7 +180,8 @@ describe('Serverless warmup plugin warmup:prewarm:start hook', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, { warmers: 'default,non-existing' });
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, { warmers: 'default,non-existing' }, pluginUtils);
 
     await plugin.hooks['before:warmup:prewarm:start']();
 
@@ -210,7 +217,8 @@ describe('Serverless warmup plugin warmup:prewarm:start hook', () => {
         functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
       },
     });
-    const plugin = new WarmUp(serverless, {});
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
 
     await plugin.hooks['before:warmup:prewarm:start']();
     await plugin.hooks['warmup:prewarm:start']();
@@ -246,7 +254,8 @@ describe('Serverless warmup plugin warmup:prewarm:start hook', () => {
           functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
         },
       });
-      const plugin = new WarmUp(serverless, {});
+      const pluginUtils = getPluginUtils();
+      const plugin = new WarmUp(serverless, {}, pluginUtils);
 
       await plugin.hooks['before:warmup:prewarm:start']();
       await plugin.hooks['warmup:prewarm:start']();

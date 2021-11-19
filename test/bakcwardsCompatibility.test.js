@@ -12,7 +12,7 @@ jest.mock('fs', () => ({
 const fs = require('fs').promises;
 const path = require('path');
 const WarmUp = require('../src/index');
-const { getServerlessConfig, getExpectedFunctionConfig } = require('./utils/configUtils');
+const { getServerlessConfig, getPluginUtils, getExpectedFunctionConfig } = require('./utils/configUtils');
 
 describe('Backward compatibility', () => {
   describe('configSchemaHandler', () => {
@@ -20,9 +20,10 @@ describe('Backward compatibility', () => {
       const serverless = getServerlessConfig({
         configSchemaHandler: null,
       });
+      const pluginUtils = getPluginUtils();
 
       // eslint-disable-next-line no-new
-      new WarmUp(serverless, {});
+      new WarmUp(serverless, {}, pluginUtils);
     });
 
     it('should not define custom properties if defineCustomProperties is undefined', async () => {
@@ -34,9 +35,10 @@ describe('Backward compatibility', () => {
           defineFunctionProperties,
         },
       });
+      const pluginUtils = getPluginUtils();
 
       // eslint-disable-next-line no-new
-      new WarmUp(serverless, {});
+      new WarmUp(serverless, {}, pluginUtils);
 
       expect(defineFunctionProperties).toHaveBeenCalledTimes(1);
     });
@@ -50,9 +52,10 @@ describe('Backward compatibility', () => {
           defineFunctionProperties,
         },
       });
+      const pluginUtils = getPluginUtils();
 
       // eslint-disable-next-line no-new
-      new WarmUp(serverless, {});
+      new WarmUp(serverless, {}, pluginUtils);
 
       expect(defineCustomProperties).toHaveBeenCalledTimes(1);
     });
@@ -84,7 +87,8 @@ describe('Backward compatibility', () => {
         },
       });
 
-      const plugin = new WarmUp(serverless, {});
+      const pluginUtils = getPluginUtils();
+      const plugin = new WarmUp(serverless, {}, pluginUtils);
 
       await plugin.hooks['before:warmup:addWarmers:addWarmers']();
       await plugin.hooks['warmup:addWarmers:addWarmers']();
@@ -113,7 +117,8 @@ describe('Backward compatibility', () => {
         serviceDir: null,
       });
 
-      const plugin = new WarmUp(serverless, {});
+      const pluginUtils = getPluginUtils();
+      const plugin = new WarmUp(serverless, {}, pluginUtils);
 
       await plugin.hooks['before:warmup:addWarmers:addWarmers']();
       await plugin.hooks['warmup:addWarmers:addWarmers']();
