@@ -9,7 +9,7 @@
 Keep your lambdas warm during winter.
 
 **Requirements:**
-* Serverless *v1.12.x* or higher (Recommended *v1.33.x* or higher because of [this](https://github.com/juanjoDiaz/serverless-plugin-warmup/pull/69)).
+* Serverless *v2.32.x* or higher
 * AWS provider
 
 ## How it works
