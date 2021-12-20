@@ -177,6 +177,12 @@ class WarmUp {
       return;
     }
 
+    // Avoid double processing due to the workaround for webpack/bundle plugins
+    // resetting the plugin and ignoring changes
+    if (this.serverless.service.functions[`warmUpPlugin${capitalize(warmerName)}`]) {
+      return;
+    }
+
     this.serverless.cli.log(`WarmUp: Creating warmer "${warmerName}" to warm up ${warmerConfig.functions.length} function${warmerConfig.functions.length === 1 ? '' : 's'}:`);
     warmerConfig.functions.forEach((func) => this.serverless.cli.log(`          * ${func.name}`));
 
