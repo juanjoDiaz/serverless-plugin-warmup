@@ -228,6 +228,7 @@ function addWarmUpFunctionToService(service, warmerName, warmerConfig) {
     ...(warmerConfig.role ? { role: warmerConfig.role } : {}),
     ...(warmerConfig.tags ? { tags: warmerConfig.tags } : {}),
     ...(warmerConfig.vpc ? { vpc: warmerConfig.vpc } : {}),
+    layers: [],
   };
 }
 

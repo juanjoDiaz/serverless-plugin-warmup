@@ -74,6 +74,7 @@ function getExpectedFunctionConfig(options = {}) {
     },
     role: 'WarmUpPluginDefaultRole',
     timeout: 10,
+    layers: [],
     ...options,
   };
 }
