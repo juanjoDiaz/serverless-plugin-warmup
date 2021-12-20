@@ -116,7 +116,7 @@ class WarmUp {
 
     await Promise.all(foldersToClean.map(async (folderToClean) => {
       try {
-        await fs.rmdir(
+        await fs.rm(
           path.join(this.serviceDir, folderToClean),
           { recursive: true },
         );
@@ -133,7 +133,7 @@ class WarmUp {
         foldersToClean.some((folder) => folder.startsWith('.warmup'))
         && (await fs.readdir(defaultDir)).length === 0
       ) {
-        await fs.rmdir(defaultDir, { recursive: true });
+        await fs.rm(defaultDir, { recursive: true });
       }
     } catch (err) {
       if (err.code !== 'ENOENT') {

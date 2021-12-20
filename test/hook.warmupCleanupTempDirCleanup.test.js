@@ -5,7 +5,7 @@ jest.mock('fs', () => ({
     mkdir: jest.fn(),
     readdir: jest.fn((file) => ((!file.endsWith('node_modules') && !file.endsWith('.warmup')) ? ['index.js', 'node_modules'] : [])),
     writeFile: jest.fn(),
-    rmdir: jest.fn(),
+    rm: jest.fn(),
     stat: jest.fn((file) => ({ isDirectory: () => !file.endsWith('.js') })),
   },
 }));
@@ -17,7 +17,7 @@ const { getServerlessConfig } = require('./utils/configUtils');
 describe('Serverless warmup plugin warmup:cleanupTempDir:cleanup hook', () => {
   beforeEach(() => {
     fs.readdir.mockClear();
-    fs.rmdir.mockClear();
+    fs.rm.mockClear();
   });
 
   it('Should be called after package:createDeploymentArtifacts', async () => {
@@ -69,9 +69,9 @@ describe('Serverless warmup plugin warmup:cleanupTempDir:cleanup hook', () => {
     await plugin.hooks['before:warmup:cleanupTempDir:cleanup']();
     await plugin.hooks['warmup:cleanupTempDir:cleanup']();
 
-    expect(fs.rmdir).toHaveBeenCalledTimes(2);
-    expect(fs.rmdir).toHaveBeenNthCalledWith(1, path.join('testPath', '.warmup', 'default'), { recursive: true });
-    expect(fs.rmdir).toHaveBeenNthCalledWith(2, path.join('testPath', '.warmup'), { recursive: true });
+    expect(fs.rm).toHaveBeenCalledTimes(2);
+    expect(fs.rm).toHaveBeenNthCalledWith(1, path.join('testPath', '.warmup', 'default'), { recursive: true });
+    expect(fs.rm).toHaveBeenNthCalledWith(2, path.join('testPath', '.warmup'), { recursive: true });
     expect(serverless.cli.log).not.toHaveBeenCalledWith(expect.stringMatching(/^WarmUp: Couldn't clean up temporary folder .*/));
   });
 
@@ -100,13 +100,13 @@ describe('Serverless warmup plugin warmup:cleanupTempDir:cleanup hook', () => {
     await plugin.hooks['before:warmup:cleanupTempDir:cleanup']();
     await plugin.hooks['warmup:cleanupTempDir:cleanup']();
 
-    expect(fs.rmdir).toHaveBeenCalledTimes(1);
-    expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', 'test-folder'), { recursive: true });
+    expect(fs.rm).toHaveBeenCalledTimes(1);
+    expect(fs.rm).toHaveBeenCalledWith(path.join('testPath', 'test-folder'), { recursive: true });
     expect(serverless.cli.log).not.toHaveBeenCalledWith(expect.stringMatching(/^WarmUp: Couldn't clean up temporary folder .*/));
   });
 
   it('Should not error if couldn\'t clean up the custom temporary folder', async () => {
-    fs.rmdir.mockRejectedValueOnce(new Error('Folder couldn\'t be cleaned'));
+    fs.rm.mockRejectedValueOnce(new Error('Folder couldn\'t be cleaned'));
     const serverless = getServerlessConfig({
       service: {
         custom: {
@@ -124,15 +124,15 @@ describe('Serverless warmup plugin warmup:cleanupTempDir:cleanup hook', () => {
     await plugin.hooks['before:warmup:cleanupTempDir:cleanup']();
     await plugin.hooks['warmup:cleanupTempDir:cleanup']();
 
-    expect(fs.rmdir).toHaveBeenCalledTimes(2);
-    expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', '.warmup', 'default'), { recursive: true });
-    expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', '.warmup'), { recursive: true });
+    expect(fs.rm).toHaveBeenCalledTimes(2);
+    expect(fs.rm).toHaveBeenCalledWith(path.join('testPath', '.warmup', 'default'), { recursive: true });
+    expect(fs.rm).toHaveBeenCalledWith(path.join('testPath', '.warmup'), { recursive: true });
   });
 
   it('Should ignore cleaning the warmer temporary folders if there was nothing to clean', async () => {
     const err = new Error('Folder doesn\'t exist');
     err.code = 'ENOENT';
-    fs.rmdir.mockRejectedValue(err);
+    fs.rm.mockRejectedValue(err);
     const serverless = getServerlessConfig({
       config: {
         cli: {
@@ -155,9 +155,9 @@ describe('Serverless warmup plugin warmup:cleanupTempDir:cleanup hook', () => {
     await plugin.hooks['before:warmup:cleanupTempDir:cleanup']();
     await plugin.hooks['warmup:cleanupTempDir:cleanup']();
 
-    expect(fs.rmdir).toHaveBeenCalledTimes(2);
-    expect(fs.rmdir).toHaveBeenNthCalledWith(1, path.join('testPath', '.warmup', 'default'), { recursive: true });
-    expect(fs.rmdir).toHaveBeenNthCalledWith(2, path.join('testPath', '.warmup'), { recursive: true });
+    expect(fs.rm).toHaveBeenCalledTimes(2);
+    expect(fs.rm).toHaveBeenNthCalledWith(1, path.join('testPath', '.warmup', 'default'), { recursive: true });
+    expect(fs.rm).toHaveBeenNthCalledWith(2, path.join('testPath', '.warmup'), { recursive: true });
     expect(serverless.cli.log).not.toHaveBeenCalledWith(expect.stringMatching(/^Middleware: Couldn't clean up temporary folder .*/));
   });
 
@@ -185,8 +185,8 @@ describe('Serverless warmup plugin warmup:cleanupTempDir:cleanup hook', () => {
     await plugin.hooks['before:warmup:cleanupTempDir:cleanup']();
     await plugin.hooks['warmup:cleanupTempDir:cleanup']();
 
-    expect(fs.rmdir).toHaveBeenCalledTimes(1);
-    expect(fs.rmdir).toHaveBeenCalledWith(path.join('testPath', '.warmup', 'default'), { recursive: true });
+    expect(fs.rm).toHaveBeenCalledTimes(1);
+    expect(fs.rm).toHaveBeenCalledWith(path.join('testPath', '.warmup', 'default'), { recursive: true });
     expect(serverless.cli.log).toHaveBeenCalledWith(expect.stringMatching(/^WarmUp: Couldn't clean up temporary folder .*/));
   });
 
@@ -214,7 +214,7 @@ describe('Serverless warmup plugin warmup:cleanupTempDir:cleanup hook', () => {
     await plugin.hooks['before:warmup:cleanupTempDir:cleanup']();
     await plugin.hooks['warmup:cleanupTempDir:cleanup']();
 
-    expect(fs.rmdir).not.toHaveBeenCalled();
+    expect(fs.rm).not.toHaveBeenCalled();
     expect(serverless.cli.log).not.toHaveBeenCalledWith(expect.stringMatching(/^WarmUp: Couldn't clean up temporary folder .*/));
   });
 });
