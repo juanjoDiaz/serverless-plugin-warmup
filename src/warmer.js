@@ -225,6 +225,9 @@ function addWarmUpFunctionToService(service, warmerName, warmerConfig) {
       ? { environment: warmerConfig.environment }
       : {}),
     ...(warmerConfig.tracing !== undefined ? { tracing: warmerConfig.tracing } : {}),
+    ...(warmerConfig.logRetentionInDays !== undefined
+      ? { logRetentionInDays: warmerConfig.logRetentionInDays }
+      : {}),
     ...(warmerConfig.role ? { role: warmerConfig.role } : {}),
     ...(warmerConfig.tags ? { tags: warmerConfig.tags } : {}),
     ...(warmerConfig.vpc ? { vpc: warmerConfig.vpc } : {}),

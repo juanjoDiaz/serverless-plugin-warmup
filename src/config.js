@@ -41,6 +41,9 @@ function getWarmerConfig(config, defaultOpts) {
       ? config.environment
       : defaultOpts.environment,
     tracing: (config.tracing !== undefined) ? config.tracing : defaultOpts.tracing,
+    logRetentionInDays: (config.logRetentionInDays !== undefined)
+      ? config.logRetentionInDays
+      : defaultOpts.logRetentionInDays,
     prewarm: (config.prewarm !== undefined) ? config.prewarm : defaultOpts.prewarm,
   };
   /* eslint-enable no-nested-ternary */

@@ -1480,6 +1480,31 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     expect(exec).not.toHaveBeenCalled();
   });
 
+  it('Should use the logRetentionInDays from options if present', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+              logRetentionInDays: 10,
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const plugin = new WarmUp(serverless, {});
+
+    await plugin.hooks['before:warmup:addWarmers:addWarmers']();
+    await plugin.hooks['warmup:addWarmers:addWarmers']();
+
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
+      .toEqual(getExpectedFunctionConfig({
+        logRetentionInDays: 10,
+      }));
+  });
+
   it('Should use the function alias from options if present', async () => {
     const serverless = getServerlessConfig({
       service: {
