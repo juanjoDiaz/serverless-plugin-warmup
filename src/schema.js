@@ -159,7 +159,7 @@ function extendServerlessSchema(serverless) {
           patternProperties: {
             '.*': {
               type: 'object',
-              properties: { functionConfigSchemaProperties },
+              properties: functionConfigSchemaProperties,
               additionalProperties: false,
             },
           },
