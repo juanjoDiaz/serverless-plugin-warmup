@@ -139,6 +139,7 @@ function extendServerlessSchema(serverless) {
     serverless.configSchemaHandler.defineCustomProperties({
       properties: {
         warmup: {
+          type: 'object',
           patternProperties: {
             '.*': {
               type: 'object',
@@ -156,6 +157,7 @@ function extendServerlessSchema(serverless) {
       type: 'object',
       properties: {
         warmup: {
+          type: 'object',
           patternProperties: {
             '.*': {
               type: 'object',
