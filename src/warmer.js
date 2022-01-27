@@ -143,28 +143,32 @@ const lambda = new AWS.Lambda({
 });
 const functions = ${JSON.stringify(functions, null, '  ')};
 
+function logger(str) {
+  if (process.env.DISABLE_WARMUP_LOGS !== 'true') console.log(str);
+}
+
 function getConcurrency(func, envVars) {
   const functionConcurrency = envVars[\`WARMUP_CONCURRENCY_\${func.name.toUpperCase().replace(/-/g, '_')}\`];
 
   if (functionConcurrency) {
     const concurrency = parseInt(functionConcurrency);
-    console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from function-specific environment variable)\`);
+    logger(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from function-specific environment variable)\`);
     return concurrency;
   }
 
   if (envVars.WARMUP_CONCURRENCY) {
     const concurrency = parseInt(envVars.WARMUP_CONCURRENCY);
-    console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from global environment variable)\`);
+    logger(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from global environment variable)\`);
     return concurrency;
   }
 
   const concurrency = parseInt(func.config.concurrency);
-  console.log(\`Warming up function: \${func.name} with concurrency: \${concurrency}\`);
+  logger(\`Warming up function: \${func.name} with concurrency: \${concurrency}\`);
   return concurrency;
 }
 
 module.exports.warmUp = async (event, context) => {
-  console.log('Warm Up Start');
+  logger('Warm Up Start');
 
   const invokes = await Promise.all(functions.map(async (func) => {
     const concurrency = getConcurrency(func, process.env);
@@ -186,15 +190,15 @@ module.exports.warmUp = async (event, context) => {
 
     try {
       await Promise.all(Array(concurrency).fill(0).map(async () => await lambda.invoke(params).promise()));
-      console.log(\`Warm Up Invoke Success: \${func.name}\`);
+      logger(\`Warm Up Invoke Success: \${func.name}\`);
       return true;
     } catch (e) {
-      console.log(\`Warm Up Invoke Error: \${func.name}\`, e);
+      logger(\`Warm Up Invoke Error: \${func.name}\`, e);
       return false;
     }
   }));
 
-  console.log(\`Warm Up Finished with \${invokes.filter(r => !r).length} invoke errors\`);
+  logger(\`Warm Up Finished with \${invokes.filter(r => !r).length} invoke errors\`);
 }`;
 
   /** Write warm up file */
