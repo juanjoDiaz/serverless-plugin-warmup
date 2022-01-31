@@ -2,14 +2,15 @@
 [![Serverless][serverless-badge]](serverless-badge-url)
 [![npm version][npm-version-badge]][npm-version-badge-url]
 [![npm monthly downloads][npm-downloads-badge]][npm-version-badge-url]
-[![Build Status][travis-badge]][travis-badge-url]
+[![Node.js CI](https://github.com/juanjoDiaz/serverless-plugin-warmup/actions/workflows/on-push.yaml/badge.svg)](https://github.com/juanjoDiaz/serverless-plugin-warmup/actions/workflows/on-push.yaml)
 [![Coverage Status][coveralls-badge]][coveralls-badge-url]
 [![license](https://img.shields.io/npm/l/serverless-plugin-warmup.svg)](https://raw.githubusercontent.com/juanjoDiaz/serverless-plugin-warmup/master/LICENSE)
 
 Keep your lambdas warm during winter.
 
 **Requirements:**
-* Serverless *v2.32.x* or higher
+* Node *v14.x* or higher
+* Serverless *v3.x* or higher
 * AWS provider
 
 ## How it works
@@ -603,8 +604,6 @@ This software is released under the MIT license. See [the license file](LICENSE)
 [npm-version-badge]: https://badge.fury.io/js/serverless-plugin-warmup.svg
 [npm-version-badge-url]: https://www.npmjs.com/package/serverless-plugin-warmup
 [npm-downloads-badge]: https://img.shields.io/npm/dm/serverless-plugin-warmup.svg
-[travis-badge]: https://travis-ci.org/juanjoDiaz/serverless-plugin-warmup.svg
-[travis-badge-url]: https://travis-ci.org/juanjoDiaz/serverless-plugin-warmup
 [coveralls-badge]: https://coveralls.io/repos/juanjoDiaz/serverless-plugin-warmup/badge.svg?branch=master
 [coveralls-badge-url]: https://coveralls.io/r/juanjoDiaz/serverless-plugin-warmup?branch=master
 
