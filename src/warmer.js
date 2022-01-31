@@ -193,7 +193,7 @@ module.exports.warmUp = async (event, context) => {
       logger(\`Warm Up Invoke Success: \${func.name}\`);
       return true;
     } catch (e) {
-      logger(\`Warm Up Invoke Error: \${func.name}\`, e);
+      console.log(\`Warm Up Invoke Error: \${func.name}\`, e);
       return false;
     }
   }));
