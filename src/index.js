@@ -193,6 +193,7 @@ class WarmUp {
       warmerConfig.tracing,
       this.provider.getRegion(),
       handlerFolder,
+      warmerConfig.enableLogs,
     );
 
     if (warmerConfig.role === undefined) {
