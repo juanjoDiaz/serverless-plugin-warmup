@@ -41,7 +41,7 @@ function getWarmerConfig(config, defaultOpts) {
       ? config.environment
       : defaultOpts.environment,
     tracing: (config.tracing !== undefined) ? config.tracing : defaultOpts.tracing,
-    enableLogs: (config.enableLogs !== undefined) ? config.enableLogs : defaultOpts.enableLogs,
+    verbose: (config.verbose !== undefined) ? config.verbose : defaultOpts.verbose,
     logRetentionInDays: (config.logRetentionInDays !== undefined)
       ? config.logRetentionInDays
       : defaultOpts.logRetentionInDays,
@@ -145,7 +145,7 @@ function getConfigsByWarmer({ service, classes }, stage) {
     memorySize: 128,
     name: `${service.service}-${stage}-warmup-plugin-${warmerName}`,
     events: [{ schedule: 'rate(5 minutes)' }],
-    enableLogs: false,
+    verbose: true,
     package: {
       individually: true,
       patterns: [],
