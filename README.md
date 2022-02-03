@@ -44,6 +44,7 @@ custom:
         - schedule: cron(0/5 8-17 ? * MON-FRI *)
       concurrency: 10
       logRetentionInDays: 10
+      verbose: true
     outOfOfficeHoursWarmer:
       enabled: true
       events:
@@ -51,6 +52,7 @@ custom:
         - schedule: cron(0/5 18-23 ? * MON-FRI *)
         - schedule: cron(0/5 * ? * SAT-SUN *)
       concurrency: 1
+      verbose: false
     testWarmer:
       enabled: false
 ```
@@ -70,6 +72,7 @@ The options are the same for all the warmers:
 * **environment** Can be used to set environment variables in the warmer lambda. You can also unset variables configured at the provider by setting them to undefined. However, you should almost never have to change the default. (defaults to unset all package level environment variables. )
 * **tracing** Specify whether to enable/disable tracing at the function level. When tracing is enabled, warmer functions will use NPM to install the X-Ray client and use it to trace requests (It takes any of the values supported by serverless as `boolean`, `Active`or `PassThrough` and defaults to the provider-level setting)
 * **logRetentionInDays** Set the retention time in days for the log group associated to this warmer lamba
+* **verbose** If set to false, it disables the console.logs placed on this warmer lambda (defaults to `true`)
 * **prewarm** If set to true, it warms up your lambdas right after deploying (defaults to `false`)
 
 There are also some options which can be set under `custom.warmup.<yourWarmer>` to be applied to all your lambdas or under `yourLambda.warmup.<yourWarmer>` to  overridde the global configuration for that particular lambda. Keep in mind that in order to configure a warmer at the function level, it needed to be previously configured at the `custom` section or the pluging will error.
@@ -105,6 +108,7 @@ custom:
           - ./**
       timeout: 20
       tracing: true
+      verbose: false # Disable the logs
       logRetentionInDays: 10
       prewarm: true # Run WarmUp immediately after a deploymentlambda
       clientContext:
