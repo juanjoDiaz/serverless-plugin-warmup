@@ -2291,41 +2291,5 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
           Qualifier: 'TEST_ALIAS',
         }));
     });
-
-    it('Should not log twice due to the webpack/bundle plugin workaround', async () => {
-      const serverless = getServerlessConfig({
-        config: {
-          cli: {
-            log: jest.fn(),
-          },
-        },
-        service: {
-          custom: {
-            warmup: {
-              default: {
-                enabled: true,
-              },
-            },
-          },
-          functions: { someFunc1: { name: 'someFunc1' } },
-        },
-      });
-      const pluginUtils = getPluginUtils({
-        log: {
-          notice: jest.fn(),
-        },
-      });
-      const plugin = new WarmUp(serverless, {}, pluginUtils);
-
-      await plugin.hooks['before:warmup:addWarmers:addWarmers']();
-      await plugin.hooks['warmup:addWarmers:addWarmers']();
-      await plugin.hooks['before:package:createDeploymentArtifacts']();
-
-      expect(plugin.serverless.service.functions.warmUpPluginDefault)
-        .toEqual(getExpectedFunctionConfig());
-
-      expect(pluginUtils.log.notice).toHaveBeenCalledTimes(1);
-      expect(pluginUtils.log.notice).toHaveBeenCalledWith(expect.stringMatching(/^WarmUp: Creating warmer "default" to warm up 1 function.*/));
-    });
   });
 });

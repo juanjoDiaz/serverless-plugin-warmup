@@ -71,8 +71,8 @@ class WarmUp {
       'warmup:cleanupTempDir:cleanup': this.cleanUp.bind(this),
       'before:warmup:prewarm:start': this.configPlugin.bind(this),
       'warmup:prewarm:start': this.prewarmFunctions.bind(this),
-      // Workaround webpack/bundle plugins, reset the plugin and ignore changes
-      'before:package:createDeploymentArtifacts': this.initializeWarmers.bind(this),
+      // Workaround webpack/bundle plugins and serverless_sdk
+      'before:package:createDeploymentArtifacts': this.resetWarmerConfigs.bind(this),
     };
 
     // Fixed for issues in Serverles
@@ -100,6 +100,23 @@ class WarmUp {
   async initializeWarmers() {
     await Promise.all(Object.entries(this.configsByWarmer)
       .map(([warmerName, warmerConfig]) => this.configureWarmer(warmerName, warmerConfig)));
+  }
+
+  /**
+   * @description Workaround webpack/bundle plugins and serverless_sdk.
+   * Reset the plugin and ignore changes
+   *
+   * @fulfil {} — Warm up set
+   * @reject {Error} Warm up error
+   *
+   * @return {Promise}
+   * */
+  async resetWarmerConfigs() {
+    await Promise.all(Object.entries(this.configsByWarmer)
+      .map(([
+        warmerName,
+        warmerConfig,
+      ]) => addWarmUpFunctionToService(this.serverless.service, warmerName, warmerConfig)));
   }
 
   /**
@@ -175,12 +192,6 @@ class WarmUp {
   async configureWarmer(warmerName, warmerConfig) {
     if (warmerConfig.functions.length === 0) {
       this.log.warning(`WarmUp: Skipping warmer "${warmerName}" creation. No functions to warm up.`);
-      return;
-    }
-
-    // Avoid double processing due to the workaround for webpack/bundle plugins
-    // resetting the plugin and ignoring changes
-    if (this.serverless.service.functions[`warmUpPlugin${capitalize(warmerName)}`]) {
       return;
     }
 
