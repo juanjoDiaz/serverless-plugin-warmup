@@ -33,7 +33,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     exec.mockClear();
   });
 
-  it('Should be called after package:createDeploymentArtifacts', async () => {
+  it('Should be called after package:initialize', async () => {
     const mockedRequest = jest.fn(() => Promise.resolve());
     const serverless = getServerlessConfig({
       provider: { request: mockedRequest },

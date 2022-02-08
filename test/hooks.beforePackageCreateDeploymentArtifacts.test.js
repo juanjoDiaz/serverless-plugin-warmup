@@ -13,17 +13,12 @@ jest.mock('child_process', () => ({
 }));
 const fs = require('fs').promises;
 const { exec } = require('child_process');
-const path = require('path');
 const WarmUp = require('../src/index');
 const {
   getServerlessConfig,
   getPluginUtils,
-  getExpectedLambdaClientConfig,
   getExpectedFunctionConfig,
-  getExpectedLambdaCallOptions,
 } = require('./utils/configUtils');
-const { GeneratedFunctionTester } = require('./utils/generatedFunctionTester');
-
 
 describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', () => {
   beforeEach(() => {
