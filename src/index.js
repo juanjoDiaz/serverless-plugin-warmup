@@ -112,11 +112,11 @@ class WarmUp {
    * @return {Promise}
    * */
   async resetWarmerConfigs() {
-    await Promise.all(Object.entries(this.configsByWarmer)
-      .map(([
-        warmerName,
-        warmerConfig,
-      ]) => addWarmUpFunctionToService(this.serverless.service, warmerName, warmerConfig)));
+    Object.entries(this.configsByWarmer)
+      .forEach(([warmerName, warmerConfig]) => {
+        if (warmerConfig.functions.length === 0) return;
+        addWarmUpFunctionToService(this.serverless.service, warmerName, warmerConfig);
+      });
   }
 
   /**
