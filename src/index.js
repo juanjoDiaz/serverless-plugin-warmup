@@ -204,9 +204,9 @@ class WarmUp {
     await createWarmUpFunctionArtifact(
       warmerConfig.functions,
       warmerConfig.tracing,
+      warmerConfig.verbose,
       this.provider.getRegion(),
       handlerFolder,
-      warmerConfig.verbose,
     );
 
     if (warmerConfig.role === undefined) {
