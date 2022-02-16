@@ -2098,6 +2098,35 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         }));
     });
 
+    it('Should package only the lambda handler by  if empty package option', async () => {
+      const serverless = getServerlessConfig({
+        service: {
+          custom: {
+            warmup: {
+              default: {
+                enabled: true,
+                package: {},
+              },
+            },
+          },
+          functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+        },
+      });
+      const pluginUtils = getPluginUtils();
+      const plugin = new WarmUp(serverless, {}, pluginUtils);
+
+      await plugin.hooks['before:warmup:addWarmers:addWarmers']();
+      await plugin.hooks['warmup:addWarmers:addWarmers']();
+
+      expect(plugin.serverless.service.functions.warmUpPluginDefault)
+        .toEqual(getExpectedFunctionConfig({
+          package: {
+            individually: true,
+            patterns: ['!**', path.join('.warmup', 'default', '**')],
+          },
+        }));
+    });
+
     it('Should use the package patterns from options if present', async () => {
       const serverless = getServerlessConfig({
         service: {
