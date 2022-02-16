@@ -19,7 +19,8 @@ class GeneratedFunctionTester {
     // eslint-disable-next-line no-new-func
     return new Function('dependencies', 'process', `
       console = {
-        log: () => {}
+        log: () => {},
+        error: () => {}
       };
       const require = (dep) => {
         if (!dependencies[dep]) {
