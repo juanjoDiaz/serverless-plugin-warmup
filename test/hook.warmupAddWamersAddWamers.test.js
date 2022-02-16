@@ -1526,6 +1526,40 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     expect(exec).not.toHaveBeenCalled();
   });
 
+  it('Should respect verbose from options if present', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+              verbose: false,
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' } },
+      },
+    });
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
+
+    await plugin.hooks['before:warmup:addWarmers:addWarmers']();
+    await plugin.hooks['warmup:addWarmers:addWarmers']();
+
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
+      .toEqual(getExpectedFunctionConfig());
+
+    const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
+    const fakeConsole = { log: jest.fn(), error: jest.fn() };
+    functionTester.executeWarmupFunction({ console: fakeConsole });
+
+    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
+    expect(functionTester.lambdaInstances[0])
+      .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
+    expect(fakeConsole.log).not.toHaveBeenCalled();
+  });
+
   it('Should use the logRetentionInDays from options if present', async () => {
     const serverless = getServerlessConfig({
       service: {
@@ -2278,7 +2312,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
         .toEqual(getExpectedFunctionConfig());
 
       const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
-      functionTester.executeWarmupFunction({ env: { SERVERLESS_ALIAS: 'TEST_ALIAS' } });
+      functionTester.executeWarmupFunction({ process: { env: { SERVERLESS_ALIAS: 'TEST_ALIAS' } } });
 
       expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
       expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);

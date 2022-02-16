@@ -17,11 +17,7 @@ class GeneratedFunctionTester {
 
   generatedWarmupFunction() {
     // eslint-disable-next-line no-new-func
-    return new Function('dependencies', 'process', `
-      console = {
-        log: () => {},
-        error: () => {}
-      };
+    return new Function('dependencies', 'process', 'console', `
       const require = (dep) => {
         if (!dependencies[dep]) {
           throw new Error(\`Unknow dependency (\${dep})\`);
@@ -35,8 +31,12 @@ class GeneratedFunctionTester {
     `);
   }
 
-  executeWarmupFunction(process) {
-    this.generatedWarmupFunction()({ 'aws-sdk': this.aws }, process || { env: {} });
+  executeWarmupFunction(args = {}) {
+    this.generatedWarmupFunction()(
+      { 'aws-sdk': this.aws },
+      args.process || { env: {} },
+      args.console || { log: () => {}, error: () => {} },
+    );
   }
 }
 
