@@ -143,7 +143,7 @@ const lambda = new AWS.Lambda({
 });
 const functions = ${JSON.stringify(functions, null, '  ')};
 
-function logger(str) {
+function logVerbose(str) {
   ${verbose ? 'console.log(str);' : ''}
 }
 
@@ -152,23 +152,23 @@ function getConcurrency(func, envVars) {
 
   if (functionConcurrency) {
     const concurrency = parseInt(functionConcurrency);
-    logger(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from function-specific environment variable)\`);
+    logVerbose(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from function-specific environment variable)\`);
     return concurrency;
   }
 
   if (envVars.WARMUP_CONCURRENCY) {
     const concurrency = parseInt(envVars.WARMUP_CONCURRENCY);
-    logger(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from global environment variable)\`);
+    logVerbose(\`Warming up function: \${func.name} with concurrency: \${concurrency} (from global environment variable)\`);
     return concurrency;
   }
 
   const concurrency = parseInt(func.config.concurrency);
-  logger(\`Warming up function: \${func.name} with concurrency: \${concurrency}\`);
+  logVerbose(\`Warming up function: \${func.name} with concurrency: \${concurrency}\`);
   return concurrency;
 }
 
 module.exports.warmUp = async (event, context) => {
-  logger('Warm Up Start');
+  logVerbose('Warm Up Start');
 
   const invokes = await Promise.all(functions.map(async (func) => {
     const concurrency = getConcurrency(func, process.env);
@@ -190,7 +190,7 @@ module.exports.warmUp = async (event, context) => {
 
     try {
       await Promise.all(Array(concurrency).fill(0).map(async () => await lambda.invoke(params).promise()));
-      logger(\`Warm Up Invoke Success: \${func.name}\`);
+      logVerbose(\`Warm Up Invoke Success: \${func.name}\`);
       return true;
     } catch (e) {
       console.error(\`Warm Up Invoke Error: \${func.name}\`, e);
@@ -198,7 +198,7 @@ module.exports.warmUp = async (event, context) => {
     }
   }));
 
-  logger(\`Warm Up Finished with \${invokes.filter(r => !r).length} invoke errors\`);
+  logVerbose(\`Warm Up Finished with \${invokes.filter(r => !r).length} invoke errors\`);
 }`;
 
   /** Write warm up file */
