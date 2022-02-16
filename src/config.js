@@ -145,7 +145,6 @@ function getConfigsByWarmer({ service, classes }, stage) {
     memorySize: 128,
     name: `${service.service}-${stage}-warmup-plugin-${warmerName}`,
     events: [{ schedule: 'rate(5 minutes)' }],
-    verbose: true,
     package: {
       individually: true,
       patterns: [],
@@ -153,6 +152,7 @@ function getConfigsByWarmer({ service, classes }, stage) {
     timeout: 10,
     environment: Object.keys(service.provider.environment || [])
       .reduce((obj, k) => ({ ...obj, [k]: undefined }), {}),
+    verbose: true,
     prewarm: false,
   });
 
