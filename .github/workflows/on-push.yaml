@@ -37,7 +37,6 @@ jobs:
           ${{ runner.OS }}-
     - run: npm ci
     - run: npm run lint
-      if: ${{ runner.OS == 'ubuntu-latest' }} # it fails on Windows
     - name: Unit tests
       run: npm run test-with-coverage
     - name: Coveralls Parallel
