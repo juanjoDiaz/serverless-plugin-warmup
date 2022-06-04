@@ -163,7 +163,9 @@ function getConfigsByWarmer({ service, classes }, stage) {
     concurrency: 1,
   };
 
-  const configsByWarmer = Object.entries(service.custom ? service.custom.warmup : {})
+  const customWarmup = service.custom != null ? service.custom.warmup : {};
+  console.log(JSON.stringify(customWarmup, null, 2));
+  const configsByWarmer = Object.entries(customWarmup)
     .reduce((warmers, [warmerName, warmerConfig]) => ({
       ...warmers,
       [warmerName]: {
