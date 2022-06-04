@@ -4,7 +4,6 @@
   "description": "Keep your lambdas warm during winter.",
   "main": "src/index.js",
   "scripts": {
-    "prepare": "husky install",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "test": "jest test",
@@ -34,6 +33,7 @@
     "eslint": "^8.5.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.24.2",
+    "husky": "^7.0.2",
     "jest": "^27.5.0"
   }
 }
