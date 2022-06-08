@@ -1,4 +1,5 @@
 const path = require('path');
+const { capitalize } = require('./utils');
 
 /**
  * @description Clean a global configuration object
@@ -147,7 +148,7 @@ function getConfigsByWarmer({ service, classes }, stage) {
     events: [{ schedule: 'rate(5 minutes)' }],
     package: {
       individually: true,
-      patterns: [],
+      patterns: service.org ? ['./serverless_sdk/**', `./s_warmUpPlugin${capitalize(warmerName)}.js`] : [],
     },
     timeout: 10,
     environment: Object.keys(service.provider.environment || [])
