@@ -82,6 +82,7 @@ function getExpectedFunctionConfig(options = {}) {
     memorySize: 128,
     name: `warmup-test-dev-warmup-plugin-${warmerName}`,
     runtime: 'nodejs16.x',
+    architecture: 'arm64',
     package: {
       individually: true,
       patterns: ['!**', path.join('.warmup', warmerName, '**')],

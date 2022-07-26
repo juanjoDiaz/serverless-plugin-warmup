@@ -256,6 +256,7 @@ The permissions can also be added to all lambdas using setting the role to `IamR
 provider:
   name: aws
   runtime: nodejs16.x
+  architecture: 'arm64',
   iamRoleStatements:
     - Effect: 'Allow'
       Action:
