@@ -94,6 +94,7 @@ function extendServerlessSchema(serverless) {
         additionalProperties: false,
       },
     },
+    architecture: { enum: ['arm64', 'x86_64'] },
     package: {
       type: 'object',
       properties: {

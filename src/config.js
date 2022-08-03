@@ -20,6 +20,9 @@ function getWarmerConfig(config, defaultOpts) {
     vpc: config.vpc === false ? { securityGroupIds: [], subnetIds: [] }
       : (config.vpc !== undefined ? config.vpc : defaultOpts.vpc),
     events: (Array.isArray(config.events)) ? config.events : defaultOpts.events,
+    architecture: (config.architecture !== undefined)
+      ? config.architecture
+      : defaultOpts.architecture,
     package: typeof config.package === 'object'
       ? {
         individually: (config.package.individually !== undefined)

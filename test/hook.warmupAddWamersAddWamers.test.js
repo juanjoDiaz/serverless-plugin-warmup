@@ -1285,6 +1285,58 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
       }));
   });
 
+  it('Should use the architecture options if present', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+              architecture: 'x86_64',
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
+
+    await plugin.hooks['before:warmup:addWarmers:addWarmers']();
+    await plugin.hooks['warmup:addWarmers:addWarmers']();
+
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
+      .toEqual(getExpectedFunctionConfig({ architecture: 'x86_64' }));
+  });
+
+  it('Should overide provider architecture setting if set up at the warmer config', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        provider: {
+          architecture: 'x86_64',
+        },
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+              architecture: 'arm64',
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
+
+    await plugin.hooks['before:warmup:addWarmers:addWarmers']();
+    await plugin.hooks['warmup:addWarmers:addWarmers']();
+
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
+      .toEqual(getExpectedFunctionConfig({ architecture: 'arm64' }));
+    expect(exec).not.toHaveBeenCalled();
+  });
+
   it('Should use the memory size from options if present', async () => {
     const serverless = getServerlessConfig({
       service: {
