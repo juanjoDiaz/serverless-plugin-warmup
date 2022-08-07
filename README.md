@@ -68,7 +68,7 @@ The options are the same for all the warmers:
 * **vpc** The VPC and subnets in which to deploy. Can be any [Serverless VPC configuration](https://serverless.com/framework/docs/providers/aws/guide/functions#vpc-configuration) or be set to `false` in order to deploy the warmup function outside of a VPC (defaults to the vpc in the provider)
 * **memorySize** The memory to be assigned to the warmer lambda (defaults to `128`)
 * **events** The event that triggers the warmer lambda. Can be any [Serverless event](https://serverless.com/framework/docs/providers/aws/events/) (defaults to `- schedule: rate(5 minutes)`)
-* **architecture**  The [instruction set to use for the lambda](https://www.serverless.com/framework/docs/providers/aws/guide/functions#instruction-set-architecture) (defaults to `arm64`)
+* **architecture**  The [instruction set to use for the lambda](https://www.serverless.com/framework/docs/providers/aws/guide/functions#instruction-set-architecture) (defaults to `x86_64`)
 * **package** The package configuration. Can be any [Serverless package configuration](https://serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration) (defaults to `{ individually: true, patterns: ['!**', '.warmup/${warmerName}/**'] }`)
 * **timeout** How many seconds until the warmer lambda times out. (defaults to `10`)
 * **environment** Can be used to set environment variables in the warmer lambda. You can also unset variables configured at the provider by setting them to undefined. However, you should almost never have to change the default. (defaults to unset all package level environment variables. )
