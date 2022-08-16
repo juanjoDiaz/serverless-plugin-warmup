@@ -109,10 +109,7 @@ function extendServerlessSchema(serverless) {
     environment: { $ref: '#/definitions/awsLambdaEnvironment' },
     tracing: { $ref: '#/definitions/awsLambdaTracing' },
     verbose: { type: 'boolean' },
-    logRetentionInDays: {
-      type: 'number',
-      enum: [1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, 3653],
-    },
+    logRetentionInDays: { $ref: '#/definitions/awsLogRetentionInDays' },
     prewarm: { type: 'boolean' },
   };
 
