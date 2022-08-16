@@ -1619,7 +1619,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
           warmup: {
             default: {
               enabled: true,
-              logRetentionInDays: 10,
+              logRetentionInDays: 14,
             },
           },
         },
@@ -1634,7 +1634,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
 
     expect(plugin.serverless.service.functions.warmUpPluginDefault)
       .toEqual(getExpectedFunctionConfig({
-        logRetentionInDays: 10,
+        logRetentionInDays: 14,
       }));
   });
 
