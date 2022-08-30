@@ -94,7 +94,16 @@ function addWarmUpFunctionRoleToResources(service, stage, warmerName, warmerConf
                   'lambda:InvokeFunction',
                 ],
                 Resource: warmerConfig.functions.map((fn) => ({
-                  'Fn::Sub': `arn:\${AWS::Partition}:lambda:\${AWS::Region}:\${AWS::AccountId}:function:${fn.name}*`,
+                  'Fn::Sub': `arn:\${AWS::Partition}:lambda:\${AWS::Region}:\${AWS::AccountId}:function:${fn.name}`,
+                })),
+              },
+              {
+                Effect: 'Allow',
+                Action: [
+                  'lambda:InvokeFunction',
+                ],
+                Resource: warmerConfig.functions.map((fn) => ({
+                  'Fn::Sub': `arn:\${AWS::Partition}:lambda:\${AWS::Region}:\${AWS::AccountId}:function:${fn.name}:*`,
                 })),
               },
               {
