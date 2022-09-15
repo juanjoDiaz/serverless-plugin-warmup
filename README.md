@@ -63,7 +63,7 @@ The options are the same for all the warmers:
 * **folderName** Folder to temporarily store the generated code (defaults to `.warmup`)
 * **cleanFolder** Whether to automatically delete the generated code folder. You might want to keep it if you are doing some custom packaging (defaults to `true`)
 * **name** Name of the generated warmer lambda (defaults to `${service}-${stage}-warmup-plugin-${warmerName}`)
-* **roleName** RoleName to apply to the warmer lambda Role (defaults to the roleName in the provider)
+* **roleName** Name to be applied to the default warmer lambda role. Ignored if a the role setting is used (defaults to `${service.service}-${stage}-${region}-${warmerName.toLowerCase()}-role`)
 * **role** Role to apply to the warmer lambda (defaults to the role in the provider)
 * **tags** Tag to apply to the generated warmer lambda (defaults to the serverless default tags)
 * **vpc** The VPC and subnets in which to deploy. Can be any [Serverless VPC configuration](https://serverless.com/framework/docs/providers/aws/guide/functions#vpc-configuration) or be set to `false` in order to deploy the warmup function outside of a VPC (defaults to the vpc in the provider)
@@ -96,7 +96,7 @@ custom:
       cleanFolder: false
       memorySize: 256
       name: warmer-default
-      roleName:
+      roleName: my-custom-role
       role: WarmupRole
       tags:
         Project: foo
