@@ -16,7 +16,7 @@ const {
   createWarmUpFunctionArtifact,
   addWarmUpFunctionToService,
 } = require('./warmer');
-const { capitalize } = require('./utils');
+const { capitalize, getLog } = require('./utils');
 
 /**
  * @classdesc Keep your lambdas warm during winter
@@ -34,7 +34,7 @@ class WarmUp {
     /** Serverless variables */
     this.serverless = serverless;
     this.cliOptions = cliOptions;
-    this.log = log;
+    this.log = log || getLog();
 
     this.provider = this.serverless.getProvider('aws');
 
