@@ -26,17 +26,16 @@ function addWarmUpFunctionRoleToResources(service, stage, warmerName, warmerConf
     Type: 'AWS::IAM::Role',
     Properties: {
       Path: '/',
-      RoleName: warmerConfig.roleName ? warmerConfig.roleName : {
+      RoleName: warmerConfig.roleName || {
         'Fn::Join': [
           '-',
-          warmerConfig.roleName ? [warmerConfig.roleName]
-            : [
-              service.service,
-              stage,
-              { Ref: 'AWS::Region' },
-              warmerName.toLowerCase(),
-              'role',
-            ],
+          [
+            service.service,
+            stage,
+            { Ref: 'AWS::Region' },
+            warmerName.toLowerCase(),
+            'role',
+          ],
         ],
       },
       AssumeRolePolicyDocument: {
