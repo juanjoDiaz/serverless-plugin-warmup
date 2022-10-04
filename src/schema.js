@@ -15,6 +15,7 @@ function extendServerlessSchema(serverless) {
     folderName: { type: 'string' },
     cleanFolder: { type: 'boolean' },
     name: { type: 'string' },
+    roleName: { type: 'string' },
     role: { $ref: '#/definitions/awsLambdaRole' },
     tags: { $ref: '#/definitions/awsResourceTags' },
     vpc: {

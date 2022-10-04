@@ -15,6 +15,7 @@ function getWarmerConfig(config, defaultOpts) {
     pathHandler: path.join(folderName, 'index.warmUp'),
     cleanFolder: (typeof config.cleanFolder === 'boolean') ? config.cleanFolder : defaultOpts.cleanFolder,
     name: (config.name !== undefined) ? config.name : defaultOpts.name,
+    roleName: (config.roleName !== undefined) ? config.roleName : defaultOpts.roleName,
     role: (config.role !== undefined) ? config.role : defaultOpts.role,
     tags: (config.tags !== undefined) ? config.tags : defaultOpts.tags,
     vpc: config.vpc === false ? { securityGroupIds: [], subnetIds: [] }

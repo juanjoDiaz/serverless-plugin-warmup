@@ -26,7 +26,7 @@ function addWarmUpFunctionRoleToResources(service, stage, warmerName, warmerConf
     Type: 'AWS::IAM::Role',
     Properties: {
       Path: '/',
-      RoleName: {
+      RoleName: warmerConfig.roleName || {
         'Fn::Join': [
           '-',
           [
@@ -233,6 +233,7 @@ function addWarmUpFunctionToService(service, warmerName, warmerConfig) {
     ...(warmerConfig.logRetentionInDays !== undefined
       ? { logRetentionInDays: warmerConfig.logRetentionInDays }
       : {}),
+    ...(warmerConfig.roleName ? { roleName: warmerConfig.roleName } : {}),
     ...(warmerConfig.role ? { role: warmerConfig.role } : {}),
     ...(warmerConfig.tags ? { tags: warmerConfig.tags } : {}),
     ...(warmerConfig.vpc ? { vpc: warmerConfig.vpc } : {}),

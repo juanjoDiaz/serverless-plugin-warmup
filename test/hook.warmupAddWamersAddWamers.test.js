@@ -1149,6 +1149,32 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
       }));
   });
 
+  it('Should use the roleName from options if present', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {
+          warmup: {
+            default: {
+              enabled: true,
+              roleName: 'test-roleName',
+            },
+          },
+        },
+        functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+      },
+    });
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
+
+    await plugin.hooks['before:warmup:addWarmers:addWarmers']();
+    await plugin.hooks['warmup:addWarmers:addWarmers']();
+
+    expect(plugin.serverless.service.functions.warmUpPluginDefault)
+      .toEqual(getExpectedFunctionConfig({
+        roleName: 'test-roleName',
+      }));
+  });
+
   it('Should use the service roles from options if present', async () => {
     const serverless = getServerlessConfig({
       service: {
@@ -1309,7 +1335,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
       .toEqual(getExpectedFunctionConfig({ architecture: 'x86_64' }));
   });
 
-  it('Should overide provider architecture setting if set up at the warmer config', async () => {
+  it('Should override provider architecture setting if set up at the warmer config', async () => {
     const serverless = getServerlessConfig({
       service: {
         provider: {
