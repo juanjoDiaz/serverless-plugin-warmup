@@ -27,72 +27,109 @@ function extendServerlessSchema(serverless) {
     events: {
       type: 'array',
       items: {
-        type: 'object',
-        properties: {
-          schedule: {
-            anyOf: [
-              { type: 'string', pattern: scheduleSyntax },
-              {
-                type: 'object',
-                properties: {
-                  rate: {
-                    type: 'array',
-                    minItems: 1,
-                    items: {
-                      type: 'string',
-                      pattern: scheduleSyntax,
-                    },
-                  },
-                  enabled: { type: 'boolean' },
-                  name: {
-                    type: 'string', minLength: 1, maxLength: 64, pattern: '[\\.\\-_A-Za-z0-9]+',
-                  },
-                  description: { type: 'string', maxLength: 512 },
-                  input: {
-                    anyOf: [
-                      { type: 'string', maxLength: 8192 },
-                      {
-                        type: 'object',
-                        oneOf: [
+        anyOf: [
+          {
+            type: 'object',
+            properties: {
+              schedule: {
+                anyOf: [
+                  { type: 'string', pattern: scheduleSyntax },
+                  {
+                    type: 'object',
+                    properties: {
+                      rate: {
+                        type: 'array',
+                        minItems: 1,
+                        items: {
+                          type: 'string',
+                          pattern: scheduleSyntax,
+                        },
+                      },
+                      enabled: { type: 'boolean' },
+                      name: {
+                        type: 'string', minLength: 1, maxLength: 64, pattern: '[\\.\\-_A-Za-z0-9]+',
+                      },
+                      description: { type: 'string', maxLength: 512 },
+                      input: {
+                        anyOf: [
+                          { type: 'string', maxLength: 8192 },
                           {
-                            properties: {
-                              body: { type: 'string', maxLength: 8192 },
-                            },
-                            required: ['body'],
-                            additionalProperties: false,
-                          },
-                          {
-                            not: {
-                              required: ['body'],
-                            },
+                            type: 'object',
+                            oneOf: [
+                              {
+                                properties: {
+                                  body: { type: 'string', maxLength: 8192 },
+                                },
+                                required: ['body'],
+                                additionalProperties: false,
+                              },
+                              {
+                                not: {
+                                  required: ['body'],
+                                },
+                              },
+                            ],
                           },
                         ],
                       },
-                    ],
-                  },
-                  inputPath: { type: 'string', maxLength: 256 },
-                  inputTransformer: {
-                    type: 'object',
-                    properties: {
-                      inputTemplate: {
-                        type: 'string',
-                        minLength: 1,
-                        maxLength: 8192,
+                      inputPath: { type: 'string', maxLength: 256 },
+                      inputTransformer: {
+                        type: 'object',
+                        properties: {
+                          inputTemplate: {
+                            type: 'string',
+                            minLength: 1,
+                            maxLength: 8192,
+                          },
+                          inputPathsMap: { type: 'object' },
+                        },
+                        required: ['inputTemplate'],
+                        additionalProperties: false,
                       },
-                      inputPathsMap: { type: 'object' },
                     },
-                    required: ['inputTemplate'],
+                    required: ['rate'],
                     additionalProperties: false,
                   },
-                },
-                required: ['rate'],
-                additionalProperties: false,
+                ],
               },
-            ],
+            },
+            required: ['schedule'],
+            additionalProperties: false,
           },
-        },
-        required: ['schedule'],
-        additionalProperties: false,
+          {
+            type: 'object',
+            properties: {
+              eventBus: {
+                anyOf: [
+                  { type: 'string', minLength: 1 },
+                  { $ref: '#/definitions/awsArnString' },
+                  { $ref: '#/definitions/awsCfImport' },
+                  { $ref: '#/definitions/awsCfRef' },
+                  // GetAtt should only reference "Name" property of EventBus
+                  {
+                    type: 'object',
+                    properties: {
+                      'Fn::GetAtt': {
+                        type: 'array',
+                        minItems: 2,
+                        maxItems: 2,
+                        items: [
+                          { type: 'string', minLength: 1 },
+                          { type: 'string', enum: ['Name'] },
+                        ],
+                      },
+                    },
+                    required: ['Fn::GetAtt'],
+                    additionalProperties: false,
+                  },
+                ],
+              },
+              schedule: { pattern: '^(?:cron|rate)\\(.+\\)$', type: 'string' },
+              enabled: { type: 'boolean' },
+            },
+            required: ['schedule'],
+          },
+        ],
       },
     },
     architecture: { enum: ['arm64', 'x86_64'] },

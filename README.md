@@ -68,7 +68,7 @@ The options are the same for all the warmers:
 * **tags** Tag to apply to the generated warmer lambda (defaults to the serverless default tags)
 * **vpc** The VPC and subnets in which to deploy. Can be any [Serverless VPC configuration](https://serverless.com/framework/docs/providers/aws/guide/functions#vpc-configuration) or be set to `false` in order to deploy the warmup function outside of a VPC (defaults to the vpc in the provider)
 * **memorySize** The memory to be assigned to the warmer lambda (defaults to `128`)
-* **events** The event that triggers the warmer lambda. Can be any [Serverless event](https://serverless.com/framework/docs/providers/aws/events/) (defaults to `- schedule: rate(5 minutes)`)
+* **events** The event that triggers the warmer lambda. Can be a Serverless [schedule](https://www.serverless.com/framework/docs/providers/aws/events/schedule) or [event-bridge](https://www.serverless.com/framework/docs/providers/aws/events/event-bridge) event (defaults to `- schedule: rate(5 minutes)`)
 * **architecture**  The [instruction set to use for the lambda](https://www.serverless.com/framework/docs/providers/aws/guide/functions#instruction-set-architecture) (defaults to `x86_64`)
 * **package** The package configuration. Can be any [Serverless package configuration](https://serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration) (defaults to `{ individually: true, patterns: ['!**', '.warmup/${warmerName}/**'] }`)
 * **timeout** How many seconds until the warmer lambda times out. (defaults to `10`)
@@ -104,6 +104,11 @@ custom:
       vpc: false
       events:
         - schedule: 'cron(0/5 8-17 ? * MON-FRI *)' # Run WarmUp every 5 minutes Mon-Fri between 8:00am and 5:55pm (UTC)
+        - eventBridge:
+          # Only the eventBus, schedule and enabled properties are supported
+          eventBus: lambda-warmup-events
+          schedule: rate(10 minutes)
+          enabled: true
       package:
         individually: true
         patterns:
