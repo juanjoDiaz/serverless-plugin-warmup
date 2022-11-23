@@ -223,7 +223,7 @@ function addWarmUpFunctionToService(service, warmerName, warmerConfig) {
     memorySize: warmerConfig.memorySize,
     name: warmerConfig.name,
     ...(warmerConfig.architecture ? { architecture: warmerConfig.architecture } : {}),
-    runtime: 'nodejs16.x',
+    runtime: 'nodejs18.x',
     package: warmerConfig.package,
     timeout: warmerConfig.timeout,
     ...(Object.keys(warmerConfig.environment).length
