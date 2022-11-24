@@ -65,9 +65,6 @@ function getExpectedLambdaClientConfig(options = {}) {
   return {
     apiVersion: '2015-03-31',
     region: 'us-east-1',
-    httpOptions: {
-      connectTimeout: 1000,
-    },
     ...options,
   };
 }
