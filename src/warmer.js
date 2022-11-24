@@ -133,7 +133,7 @@ async function createWarmUpFunctionArtifact(functions, tracing, verbose, region,
 ${tracing
     ? `const AWSXRay = require('aws-xray-sdk-core');
 const AWS = AWSXRay.captureAWS(require('@aws-sdk/client-lambda'));`
-    : 'const AWS = require("@aws-sdk/client-lambda")'};
+    : 'const AWS = require(\'@aws-sdk/client-lambda\')'};
 const lambda = new AWS.Lambda({
   apiVersion: '2015-03-31',
   region: '${region}'
