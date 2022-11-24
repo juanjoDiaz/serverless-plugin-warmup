@@ -132,14 +132,11 @@ async function createWarmUpFunctionArtifact(functions, tracing, verbose, region,
 
 ${tracing
     ? `const AWSXRay = require('aws-xray-sdk-core');
-const AWS = AWSXRay.captureAWS(require('aws-sdk'));`
-    : 'const AWS = require(\'aws-sdk\')'};
+const AWS = AWSXRay.captureAWS(require('@aws-sdk/client-lambda'));`
+    : 'const AWS = require(\'@aws-sdk/client-lambda\')'};
 const lambda = new AWS.Lambda({
   apiVersion: '2015-03-31',
-  region: '${region}',
-  httpOptions: {
-    connectTimeout: 1000, // 1 second
-  },
+  region: '${region}'
 });
 const functions = ${JSON.stringify(functions, null, '  ')};
 
@@ -189,7 +186,7 @@ module.exports.warmUp = async (event, context) => {
     };
 
     try {
-      await Promise.all(Array(concurrency).fill(0).map(async () => await lambda.invoke(params).promise()));
+      await Promise.all(Array(concurrency).fill(0).map(async () => await lambda.invoke(params)));
       logVerbose(\`Warm Up Invoke Success: \${func.name}\`);
       return true;
     } catch (e) {

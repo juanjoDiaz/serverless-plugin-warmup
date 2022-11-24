@@ -33,7 +33,7 @@ class GeneratedFunctionTester {
 
   executeWarmupFunction(args = {}) {
     this.generatedWarmupFunction()(
-      { 'aws-sdk': this.aws },
+      { '@aws-sdk/client-lambda': this.aws },
       args.process || { env: {} },
       args.console || { log: () => {}, error: () => {} },
     );
