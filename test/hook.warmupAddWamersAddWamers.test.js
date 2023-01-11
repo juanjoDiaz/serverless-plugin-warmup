@@ -2147,6 +2147,20 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     }
   });
 
+  it('Should not error if the warmup configuration is missing', async () => {
+    const serverless = getServerlessConfig({
+      service: {
+        custom: {},
+        functions: {},
+      },
+    });
+    const pluginUtils = getPluginUtils();
+    const plugin = new WarmUp(serverless, {}, pluginUtils);
+
+    await plugin.hooks['before:warmup:addWarmers:addWarmers']();
+    await plugin.hooks['warmup:addWarmers:addWarmers']();
+  });
+
   describe('Packaging', () => {
     it('Should package only the lambda handler by default', async () => {
       const serverless = getServerlessConfig({
