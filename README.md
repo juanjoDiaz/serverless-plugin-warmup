@@ -585,13 +585,13 @@ You can check the Lambda [pricing](https://aws.amazon.com/lambda/pricing/) and C
 
 #### Example
 
-If you have a single warmer and want to warm 10 functions, each with `memorySize = 1024` and `duration = 10`, using the default settings (and we ignore the free tier):
+If you have a single warmer and want to warm 10 functions, each with `memorySize = 1024` and `duration = 10`, using the default settings ($0.0000166667 for every GB-second) and ignoring the free tier:
 
-* WarmUp: runs 8640 times per month = $0.18
-* 10 warm lambdas: each invoked 8640 times per month = $14.4
-* Total = $14.58
+* WarmUp: runs 8640 times per month = $0.0
+* 10 warm lambdas: each invoked 8640 times per month = $0.3
+* Total = $0.3
 
-CloudWatch costs are not in this example because they are very low.
+CloudWatch costs are not consdiered in this example.
 
 ## Contribute
 
