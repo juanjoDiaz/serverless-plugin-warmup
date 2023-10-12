@@ -122,6 +122,7 @@ function extendServerlessSchema(serverless) {
         { type: 'array', items: { type: 'string' } },
       ],
     },
+    alias: { type: 'string' },
     clientContext: {
       anyOf: [
         { const: false }, // to skip it
