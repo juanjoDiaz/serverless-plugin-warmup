@@ -1,19 +1,29 @@
 /* global jest */
 
+/* eslint-disable max-classes-per-file, no-multi-assign */
 class GeneratedFunctionTester {
   constructor(func) {
     this.func = func;
-    this.lambdaInstances = [];
-    this.aws = {
+    const lambdaInstances = this.lambdaInstances = [];
+    const aws = this.aws = {
       config: {},
-      Lambda: jest.fn().mockImplementation((config) => {
-        this.aws.config = config;
-        const invoke = jest.fn().mockReturnValue(Promise.resolve());
-        this.lambdaInstances.push(invoke);
-        return { invoke };
-      }),
+      LambdaClient: class LambdaClient {
+        constructor(config) {
+          aws.config = config;
+          this.send = jest.fn().mockReturnValue(Promise.resolve());
+          lambdaInstances.push(this.send);
+        }
+      },
+      InvokeCommand: class InvokeCommand {
+        constructor(params) {
+          Object.keys(params).forEach((key) => {
+            this[key] = params[key];
+          });
+        }
+      },
     };
   }
+  /* eslint-enable max-classes-per-file, no-multi-assign */
 
   generatedWarmupFunction() {
     // eslint-disable-next-line no-new-func
@@ -26,7 +36,9 @@ class GeneratedFunctionTester {
         return dependencies[dep];
       };
       const module = { exports: {} };
-      ${this.func}
+      ${this.func
+    .replace(/import (\{.*\}) from ('.*');/, 'const $1 = require($2);')
+    .replace('export const warmUp', 'module.exports.warmUp')}
       module.exports.warmUp();
     `);
   }

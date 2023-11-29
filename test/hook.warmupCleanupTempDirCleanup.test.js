@@ -3,7 +3,7 @@
 jest.mock('fs', () => ({
   promises: {
     mkdir: jest.fn(),
-    readdir: jest.fn((file) => ((!file.endsWith('node_modules') && !file.endsWith('.warmup')) ? ['index.js', 'node_modules'] : [])),
+    readdir: jest.fn((file) => ((!file.endsWith('node_modules') && !file.endsWith('.warmup')) ? ['index.mjs', 'node_modules'] : [])),
     writeFile: jest.fn(),
     rm: jest.fn(),
     stat: jest.fn((file) => ({ isDirectory: () => !file.endsWith('.js') })),

@@ -99,7 +99,7 @@ describe('Backward compatibility', () => {
       expect(fs.mkdir).toHaveBeenCalledTimes(1);
       expect(fs.mkdir).toHaveBeenCalledWith(path.join('testPath', '.warmup', 'default'), { recursive: true });
       expect(fs.writeFile).toHaveBeenCalledTimes(1);
-      expect(fs.writeFile).toHaveBeenCalledWith(path.join('testPath', '.warmup', 'default', 'index.js'), expect.anything());
+      expect(fs.writeFile).toHaveBeenCalledWith(path.join('testPath', '.warmup', 'default', 'index.mjs'), expect.anything());
     });
 
     it('should fallback to \'\' if serviceDir and servicePath are not defined', async () => {
@@ -129,7 +129,7 @@ describe('Backward compatibility', () => {
       expect(fs.mkdir).toHaveBeenCalledTimes(1);
       expect(fs.mkdir).toHaveBeenCalledWith(path.join('', '.warmup', 'default'), { recursive: true });
       expect(fs.writeFile).toHaveBeenCalledTimes(1);
-      expect(fs.writeFile).toHaveBeenCalledWith(path.join('', '.warmup', 'default', 'index.js'), expect.anything());
+      expect(fs.writeFile).toHaveBeenCalledWith(path.join('', '.warmup', 'default', 'index.mjs'), expect.anything());
     });
   });
 });
