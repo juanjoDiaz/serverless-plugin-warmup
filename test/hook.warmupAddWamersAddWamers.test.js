@@ -279,7 +279,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
@@ -316,7 +316,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
@@ -377,7 +377,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
@@ -441,7 +441,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'));
@@ -479,7 +479,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'));
@@ -517,7 +517,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'));
@@ -555,7 +555,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
@@ -593,7 +593,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
@@ -631,7 +631,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
@@ -669,7 +669,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'));
@@ -707,7 +707,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'));
@@ -745,7 +745,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'));
@@ -783,7 +783,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
@@ -821,7 +821,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
@@ -859,7 +859,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
@@ -897,7 +897,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'));
@@ -935,7 +935,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'));
@@ -973,7 +973,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc2'));
@@ -1011,7 +1011,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
@@ -1049,7 +1049,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
@@ -1087,7 +1087,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
@@ -1631,7 +1631,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const fakeConsole = { log: jest.fn(), error: jest.fn() };
     functionTester.executeWarmupFunction({ console: fakeConsole });
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(1);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1'));
@@ -1690,7 +1690,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
@@ -1731,7 +1731,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
@@ -1769,7 +1769,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
@@ -1810,7 +1810,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
@@ -1848,7 +1848,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
@@ -1886,7 +1886,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
@@ -1926,7 +1926,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
@@ -1969,7 +1969,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
@@ -2010,7 +2010,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
@@ -2054,7 +2054,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
     expect(functionTester.lambdaInstances[0])
       .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {
@@ -2094,7 +2094,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(6);
     for (let i = 1; i <= 3; i += 1) {
       expect(functionTester.lambdaInstances[0])
@@ -2135,7 +2135,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
     const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
     functionTester.executeWarmupFunction();
 
-    expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+    expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
     expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(9);
     for (let i = 1; i <= 6; i += 1) {
       expect(functionTester.lambdaInstances[0])
@@ -2435,7 +2435,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
       const functionTester = new GeneratedFunctionTester(fs.writeFile.mock.calls[0][1]);
       functionTester.executeWarmupFunction({ process: { env: { SERVERLESS_ALIAS: 'TEST_ALIAS' } } });
 
-      expect(functionTester.aws.config).toEqual(getExpectedLambdaClientConfig());
+      expect(functionTester.aws.config).toMatchObject(getExpectedLambdaClientConfig());
       expect(functionTester.lambdaInstances[0]).toHaveBeenCalledTimes(2);
       expect(functionTester.lambdaInstances[0])
         .toHaveBeenNthCalledWith(1, getExpectedLambdaCallOptions('someFunc1', {

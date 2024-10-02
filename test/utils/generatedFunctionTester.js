@@ -37,7 +37,7 @@ class GeneratedFunctionTester {
       };
       const module = { exports: {} };
       ${this.func
-    .replace(/import (\{.*\}) from ('.*');/, 'const $1 = require($2);')
+    .replaceAll(/import (\{.*\}) from ('.*');/g, 'const $1 = require($2);')
     .replace('export const warmUp', 'module.exports.warmUp')}
       module.exports.warmUp();
     `);
@@ -45,7 +45,10 @@ class GeneratedFunctionTester {
 
   executeWarmupFunction(args = {}) {
     this.generatedWarmupFunction()(
-      { '@aws-sdk/client-lambda': this.aws },
+      {
+        '@aws-sdk/client-lambda': this.aws,
+        '@smithy/node-http-handler': { NodeHttpHandler: class NodeHttpHandler {} },
+      },
       args.process || { env: {} },
       args.console || { log: () => {}, error: () => {} },
     );
