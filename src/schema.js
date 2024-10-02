@@ -11,6 +11,9 @@ function extendServerlessSchema(serverless) {
   const cronSyntax = '^cron\\(\\S+ \\S+ \\S+ \\S+ \\S+ \\S+\\)$';
   const scheduleSyntax = `${rateSyntax}|${cronSyntax}`;
 
+  const METHOD_SCHEDULER = 'scheduler';
+  const METHOD_EVENT_BUS = 'eventBus';
+
   const globalConfigSchemaProperties = {
     folderName: { type: 'string' },
     cleanFolder: { type: 'boolean' },
@@ -83,6 +86,14 @@ function extendServerlessSchema(serverless) {
                     },
                     required: ['inputTemplate'],
                     additionalProperties: false,
+                  },
+                  method: {
+                    type: 'string',
+                    enum: [METHOD_EVENT_BUS, METHOD_SCHEDULER],
+                  },
+                  timezone: {
+                    type: 'string',
+                    pattern: '[\\w\\-\\/]+',
                   },
                 },
                 required: ['rate'],
