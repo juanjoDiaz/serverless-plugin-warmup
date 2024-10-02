@@ -139,7 +139,8 @@ const uninstrumentedLambdaClient = new LambdaClient({
 });
 
 ${tracing
-    ? 'const lambdaClient = AWSXRay.captureAWSv3Client(uninstrumentedLambdaClient);'
+    ? `import * as AWSXRay from 'aws-xray-sdk';
+const lambdaClient = AWSXRay.captureAWSv3Client(uninstrumentedLambdaClient);`
     : 'const lambdaClient = uninstrumentedLambdaClient;'}
 
 const functions = ${JSON.stringify(functions, null, '  ')};
