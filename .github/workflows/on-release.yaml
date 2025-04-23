@@ -10,7 +10,7 @@ jobs:
     # Setup .npmrc file to publish to npm
     - uses: actions/setup-node@v1
       with:
-        node-version: '20.x'
+        node-version: '22.x'
         # Needs to be explicitly specified for auth to work
         registry-url: 'https://registry.npmjs.org'
     - run: npm ci

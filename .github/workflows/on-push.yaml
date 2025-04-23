@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest] # macos-latest is too slow
-        node-version: [20.x, 18.x]
+        node-version: [22.x, 20.x, 18.x] # consider dropping 18.x to reflect end of support for Node.js 18 in Lambda on September 1, 2025 
 
     steps:
     - uses: actions/checkout@v2
