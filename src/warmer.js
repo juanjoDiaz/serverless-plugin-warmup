@@ -154,7 +154,7 @@ function getConcurrency(func, envVars) {
   return concurrency;
 }
 
-exports.warmUp = async (event, context) => {
+export const warmUp = async (event, context) => {
   logVerbose('Warm Up Start');
 
   const invokes = await Promise.all(functions.map(async (func) => {
@@ -194,9 +194,7 @@ exports.warmUp = async (event, context) => {
 
   if (tracing) {
     await execAsync('npm init -y', { cwd: handlerFolder });
-    await execAsync('npm install --save aws-xray-sdk-core', {
-      cwd: handlerFolder,
-    });
+    await execAsync('npm install --save aws-xray-sdk-core', { cwd: handlerFolder });
   }
 }
 
