@@ -1,0 +1,29 @@
+name: PR Check
+
+on:
+  pull_request:
+    types: ['opened', 'reopened', 'edited']
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: setup NodeJS v22.13.1
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: test
+        run: |
+          npm run test-with-coverage
+
