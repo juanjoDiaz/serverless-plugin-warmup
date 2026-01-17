@@ -9,7 +9,7 @@
 Keep your lambdas warm during winter.
 
 **Requirements:**
-* Node *v18.x* or higher
+* Node *v20.x* or higher
 * Serverless *v3.8* or higher
 * AWS provider
 
