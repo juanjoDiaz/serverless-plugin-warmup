@@ -4,11 +4,11 @@ on:
     types: [published]
 jobs:
   build:
-    runs-on: Ubuntu-20.04
+    runs-on: Ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v5
     # Setup .npmrc file to publish to npm
-    - uses: actions/setup-node@v1
+    - uses: actions/setup-node@v6
       with:
         node-version: '20.x'
         # Needs to be explicitly specified for auth to work
