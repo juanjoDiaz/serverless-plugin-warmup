@@ -1,7 +1,13 @@
 name: Node.js Publish
+
 on:
   release:
     types: [published]
+
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build:
     runs-on: Ubuntu-latest
@@ -15,5 +21,3 @@ jobs:
         registry-url: 'https://registry.npmjs.org'
     - run: npm ci
     - run: npm publish --access public
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
