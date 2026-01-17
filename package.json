@@ -4,7 +4,7 @@
 	"description": "Keep your lambdas warm during winter.",
 	"main": "src/index.js",
 	"scripts": {
-		"prepare": "husky install",
+		"prepare": "husky",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
 		"format": "biome format --write .",
