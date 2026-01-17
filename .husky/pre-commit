@@ -1,6 +1,3 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
 # So it cand find NPM installed by homebrew
 PATH="/usr/local/bin/:$PATH"
 

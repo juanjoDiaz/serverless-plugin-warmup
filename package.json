@@ -1,40 +1,38 @@
 {
-  "name": "serverless-plugin-warmup",
-  "version": "8.3.0",
-  "description": "Keep your lambdas warm during winter.",
-  "main": "src/index.js",
-  "scripts": {
-    "prepare": "husky install",
-    "lint": "eslint .",
-    "lint:fix": "eslint --fix .",
-    "test": "jest test",
-    "test-with-coverage": "jest --coverage --collectCoverageFrom=src/**/*.js test"
-  },
-  "author": "Juanjo Diaz <juanjo.diazmo@gmail.com>",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/juanjoDiaz/serverless-plugin-warmup.git"
-  },
-  "keywords": [
-    "serverless plugin warm up lambdas",
-    "serverless warmup",
-    "serverless plugin",
-    "lambda serverless",
-    "warm lambda",
-    "lambda coldstart",
-    "lambda cold"
-  ],
-  "bugs": {
-    "url": "https://github.com/juanjoDiaz/serverless-plugin-warmup/issues"
-  },
-  "homepage": "https://github.com/juanjoDiaz/serverless-plugin-warmup",
-  "dependencies": {},
-  "devDependencies": {
-    "eslint": "^8.5.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.24.2",
-    "husky": "^8.0.1",
-    "jest": "^29.1.2"
-  }
+	"name": "serverless-plugin-warmup",
+	"version": "8.3.0",
+	"description": "Keep your lambdas warm during winter.",
+	"main": "src/index.js",
+	"scripts": {
+		"prepare": "husky install",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"format": "biome format --write .",
+		"test": "jest test",
+		"test-with-coverage": "jest --coverage --collectCoverageFrom=src/**/*.js test"
+	},
+	"author": "Juanjo Diaz <juanjo.diazmo@gmail.com>",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/juanjoDiaz/serverless-plugin-warmup.git"
+	},
+	"keywords": [
+		"serverless plugin warm up lambdas",
+		"serverless warmup",
+		"serverless plugin",
+		"lambda serverless",
+		"warm lambda",
+		"lambda coldstart",
+		"lambda cold"
+	],
+	"bugs": {
+		"url": "https://github.com/juanjoDiaz/serverless-plugin-warmup/issues"
+	},
+	"homepage": "https://github.com/juanjoDiaz/serverless-plugin-warmup",
+	"devDependencies": {
+		"@biomejs/biome": "2.3.11",
+		"husky": "^9.1.7",
+		"jest": "^30.2.0"
+	}
 }
