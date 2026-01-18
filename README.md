@@ -1,5 +1,4 @@
 # Serverless WarmUp Plugin ♨
-[![Serverless][serverless-badge]](serverless-badge-url)
 [![npm version][npm-version-badge]][npm-version-badge-url]
 [![npm monthly downloads][npm-downloads-badge]][npm-version-badge-url]
 [![Node.js CI](https://github.com/juanjoDiaz/serverless-plugin-warmup/actions/workflows/on-push.yaml/badge.svg)](https://github.com/juanjoDiaz/serverless-plugin-warmup/actions/workflows/on-push.yaml)
@@ -607,8 +606,6 @@ Help us making this plugin better and future-proof.
 
 This software is released under the MIT license. See [the license file](LICENSE) for more details.
 
-[serverless-badge]: http://public.serverless.com/badges/v3.svg
-[serverless-badge-url]: http://www.serverless.com
 [npm-version-badge]: https://badge.fury.io/js/serverless-plugin-warmup.svg
 [npm-version-badge-url]: https://www.npmjs.com/package/serverless-plugin-warmup
 [npm-downloads-badge]: https://img.shields.io/npm/dm/serverless-plugin-warmup.svg
