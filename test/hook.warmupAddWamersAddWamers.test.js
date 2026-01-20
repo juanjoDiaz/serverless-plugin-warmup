@@ -2798,6 +2798,7 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
 				outfile: bundledFile,
 				bundle: true,
 				platform: 'node',
+				packages: 'bundle',
 				format: 'esm',
 				target: 'node18',
 				sourcemap: false,
