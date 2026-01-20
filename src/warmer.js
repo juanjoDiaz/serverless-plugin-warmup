@@ -3,6 +3,7 @@ const path = require('path');
 const { exec } = require('child_process');
 const util = require('util');
 const { capitalize } = require('./utils');
+const esbuild = require('esbuild');
 
 const execAsync = util.promisify(exec);
 
@@ -124,7 +125,7 @@ const uninstrumentedLambdaClient = new LambdaClient({
 ${
 	tracing
 		? `import * as AWSXRay from 'aws-xray-sdk';
-const lambdaClient = AWSXRay.captureAWSv3Client(uninstrumentedLambdaClient);`
+	const lambdaClient = AWSXRay.captureAWSv3Client(uninstrumentedLambdaClient);`
 		: 'const lambdaClient = uninstrumentedLambdaClient;'
 }
 
@@ -196,6 +197,27 @@ export const warmUp = async (event, context) => {
 		await execAsync('npm init -y', { cwd: handlerFolder });
 		await execAsync('npm install --save aws-xray-sdk-core', { cwd: handlerFolder });
 	}
+
+	// Bundle warmup handler so it does not rely on node_modules at runtime
+	const entryFile = path.join(handlerFolder, 'index.mjs');
+	const bundledFile = path.join(handlerFolder, 'index.bundled.mjs');
+
+	await esbuild.build({
+		entryPoints: [entryFile],
+		outfile: bundledFile,
+		bundle: true,
+		platform: 'node',
+		format: 'esm',
+		target: 'node18',
+		// Important: bundle everything needed by the warmer into a single file
+		// (no externals), so the artifact can stay minimal.
+		sourcemap: false,
+		minify: false,
+	});
+
+	// Replace original with bundled output
+	await fs.unlink(entryFile);
+	await fs.rename(bundledFile, entryFile);
 }
 
 /**
