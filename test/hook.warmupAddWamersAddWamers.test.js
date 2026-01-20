@@ -4,6 +4,7 @@ jest.mock('fs', () => ({
 	promises: {
 		mkdir: jest.fn(),
 		unlink: jest.fn(),
+		rename: jest.fn(),
 		writeFile: jest.fn(),
 		rm: jest.fn(),
 	},
@@ -11,8 +12,12 @@ jest.mock('fs', () => ({
 jest.mock('child_process', () => ({
 	exec: jest.fn((_path, _opts, cb) => cb()),
 }));
+jest.mock('esbuild', () => ({
+	build: jest.fn(() => Promise.resolve()),
+}));
 const fs = require('fs').promises;
 const { exec } = require('child_process');
+const esbuild = require('esbuild');
 const path = require('path');
 const WarmUp = require('../src/index');
 const {
@@ -30,7 +35,13 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
 		fs.mkdir.mockResolvedValue(undefined);
 		fs.writeFile.mockClear();
 		fs.writeFile.mockResolvedValue(undefined);
+		fs.unlink.mockClear();
+		fs.unlink.mockResolvedValue(undefined);
+		fs.rename.mockClear();
+		fs.rename.mockResolvedValue(undefined);
 		exec.mockClear();
+		esbuild.build.mockClear();
+		esbuild.build.mockResolvedValue({});
 	});
 
 	it('Should be called after package:initialize', async () => {
@@ -2755,6 +2766,52 @@ describe('Serverless warmup plugin warmup:warmers:addWarmers:addWarmers hook', (
 					},
 				}),
 			);
+		});
+
+		it('Should bundle warmup handler with esbuild to make it self-contained', async () => {
+			const serverless = getServerlessConfig({
+				service: {
+					custom: {
+						warmup: {
+							default: {
+								enabled: true,
+							},
+						},
+					},
+					functions: { someFunc1: { name: 'someFunc1' }, someFunc2: { name: 'someFunc2' } },
+				},
+			});
+			const pluginUtils = getPluginUtils();
+			const plugin = new WarmUp(serverless, {}, pluginUtils);
+
+			await plugin.hooks['before:warmup:addWarmers:addWarmers']();
+			await plugin.hooks['warmup:addWarmers:addWarmers']();
+
+			const handlerFolder = path.join('testPath', '.warmup', 'default');
+			const entryFile = path.join(handlerFolder, 'index.mjs');
+			const bundledFile = path.join(handlerFolder, 'index.bundled.mjs');
+
+			// Verify esbuild.build was called with correct parameters
+			expect(esbuild.build).toHaveBeenCalledTimes(1);
+			expect(esbuild.build).toHaveBeenCalledWith({
+				entryPoints: [entryFile],
+				outfile: bundledFile,
+				bundle: true,
+				platform: 'node',
+				packages: 'bundle',
+				format: 'esm',
+				target: 'node18',
+				sourcemap: false,
+				minify: false,
+			});
+
+			// Verify the original file was deleted
+			expect(fs.unlink).toHaveBeenCalledTimes(1);
+			expect(fs.unlink).toHaveBeenCalledWith(entryFile);
+
+			// Verify the bundled file was renamed to replace the original
+			expect(fs.rename).toHaveBeenCalledTimes(1);
+			expect(fs.rename).toHaveBeenCalledWith(bundledFile, entryFile);
 		});
 	});
 
