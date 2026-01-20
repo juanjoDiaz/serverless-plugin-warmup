@@ -210,6 +210,7 @@ export const warmUp = async (event, context) => {
 			platform: 'node',
 			format: 'esm',
 			target: 'node18',
+			packages: 'bundle',
 			// Important: bundle everything needed by the warmer into a single file
 			// (no externals), so the artifact can stay minimal.
 			sourcemap: false,
