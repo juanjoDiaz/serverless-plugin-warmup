@@ -202,22 +202,26 @@ export const warmUp = async (event, context) => {
 	const entryFile = path.join(handlerFolder, 'index.mjs');
 	const bundledFile = path.join(handlerFolder, 'index.bundled.mjs');
 
-	await esbuild.build({
-		entryPoints: [entryFile],
-		outfile: bundledFile,
-		bundle: true,
-		platform: 'node',
-		format: 'esm',
-		target: 'node18',
-		// Important: bundle everything needed by the warmer into a single file
-		// (no externals), so the artifact can stay minimal.
-		sourcemap: false,
-		minify: false,
-	});
+	try {
+		await esbuild.build({
+			entryPoints: [entryFile],
+			outfile: bundledFile,
+			bundle: true,
+			platform: 'node',
+			format: 'esm',
+			target: 'node18',
+			// Important: bundle everything needed by the warmer into a single file
+			// (no externals), so the artifact can stay minimal.
+			sourcemap: false,
+			minify: false,
+		});
 
-	// Replace original with bundled output
-	await fs.unlink(entryFile);
-	await fs.rename(bundledFile, entryFile);
+		// Replace original with bundled output
+		await fs.unlink(entryFile);
+		await fs.rename(bundledFile, entryFile);
+	} catch (error) {
+		throw new Error(`Error bundling warmup function: ${error.message}`);
+	}
 }
 
 /**
