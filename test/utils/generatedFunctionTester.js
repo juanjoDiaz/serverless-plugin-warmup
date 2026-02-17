@@ -52,7 +52,6 @@ class GeneratedFunctionTester {
 		this.generatedWarmupFunction()(
 			{
 				'@aws-sdk/client-lambda': this.aws,
-				'@smithy/node-http-handler': { NodeHttpHandler: class NodeHttpHandler {} },
 			},
 			args.process || { env: {} },
 			args.console || { log: () => {}, error: () => {} },
