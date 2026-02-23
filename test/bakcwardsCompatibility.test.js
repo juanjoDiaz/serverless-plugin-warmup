@@ -4,9 +4,13 @@ jest.mock('fs', () => ({
 	promises: {
 		mkdir: jest.fn(),
 		unlink: jest.fn(),
+		rename: jest.fn(),
 		writeFile: jest.fn(),
 		rm: jest.fn(),
 	},
+}));
+jest.mock('esbuild', () => ({
+	build: jest.fn(() => Promise.resolve()),
 }));
 
 const fs = require('fs').promises;
@@ -71,6 +75,13 @@ describe('Backward compatibility', () => {
 			fs.mkdir.mockResolvedValue(undefined);
 			fs.writeFile.mockClear();
 			fs.writeFile.mockResolvedValue(undefined);
+			fs.unlink.mockClear();
+			fs.unlink.mockResolvedValue(undefined);
+			fs.rename.mockClear();
+			fs.rename.mockResolvedValue(undefined);
+			const esbuild = require('esbuild');
+			esbuild.build.mockClear();
+			esbuild.build.mockResolvedValue({});
 		});
 
 		it('should fallback to servicePath if serviceDir is not defined', async () => {
