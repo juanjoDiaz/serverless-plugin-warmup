@@ -13,7 +13,7 @@ function getWarmerConfig(config, defaultOpts) {
 	/* eslint-disable no-nested-ternary */
 	return {
 		folderName,
-		pathHandler: path.join(folderName, 'index.warmUp'),
+		pathHandler: path.posix.join(folderName, 'index.warmUp'),
 		cleanFolder:
 			typeof config.cleanFolder === 'boolean' ? config.cleanFolder : defaultOpts.cleanFolder,
 		name: config.name !== undefined ? config.name : defaultOpts.name,
@@ -39,15 +39,15 @@ function getWarmerConfig(config, defaultOpts) {
 						patterns: [
 							'!**',
 							...(Array.isArray(config.package.patterns)
-								? config.package.patterns.includes(path.join(folderName, '**'))
+								? config.package.patterns.includes(path.posix.join(folderName, '**'))
 									? config.package.patterns
-									: [...config.package.patterns, path.join(folderName, '**')]
-								: [...defaultOpts.package.patterns, path.join(folderName, '**')]),
+									: [...config.package.patterns, path.posix.join(folderName, '**')]
+								: [...defaultOpts.package.patterns, path.posix.join(folderName, '**')]),
 						],
 					}
 				: {
 						...defaultOpts.package,
-						patterns: ['!**', ...defaultOpts.package.patterns, path.join(folderName, '**')],
+						patterns: ['!**', ...defaultOpts.package.patterns, path.posix.join(folderName, '**')],
 					},
 		memorySize: config.memorySize !== undefined ? config.memorySize : defaultOpts.memorySize,
 		timeout: config.timeout !== undefined ? config.timeout : defaultOpts.timeout,
@@ -152,7 +152,7 @@ function getFunctionsByWarmer(service, stage, configsByWarmer, serverlessClasses
  * */
 function getConfigsByWarmer({ service, classes }, stage) {
 	const getWarmerDefaultOpts = (warmerName) => ({
-		folderName: path.join('.warmup', warmerName),
+		folderName: path.posix.join('.warmup', warmerName),
 		cleanFolder: true,
 		memorySize: 128,
 		name: `${service.service}-${stage}-warmup-plugin-${warmerName}`,
